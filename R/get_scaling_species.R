@@ -8,6 +8,7 @@ library(lme4)
 library(tidyverse)
 library(reshape2)
 library(ggformat2)
+library(here)
 
 # Sys.Date()
 data.imports<-"2023-01-23"
@@ -15,9 +16,7 @@ getModelParameters<-"NO"
 # ^ this is computationally heavy task, to get saved data: "NO" or 2
 # to get compute now: "YES" or 1 
 
-setwd("/Users/kristakraskura/Github_repositories/KK_etal_synthesis_fish_temp_scaling/")
 source("./R/phylo_mixed model.R")
-
 
 # 1. Summary tables: by Species 
 

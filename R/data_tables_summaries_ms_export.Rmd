@@ -1,0 +1,176 @@
+---
+title: "Synthesis: model parameters, data table, and data summaries"
+author: "K. Kraskura"
+date: "`r Sys.Date()`"
+output: html_document
+
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(kableExtra)
+library(tidyverse)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Metabolic scaling with temperature and species ecologies 
+
+```{r Prep runs, include = F}
+date.imports<-substr(list.files("../Data_exports/Phylo/")[1], start = 17, stop = 26)
+getModelCIs<-FALSE
+source("phylo_mixed model.R")
+```
+
+### Mixed models (`evolvability::Almer`)
+
+Rationale behind each model:
+
+- model sets: Different random effects 
+  + set 0: `(1|species)` = species intercept only
+  + set 1: `(1|species) + (1|species:trial)` = species, and nested trial under species intercepts
+  + set 2: `(1|species) +(0 + tempTestK1000|species) + (1|species:trial)` = species intercept, nested trial under species intercept, species-specific response to temperature (i.e. different size individuals of the same species, woutl have differe sensititivy to temperature). 
+  + set 3: _(models lead to singular fits, these were no longer considered)_
+  + set 4: `(1|species) +(0 + lnBWg|species) + (1|species:trial)` = species intercept, nested trial under species intercept, species-specific mass scaling slopes 
+  + set 5: `(1|species) +(0 + lnBWg|species:trial) + (1|species:trial)` = species intercept, nested trial under species intercept, nested species:trial mass scaling slopes
+- model types: 
+  + mass and temperature affect metabolism independently 
+  + (`int`) mass and temperature affect metabolism in interaction 
+  + (`.POLY`) nonlinear polynomial Arrhenius temperature response 
+  + (`intPOLY`) nonlinear polynomial Arrhenius temperature response that changes with body mass (interaction nonlinear temp X mass)
+
+- Not printed below, but constructed were also models for MMR, AAS, and FAS. BIC comparison for these is shown below.  Specifically compared were: 
+  1. best non-phylogeny model (thesis)
+  2. equivalent phylogeny model
+
+
+### 1. BIC RMR - optimal temperatures
+```{r, echo = FALSE, fig.align = 'left'}
+RMR_BIC %>%
+  kbl(digits = 2) %>%
+  kable_classic_2(full_width = F)
+    
+# Phylo model can be used in model selection 
+```
+<br>
+
+### 2. BIC RMR - warm temperatures
+
+```{r, echo = FALSE}
+RMR_W_BIC %>%
+  kbl(digits = 2) %>%
+  kable_classic_2(full_width = F)
+
+# knitr:::kable(RMR_W_BIC%>%   kbl(digits = 2) %>%   kable_classic_2(full_width = F)      # Phylo model can be used in model selection 
+```
+
+<br>
+
+### 3. BIC MMR - optimal temperatures
+
+```{r, echo = FALSE}
+MMR_BIC %>%
+  kbl(digits = 2) %>%
+  kable_classic_2(full_width = F)
+```
+
+<br>
+
+### 4. BIC MMR - warm temperatures
+```{r, echo = FALSE}
+MMR_W_BIC %>%
+  kbl(digits = 2) %>%
+  kable_classic_2(full_width = F)
+    # Phylo model can be used in model selection 
+```
+
+<br>
+
+### 5. BIC Absolute AS - optimal temperatures
+```{r, echo = FALSE}
+AS_BIC %>%
+  kbl(digits = 2) %>%
+  kable_classic_2(full_width = F)
+    # Phylo model can be used in model selection 
+```
+
+<br>
+
+### 6. BIC Absolute AS - warm temperatures
+```{r, echo = FALSE}
+AS_W_BIC %>%
+  kbl(digits = 2) %>%
+  kable_classic_2(full_width = F)
+    # Phylo model can be used in model selection 
+```
+
+<br>
+
+### 7. BIC Factorial AS - optimal temperatures
+```{r, echo = FALSE}
+FAS_BIC %>%
+  kbl(digits = 2) %>%
+  kable_classic_2(full_width = F)
+    # Phylo model can be used in model selection 
+```
+
+<br>
+
+### 8. BIC Factorial AS - warm temperatures
+```{r, echo = FALSE}
+FAS_W_BIC %>%
+  kbl(digits = 2) %>%
+  kable_classic_2(full_width = F)
+    # Phylo model can be used in model selection 
+```
+
+## Best models summries:
+
+### Ecologically relevant 
+```{r model summaries, echo =F }
+# Ecol relev
+summary(rmr_mod_ER)
+summary(amr_mod_ER)
+summary(fas_mod_ER)
+summary(as_mod_ER)
+```
+
+
+### Warm fish
+```{r model summaries warm, echo = F}
+# warm
+summary(rmr_mod_W)
+summary(amr_mod_W)
+summary(fas_mod_W)
+summary(as_mod_W)
+```
+
+ 
+## Summary data 
+```{r min max data, echo = F}
+sum_data %>%
+  kbl(digits = 2) %>%
+  kable_classic_2(full_width = F)
+
+```
+
+## Scaling parameters 
+
+```{r scaling parameters, echo = F}
+scaling.params %>%
+  mutate_at(c('lnBWg', "(Intercept)", 'tempTestK1000', "E(ev)"), as.numeric) %>% 
+  kbl(digits = 3) %>%
+  kable_classic_2(full_width = F)
+
+```
+
+
+## Confidence intervals 
+
+```{r}
+
+sum_CItable %>% 
+  kbl(digits = 3) %>%
+  kable_classic_2(full_width = F)
+
+```
+

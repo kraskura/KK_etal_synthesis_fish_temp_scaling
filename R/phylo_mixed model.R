@@ -5,6 +5,7 @@ library(evolvability) # Almer function
 library(ape)
 library(rotl)
 library(Matrix)
+library(emmeans)
 library(pryr)
 library(ggtree)
 library(TDbook)
@@ -107,6 +108,12 @@ Phylo_RMR_model5 <- Almer(lnRMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + lnB
 Phylo_RMR_model5int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
 Phylo_RMR_model5.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
 Phylo_RMR_model5intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+
+# tests herehere
+Phylo_RMR_model6 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+Phylo_RMR_model6int <- Almer(lnRMR ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+Phylo_RMR_model6.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+Phylo_RMR_model6intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
 
 ### BIC --------------
 RMR_BIC<-BICdelta(BIC(Phylo_RMR_model0, Phylo_RMR_model0int, Phylo_RMR_model0.POLY, Phylo_RMR_model0intPOLY,
@@ -416,7 +423,128 @@ data.as.test[which(data.as.test$resid < -1.5),] # could be considered outlier da
 
 # Model scaling parameters and CIs ----------
 
-if (getModelParameters == 1 | getModelParameters == "YES"){
+if (getModelCIs){
+
+  # RMR optimal - ecologically relevant grid; plot/predict full range (All data coverage for reference)
+  data.plotRMR_ER<-expand.grid(tempTestK1000 = seq(C40inTempTestK1000, C0inTempTestK1000 , 0.05), lnBWg = seq(sum_rmr_ALL$min_bwLOG,sum_rmr_ALL$max_bwLOG, 0.5))
+  data.plotRMR_ER$model_predFE <- predict(rmr_mod_ER, re.form = NA, newdata = data.plotRMR_ER)
+  conf.int_RMR_ER <- confint(rmr_mod_ER, method = "boot", FUN=function(x)predict(x, data.plotRMR_ER, re.form=NA), nsim=10)
+  data.plotRMR_ER$CI_2.5<-conf.int_RMR_ER[,1]
+  data.plotRMR_ER$CI_97.5<-conf.int_RMR_ER[,2]
+
+  # FAS optimal - ecologically relevant grid; plot/predict full range (All data coverage for reference)
+  data.plotFAS_ER<-expand.grid(tempTest = 20, lnBWg = seq(sum_fas_ER$min_bwLOG,sum_fas_ER$max_bwLOG, 0.5))
+  data.plotFAS_ER$model_predFE <- predict(fas_mod_ER, re.form = NA, newdata = data.plotFAS_ER)
+  conf.int_FAS_ER <- confint(fas_mod_ER, method = "boot", FUN=function(x)predict(x, data.plotFAS_ER, re.form=NA), nsim=10)
+  data.plotFAS_ER$CI_2.5<-conf.int_FAS_ER[,1]
+  data.plotFAS_ER$CI_97.5<-conf.int_FAS_ER[,2]
+
+  # AS optimal - ecologically relevant grid; plot/predict full range (All data coverage for reference)
+  data.plotAS_ER<-expand.grid(tempTestK1000 = seq(C40inTempTestK1000, C0inTempTestK1000 , 0.05), lnBWg = seq(sum_as_ALL$min_bwLOG,sum_as_ALL$max_bwLOG, 0.5))
+  data.plotAS_ER$model_predFE <- predict(as_mod_ER, re.form = NA, newdata = data.plotAS_ER)
+  conf.int_AS_ER <- confint(as_mod_ER, method = "boot", FUN=function(x)predict(x, data.plotAS_ER, re.form=NA), nsim=10)
+  data.plotAS_ER$CI_2.5<-conf.int_AS_ER[,1]
+  data.plotAS_ER$CI_97.5<-conf.int_AS_ER[,2]
+
+  # MMR or AMR  optimal - interaction model; plot/predict full range (All data coverage for reference)
+  data.plotAMRint_ER <- expand.grid(tempTestK1000 = seq(C40inTempTestK1000,C0inTempTestK1000, 0.05), lnBWg= seq(sum_amr_ALL$min_bwLOG,sum_amr_ALL$max_bwLOG, 0.5))
+  data.plotAMRint_ER$model_predFE <- predict(amr_mod_ER, re.form = NA, newdata = data.plotAMRint_ER)
+  conf.int_AMRint_ER <- confint(as_mod_ER, method = "boot", FUN=function(x)predict(x, data.plotAMRint_ER, re.form=NA), nsim=10)
+  data.plotAMRint_ER$CI_2.5<-conf.int_AMRint_ER[,1]
+  data.plotAMRint_ER$CI_97.5<-conf.int_AMRint_ER[,2]
+  data.plotAMRint_ER$tempTestK1000_inC <- ((1000/data.plotAMRint_ER$tempTestK1000))-275.15
+
+  # All temps for the Arrhenius plot:
+  # RMR - warm temp grid; plot/predict full range (All data coverage for reference)
+  data.plotRMR_warm<-expand.grid(tempTestK1000 = seq(C40inTempTestK1000, C0inTempTestK1000 , 0.05), lnBWg = seq(sum_rmr_ALL$min_bwLOG,sum_rmr_ALL$max_bwLOG, 0.5))
+  data.plotRMR_warm$model_predFE <- predict(rmr_mod_W, re.form = NA, newdata = data.plotRMR_warm)
+  conf.int_RMR_warm <- confint(rmr_mod_W, method = "boot", FUN=function(x)predict(x, data.plotRMR_warm, re.form=NA), nsim=10)
+  data.plotRMR_warm$CI_2.5<-conf.int_RMR_warm[,1]
+  data.plotRMR_warm$CI_97.5<-conf.int_RMR_warm[,2]
+
+  # MMR - warm temp plot grid; plot/predict full range (All data coverage for reference)
+  data.plotAMR_warm<-expand.grid(tempTestK1000 = seq(C40inTempTestK1000, C0inTempTestK1000 , 0.05), lnBWg = seq(sum_amr_ALL$min_bwLOG,sum_amr_ALL$max_bwLOG, 0.5))
+  data.plotAMR_warm$model_predFE <- predict(amr_mod_W, re.form = NA, newdata = data.plotAMR_warm)
+  conf.int_AMR_warm <- confint(amr_mod_W, method = "boot", FUN=function(x)predict(x, data.plotAMR_warm, re.form=NA), nsim=10)
+  data.plotAMR_warm$CI_2.5<-conf.int_AMR_warm[,1]
+  data.plotAMR_warm$CI_97.5<-conf.int_AMR_warm[,2]
+
+  # FAS - warm temp plot grid; plot/predict full range (All data coverage for reference)
+  data.plotFAS_warm <- expand.grid(lnBWg = seq(sum_fas_ALL$min_bwLOG,sum_fas_ALL$max_bwLOG, 0.5), tempTest = 20)
+  data.plotFAS_warm$model_predFE <- predict(fas_mod_W, re.form = NA, newdata = data.plotFAS_warm)
+  conf.int_FAS_warm <- confint(fas_mod_W, method = "boot", FUN=function(x)predict(x, data.plotFAS_warm, re.form=NA), nsim=10)
+  data.plotFAS_warm$CI_2.5<-conf.int_FAS_warm[,1]
+  data.plotFAS_warm$CI_97.5<-conf.int_FAS_warm[,2]
+
+  # AS - warm temp plot grid; plot/predict full range (All data coverage for reference)
+  data.plotAS_warm <- expand.grid(lnBWg = seq(sum_as_ALL$min_bwLOG,sum_as_ALL$max_bwLOG, 0.5), tempTestK1000 = seq(C40inTempTestK1000, C0inTempTestK1000 , 0.1))
+  data.plotAS_warm$model_predFE <- predict(as_mod_W, re.form = NA, newdata = data.plotAS_warm)
+  conf.int_AS_warm <- confint(as_mod_W, method = "boot", FUN=function(x)predict(x, data.plotAS_warm, re.form=NA), nsim=10)
+  data.plotAS_warm$CI_2.5<-conf.int_AS_warm[,1]
+  data.plotAS_warm$CI_97.5<-conf.int_AS_warm[,2]
+
+  # CIs for all model parameters
+  CI.amr.ER<-as.data.frame(confint.merMod(amr_mod_ER, level = 0.90))
+  CI.amr.ER$var<-rownames(CI.amr.ER)
+  CI.amr.ER$MR<-"MMR"
+  CI.amr.ER$temp_cat<-"ER"
+
+  CI.rmr.ER<-as.data.frame(confint.merMod(rmr_mod_ER, level = 0.90))
+  CI.rmr.ER$var<-rownames(CI.rmr.ER)
+  CI.rmr.ER$MR<-"RMR"
+  CI.rmr.ER$temp_cat<-"ER"
+
+  CI.fas.ER<-as.data.frame(confint.merMod(fas_mod_ER, level = 0.90))
+  CI.fas.ER$var<-rownames(CI.fas.ER)
+  CI.fas.ER$MR<-"FAS"
+  CI.fas.ER$temp_cat<-"ER"
+
+  CI.as.ER<-as.data.frame(confint.merMod(as_mod_ER, level = 0.90))
+  CI.as.ER$var<-rownames(CI.as.ER)
+  CI.as.ER$MR<-"AS"
+  CI.as.ER$temp_cat<-"ER"
+
+  CI.amr.W<-as.data.frame(confint.merMod(amr_mod_W, level = 0.90))
+  CI.amr.W$var<-rownames(CI.amr.W)
+  CI.amr.W$MR<-"MMR"
+  CI.amr.W$temp_cat<-"W"
+
+  CI.rmr.W<-as.data.frame(confint.merMod(rmr_mod_W, level = 0.90))
+  CI.rmr.W$var<-rownames(CI.rmr.W)
+  CI.rmr.W$MR<-"RMR"
+  CI.rmr.W$temp_cat<-"W"
+
+  CI.fas.W<-as.data.frame(confint.merMod(fas_mod_W, level = 0.90))
+  CI.fas.W$var<-rownames(CI.fas.W)
+  CI.fas.W$MR<-"FAS"
+  CI.fas.W$temp_cat<-"W"
+
+  CI.as.W<-as.data.frame(confint.merMod(as_mod_W, level = 0.90))
+  CI.as.W$var<-rownames(CI.as.W)
+  CI.as.W$MR<-"AS"
+  CI.as.W$temp_cat<-"W"
+
+  sum_CItable<-rbind(CI.amr.ER, CI.rmr.ER, CI.fas.ER, CI.as.ER, # ecol relev
+                     CI.amr.W, CI.rmr.W, CI.fas.W, CI.as.W) # warm
+
+  # Saving all export files
+  write.csv(file = "./Data_exports/Phylo/Table_CIsummary.csv", sum_CItable, row.names=TRUE)
+
+  write.csv(file = paste("./Data_exports/Phylo/dataPred_RMR_er_", Sys.Date(), ".csv", sep=""),  data.plotRMR_ER, row.names = F)
+  write.csv(file = paste("./Data_exports/Phylo/dataPred_AMR_er_", Sys.Date(), ".csv", sep=""),  data.plotAMRint_ER, row.names = F)
+  write.csv(file = paste("./Data_exports/Phylo/dataPred_AS_er_", Sys.Date(), ".csv", sep=""),  data.plotAS_ER, row.names = F)
+  write.csv(file = paste("./Data_exports/Phylo/dataPred_FAS_er_", Sys.Date(), ".csv", sep=""),  data.plotFAS_ER, row.names = F)
+
+  write.csv(file = paste("./Data_exports/Phylo/dataPred_RMR_warm_", Sys.Date(), ".csv", sep=""),  data.plotRMR_warm, row.names = F)
+  write.csv(file = paste("./Data_exports/Phylo/dataPred_AMR_warm_", Sys.Date(), ".csv", sep=""),  data.plotAMR_warm, row.names = F)
+  write.csv(file = paste("./Data_exports/Phylo/dataPred_AS_warm_", Sys.Date(), ".csv", sep=""),  data.plotAS_warm, row.names = F)
+  write.csv(file = paste("./Data_exports/Phylo/dataPred_FAS_warm_", Sys.Date(), ".csv", sep=""),  data.plotFAS_warm, row.names = F)
+
+
+}else{
+ 
+  k<-(8.62*10^(-5)) # Boltzmann's constant
+
   # ECOL RELEV
   RMR_slope<-round(fixef(rmr_mod_ER)[2],3)
   RMR_int<-round(fixef(rmr_mod_ER)[1],3)
@@ -544,15 +672,18 @@ if (getModelParameters == 1 | getModelParameters == "YES"){
   colnames(FAS_er_row)<-colnames(scaling.params)
   colnames(FAS_W_row)<-colnames(scaling.params)
 
-  scaling.params<-rbind(MMR_er_row, MMR_er_row2, MMR_W_row)
-
+  scaling.params<-rbind(MMR_er_row, MMR_er_row2, MMR_W_row, 
+                        RMR_er_row, RMR_W_row,
+                        AS_er_row, AS_W_row, 
+                        FAS_er_row, FAS_W_row)
+  
   # MMR_W_ER$MMR_E_ER_eV<--1*(MMR_E_ER$tempTestK1000.trend)*k*1000
   # RMR_W_ER_eV<--1*(RMR_W_ER_eV)*k*1000
 
   # Figure parameters:
   summarise.dataframes<- function(data.summarise, export.name){
     dataframe.new <- data.summarise %>%
-      summarise(min_bw = min(BW_g), max_bw = max(BW_g), mean_bw = mean(BW_g),
+      dplyr:::summarise(min_bw = min(BW_g), max_bw = max(BW_g), mean_bw = mean(BW_g),
                 min_bwLOG = min(lnBWg), max_bwLOG = max(lnBWg), mean_bwLOG = mean(lnBWg),
                 min_temp = min(tempTest), max_temp = max(tempTest), mean_temp = mean(tempTest),
                 min_tempArrh = min(tempTestK1000), max_tempArrh = max(tempTestK1000), mean_tempArrh = mean(tempTestK1000),
@@ -574,6 +705,15 @@ if (getModelParameters == 1 | getModelParameters == "YES"){
   sum_rmr_ALL<-summarise.dataframes(data.rmr, "sum_rmr_ALL")
   sum_fas_ALL<-summarise.dataframes(data.fas, "sum_fas_ALL")
   sum_as_ALL<-summarise.dataframes(data.as, "sum_as_ALL")
+  
+  # row-bind in one dataframe 
+  sum_data<-rbind(sum_amr_ER, sum_amr_warm, 
+                  sum_rmr_ER, sum_rmr_warm,
+                  sum_as_ER, sum_as_warm,
+                  sum_fas_ER, sum_fas_warm)
+  
+  sum_data$MR<-c("MMR", "MMR", "RMR", "RMR", "AS", "AS", "FAS", "FAS")
+  sum_data$Temp<-c("er", "warm","er", "warm","er", "warm","er", "warm")
 
   data.amr$tempTestK1<-1/data.amr$tempTestK
   data.amr$tempTestK1000<-1000/data.amr$tempTestK
@@ -588,131 +728,16 @@ if (getModelParameters == 1 | getModelParameters == "YES"){
   C40inTempTestK1000<-1000/((40+273.15))
 
   # 40 = (1000 / (C40inTempTestK1000))- 273.15
-  (1000 / (C40inTempTestK1000))- 273.15
+  # (1000 / (C40inTempTestK1000))- 273.15
   # ((1/C20inTempTestkT)/k)-273.15
-
-  # RMR optimal - ecologically relevant grid; plot/predict full range (All data coverage for reference)
-  data.plotRMR_ER<-expand.grid(tempTestK1000 = seq(C40inTempTestK1000, C0inTempTestK1000 , 0.05), lnBWg = seq(sum_rmr_ALL$min_bwLOG,sum_rmr_ALL$max_bwLOG, 0.5))
-  data.plotRMR_ER$model_predFE <- predict(rmr_mod_ER, re.form = NA, newdata = data.plotRMR_ER)
-  conf.int_RMR_ER <- confint(rmr_mod_ER, method = "boot", FUN=function(x)predict(x, data.plotRMR_ER, re.form=NA), nsim=10)
-  data.plotRMR_ER$CI_2.5<-conf.int_RMR_ER[,1]
-  data.plotRMR_ER$CI_97.5<-conf.int_RMR_ER[,2]
-
-  # FAS optimal - ecologically relevant grid; plot/predict full range (All data coverage for reference)
-  data.plotFAS_ER<-expand.grid(tempTest = 20, lnBWg = seq(sum_fas_ER$min_bwLOG,sum_fas_ER$max_bwLOG, 0.5))
-  data.plotFAS_ER$model_predFE <- predict(fas_mod_ER, re.form = NA, newdata = data.plotFAS_ER)
-  conf.int_FAS_ER <- confint(fas_mod_ER, method = "boot", FUN=function(x)predict(x, data.plotFAS_ER, re.form=NA), nsim=10)
-  data.plotFAS_ER$CI_2.5<-conf.int_FAS_ER[,1]
-  data.plotFAS_ER$CI_97.5<-conf.int_FAS_ER[,2]
-
-  # AS optimal - ecologically relevant grid; plot/predict full range (All data coverage for reference)
-  data.plotAS_ER<-expand.grid(tempTestK1000 = seq(C40inTempTestK1000, C0inTempTestK1000 , 0.05), lnBWg = seq(sum_as_ALL$min_bwLOG,sum_as_ALL$max_bwLOG, 0.5))
-  data.plotAS_ER$model_predFE <- predict(as_mod_ER, re.form = NA, newdata = data.plotAS_ER)
-  conf.int_AS_ER <- confint(as_mod_ER, method = "boot", FUN=function(x)predict(x, data.plotAS_ER, re.form=NA), nsim=10)
-  data.plotAS_ER$CI_2.5<-conf.int_AS_ER[,1]
-  data.plotAS_ER$CI_97.5<-conf.int_AS_ER[,2]
-
-  # MMR or AMR  optimal - interaction model; plot/predict full range (All data coverage for reference)
-  data.plotAMRint_ER <- expand.grid(tempTestK1000 = seq(C40inTempTestK1000,C0inTempTestK1000, 0.05), lnBWg= seq(sum_amr_ALL$min_bwLOG,sum_amr_ALL$max_bwLOG, 0.5))
-  data.plotAMRint_ER$model_predFE <- predict(amr_mod_ER, re.form = NA, newdata = data.plotAMRint_ER)
-  conf.int_AMRint_ER <- confint(as_mod_ER, method = "boot", FUN=function(x)predict(x, data.plotAMRint_ER, re.form=NA), nsim=10)
-  data.plotAMRint_ER$CI_2.5<-conf.int_AMRint_ER[,1]
-  data.plotAMRint_ER$CI_97.5<-conf.int_AMRint_ER[,2]
-  data.plotAMRint_ER$tempTestK1000_inC <- ((1000/data.plotAMRint_ER$tempTestK1000))-275.15
-
-  # All temps for the Arrhenius plot:
-  # RMR - warm temp grid; plot/predict full range (All data coverage for reference)
-  data.plotRMR_warm<-expand.grid(tempTestK1000 = seq(C40inTempTestK1000, C0inTempTestK1000 , 0.05), lnBWg = seq(sum_rmr_ALL$min_bwLOG,sum_rmr_ALL$max_bwLOG, 0.5))
-  data.plotRMR_warm$model_predFE <- predict(rmr_mod_W, re.form = NA, newdata = data.plotRMR_warm)
-  conf.int_RMR_warm <- confint(rmr_mod_W, method = "boot", FUN=function(x)predict(x, data.plotRMR_warm, re.form=NA), nsim=10)
-  data.plotRMR_warm$CI_2.5<-conf.int_RMR_warm[,1]
-  data.plotRMR_warm$CI_97.5<-conf.int_RMR_warm[,2]
-
-  # MMR - warm temp plot grid; plot/predict full range (All data coverage for reference)
-  data.plotAMR_warm<-expand.grid(tempTestK1000 = seq(C40inTempTestK1000, C0inTempTestK1000 , 0.05), lnBWg = seq(sum_amr_ALL$min_bwLOG,sum_amr_ALL$max_bwLOG, 0.5))
-  data.plotAMR_warm$model_predFE <- predict(amr_mod_W, re.form = NA, newdata = data.plotAMR_warm)
-  conf.int_AMR_warm <- confint(amr_mod_W, method = "boot", FUN=function(x)predict(x, data.plotAMR_warm, re.form=NA), nsim=10)
-  data.plotAMR_warm$CI_2.5<-conf.int_AMR_warm[,1]
-  data.plotAMR_warm$CI_97.5<-conf.int_AMR_warm[,2]
-
-  # FAS - warm temp plot grid; plot/predict full range (All data coverage for reference)
-  data.plotFAS_warm <- expand.grid(lnBWg = seq(sum_fas_ALL$min_bwLOG,sum_fas_ALL$max_bwLOG, 0.5), tempTest = 20)
-  data.plotFAS_warm$model_predFE <- predict(fas_mod_W, re.form = NA, newdata = data.plotFAS_warm)
-  conf.int_FAS_warm <- confint(fas_mod_W, method = "boot", FUN=function(x)predict(x, data.plotFAS_warm, re.form=NA), nsim=10)
-  data.plotFAS_warm$CI_2.5<-conf.int_FAS_warm[,1]
-  data.plotFAS_warm$CI_97.5<-conf.int_FAS_warm[,2]
-
-  # AS - warm temp plot grid; plot/predict full range (All data coverage for reference)
-  data.plotAS_warm <- expand.grid(lnBWg = seq(sum_as_ALL$min_bwLOG,sum_as_ALL$max_bwLOG, 0.5), tempTestK1000 = seq(C40inTempTestK1000, C0inTempTestK1000 , 0.1))
-  data.plotAS_warm$model_predFE <- predict(as_mod_W, re.form = NA, newdata = data.plotAS_warm)
-  conf.int_AS_warm <- confint(as_mod_W, method = "boot", FUN=function(x)predict(x, data.plotAS_warm, re.form=NA), nsim=10)
-  data.plotAS_warm$CI_2.5<-conf.int_AS_warm[,1]
-  data.plotAS_warm$CI_97.5<-conf.int_AS_warm[,2]
-
-  # CIs for all model parameters
-  CI.amr.ER<-as.data.frame(confint.merMod(amr_mod_ER, level = 0.90))
-  CI.amr.ER$var<-rownames(CI.amr.ER)
-  CI.amr.ER$MR<-"MMR"
-  CI.amr.ER$temp_cat<-"ER"
-
-  CI.rmr.ER<-as.data.frame(confint.merMod(rmr_mod_ER, level = 0.90))
-  CI.rmr.ER$var<-rownames(CI.rmr.ER)
-  CI.rmr.ER$MR<-"RMR"
-  CI.rmr.ER$temp_cat<-"ER"
-
-  CI.fas.ER<-as.data.frame(confint.merMod(fas_mod_ER, level = 0.90))
-  CI.fas.ER$var<-rownames(CI.fas.ER)
-  CI.fas.ER$MR<-"FAS"
-  CI.fas.ER$temp_cat<-"ER"
-
-  CI.as.ER<-as.data.frame(confint.merMod(as_mod_ER, level = 0.90))
-  CI.as.ER$var<-rownames(CI.as.ER)
-  CI.as.ER$MR<-"AS"
-  CI.as.ER$temp_cat<-"ER"
-
-  CI.amr.W<-as.data.frame(confint.merMod(amr_mod_W, level = 0.90))
-  CI.amr.W$var<-rownames(CI.amr.W)
-  CI.amr.W$MR<-"MMR"
-  CI.amr.W$temp_cat<-"W"
-
-  CI.rmr.W<-as.data.frame(confint.merMod(rmr_mod_W, level = 0.90))
-  CI.rmr.W$var<-rownames(CI.rmr.W)
-  CI.rmr.W$MR<-"RMR"
-  CI.rmr.W$temp_cat<-"W"
-
-  CI.fas.W<-as.data.frame(confint.merMod(fas_mod_W, level = 0.90))
-  CI.fas.W$var<-rownames(CI.fas.W)
-  CI.fas.W$MR<-"FAS"
-  CI.fas.W$temp_cat<-"W"
-
-  CI.as.W<-as.data.frame(confint.merMod(as_mod_W, level = 0.90))
-  CI.as.W$var<-rownames(CI.as.W)
-  CI.as.W$MR<-"AS"
-  CI.as.W$temp_cat<-"W"
-
-  sum_CItable<-rbind(CI.amr.ER, CI.rmr.ER, CI.fas.ER, CI.as.ER, # ecol relev
-                     CI.amr.W, CI.rmr.W, CI.fas.W, CI.as.W) # warm
-
-  # Saving all export files
-  write.csv(file = "./Data_exports/Phylo/Table_CIsummary.csv", sum_CItable, row.names=FALSE)
-
-  write.csv(file = paste("./Data_exports/Phylo/dataPred_RMR_er_", Sys.Date(), ".csv", sep=""),  data.plotRMR_ER, row.names = F)
-  write.csv(file = paste("./Data_exports/Phylo/dataPred_AMR_er_", Sys.Date(), ".csv", sep=""),  data.plotAMRint_ER, row.names = F)
-  write.csv(file = paste("./Data_exports/Phylo/dataPred_AS_er_", Sys.Date(), ".csv", sep=""),  data.plotAS_ER, row.names = F)
-  write.csv(file = paste("./Data_exports/Phylo/dataPred_FAS_er_", Sys.Date(), ".csv", sep=""),  data.plotFAS_ER, row.names = F)
-
-  write.csv(file = paste("./Data_exports/Phylo/dataPred_RMR_warm_", Sys.Date(), ".csv", sep=""),  data.plotRMR_warm, row.names = F)
-  write.csv(file = paste("./Data_exports/Phylo/dataPred_AMR_warm_", Sys.Date(), ".csv", sep=""),  data.plotAMR_warm, row.names = F)
-  write.csv(file = paste("./Data_exports/Phylo/dataPred_AS_warm_", Sys.Date(), ".csv", sep=""),  data.plotAS_warm, row.names = F)
-  write.csv(file = paste("./Data_exports/Phylo/dataPred_FAS_warm_", Sys.Date(), ".csv", sep=""),  data.plotFAS_warm, row.names = F)
-
-
-}else{
-
+  
 
   message("Data to plot predicted data and scaling are imported from './Data_exports/'")
+  
+  sum_CItable<-read.csv(file = "./Data_exports/Phylo/Table_CIsummary.csv")
+
   data.plotRMR_ER<-read.csv(file = paste("./Data_exports/Phylo/dataPred_RMR_er_", date.imports, ".csv", sep=""))
-  data.plotAMR_ER<-read.csv(file = paste("./Data_exports/Phylo/dataPred_AMR_er_", date.imports, ".csv", sep=""))
+  data.plotAMRint_ER<-read.csv(file = paste("./Data_exports/Phylo/dataPred_AMR_er_", date.imports, ".csv", sep=""))
   data.plotAS_ER<-read.csv(file = paste("./Data_exports/Phylo/dataPred_AS_er_", date.imports, ".csv", sep=""))
   data.plotFAS_ER<-read.csv(file = paste("./Data_exports/Phylo/dataPred_FAS_er_", date.imports, ".csv", sep=""))
 

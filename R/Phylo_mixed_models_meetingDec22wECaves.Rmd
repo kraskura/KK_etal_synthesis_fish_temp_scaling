@@ -1,5 +1,5 @@
 ---
-title: "Phylo models for fish scaling"
+title: "Methods development: Phylo models for fish scaling"
 author: "Krista Kraskura"
 date: "`r Sys.Date()`"
 output: 
@@ -282,7 +282,7 @@ ggtree(tree.kk) +
  Difference in models:
 
 - model sets: Different random effects 
-  + set 0:  `(1|species)` = species intercept only
+  + set 0: `(1|species)` = species intercept only
   + set 1: `(1|species) + (1|species:trial)` = species, and nested trial under species intercepts
   + set 2: `(1|species) +(0 + tempTestK1000|species) + (1|species:trial)` = species intercept, nested trial under species intercept, species-specific response to temperature (i.e. different size individuals of the same species, woutl have differe sensititivy to temperature). 
   + set 3: _(models lead to singular fits, these were no longer considered)_

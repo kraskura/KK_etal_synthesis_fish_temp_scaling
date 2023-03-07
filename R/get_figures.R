@@ -3,107 +3,36 @@ set.seed(51423)
 
 library(ggplot2)
 library(ggpubr)
+library(here)
+library(cowplot)
+library(forcats)
 # MMR and AMR used interchangeably throughout 
 
-cols.as<-c("#265F73", "#00929A", "#00C5A3")
+cols.as<-c("#265F73", "#007E66", "#00C5A3")
 cols.fas<-c("#395200", "#89A000", "yellow")
 cols.rmr<-c("#C70039", "#FF6D7C", "#FFA3AC")
 cols.amr<-c("#00749F","#00A8D6", "#9CE9FF")
-cols<-c("#004EBF","#f45905","#004EBF","#f45905", "#8EA8FF","#FFC6A5", "#00B498", "#007E66")# AMR -rmr- AMR dark - rmr dark - light - as - fas
-
+cols<-c("#00749F","#C70039","#00A8D6","#FF6D7C", "#9CE9FF","#FFA3AC", "#00C5A3", "#265F73")# AMR -rmr- AMR dark - rmr dark - light - as - fas
 
 # FUNCTION BELOW ---------
-
 # Sys.Date()
-date.imports<-"2023-01-23"
-getModelParameters<-"NO" 
+date.imports<-substr(list.files("./Data_exports/Phylo/")[1], start = 17, stop = 26)
+getModelCIs<-FALSE
+
 # ^ this is computationally heavy task, to get saved data: "NO" or 2
 # to get compute now: "YES" or 1 
-
-setwd("/Users/kristakraskura/Github_repositories/KK_etal_synthesis_fish_temp_scaling/")
 source("./R/phylo_mixed model.R")
 source("./R/get_data_for_figures.R")
 
-# source("./R/get_scaling_data_temp.R")
-# source("/Users/kristakraskura/Github_repositories/Metabolic-scaling-fish/Codes/MR-fish-metadata/deltaIC_BICdelta_ggformat.R")
-# 
-# data.list<-get_scaling_data_temp(data.amr = "/Users/kristakraskura/Github_repositories/Metabolic-scaling-fish/Data/MR-fish-metadata-data/Fish_AMR_temp_dataset_mar2022.csv",
-#                                  data.rmr = "/Users/kristakraskura/Github_repositories/Metabolic-scaling-fish/Data/MR-fish-metadata-data/Fish_RMR_temp_dataset_mar2022.csv",
-#                                  ecology.data = "/Users/kristakraskura/Github_repositories/Metabolic-scaling-fish/Data/MR-fish-metadata-data/Kraskura_species_ecologies_mar2022.csv", 
-#                                  onlyTop.above = TRUE,
-#                                  exp_rmr = round(fixef(rmr_mod_ER)[2],3),
-#                                  exp_amr = round(fixef(amr_mod_ER)[2],3),
-#                                  exp_as = round(fixef(as_mod_ER)[2],3),
-#                                  exp_rmr_warm = round(fixef(rmr_mod_W)[2],3),
-#                                  exp_amr_warm = round(fixef(amr_mod_W)[2],3),
-#                                  exp_as_warm = round(fixef(as_mod_W)[2],3))
-# 
-# data.amrAC<-data.frame(data.list[1]) 
-# data.rmrAC<-data.frame(data.list[2])
-# data.amrAM<-data.frame(data.list[3])
-# data.rmrAM<-data.frame(data.list[4])
-# data.amrER<-data.frame(data.list[5])
-# data.rmrER<-data.frame(data.list[6])
-# 
-# data.asAC<-data.frame(data.list[7]) 
-# data.fasAC<-data.frame(data.list[8])
-# data.asAM<-data.frame(data.list[9])
-# data.fasAM<-data.frame(data.list[10])
-# data.asER<-data.frame(data.list[11])
-# data.fasER<-data.frame(data.list[12])
-# 
-# data.amr<-data.frame(data.list[13]) 
-# data.rmr<-data.frame(data.list[14]) 
-# dataMR<-data.frame(data.list[15])
-# data.as<-data.frame(data.list[16])
-# data.fas<-data.frame(data.list[17])
-# 
-# 
-# k<-(8.62*10^(-5)) # Boltzmann's constant
-# E<-0.63 # activation energy MTE
-# 
-# data.amr$test_category2<-"acclim"
-# data.amr$test_category2[data.amr$test_category=="acute"] <- "acute"
-# data.amr$test_category3<-"ecol_relev"
-# data.amr$test_category3[data.amr$test_category=="acute"] <- "warm"
-# data.amr$test_category3[data.amr$test_category=="acclim"] <- "warm"
-# data.rmr$test_category2<-"acclim"
-# data.rmr$test_category2[data.rmr$test_category=="acute"] <- "acute"
-# data.rmr$test_category3<-"ecol_relev"
-# data.rmr$test_category3[data.rmr$test_category=="acute"] <- "warm"
-# data.rmr$test_category3[data.rmr$test_category=="acclim"] <- "warm"
-# data.fas$test_category2<-"acclim"
-# data.fas$test_category2[data.fas$test_category=="acute"] <- "acute"
-# data.fas$test_category3<-"ecol_relev"
-# data.fas$test_category3[data.fas$test_category=="acute"] <- "warm"
-# data.fas$test_category3[data.fas$test_category=="acclim"] <- "warm"
-# data.as$test_category2<-"acclim"
-# data.as$test_category2[data.as$test_category=="acute"] <- "acute"
-# data.as$test_category3<-"ecol_relev"
-# data.as$test_category3[data.as$test_category=="acute"] <- "warm"
-# data.as$test_category3[data.as$test_category=="acclim"] <- "warm"
-# 
-# # these datasets are > Topt temperatures
-# data.amr.test<-rbind(data.amrAC, data.amrAM)
-# data.rmr.test<-rbind(data.rmrAC, data.rmrAM)
-# data.fas.test<-data.amr.test[c(!is.na(data.amr.test$FAS) & is.finite(data.amr.test$FAS)) , ]
-# data.as.test<-data.amr.test[c(!is.na(data.amr.test$lnAS) & is.finite(data.amr.test$lnAS)) , ]
-# 
-# data.amrER$tempTestK1000_inC<-((1000/data.amrER$tempTestK1000))-273.15
-
-# nrow(data.amr.test)+nrow(data.amrER)
-# nrow(data.rmr.test)+nrow(data.rmrER)
-  
-
-
-
-
-
+# General scaling plots ------
 AMRmodel_plot1<-ggplot(data=data.amrER, aes(x=lnBWg, y=lnAMR)) +
   geom_point(alpha=0.9,  size=2, pch=19, color="grey70")+
-  geom_line(data=data.plotAMRint_ER, aes(y = model_predFE, x=lnBWg,  group=tempTestK1000_inC, color = tempTestK1000_inC), size=0.3, lty=1,alpha=0.8, show.legend=FALSE) +
+  geom_line(data=data.plotAMRint_ER,
+            aes(y = model_predFE, x=lnBWg,  group=tempTestK1000_inC, color = tempTestK1000_inC),
+            linewidth=0.3, lty=1,alpha=0.8, show.legend=FALSE) +
   geom_point(alpha=0.9,  size=2, pch=21, color="grey50",fill="grey70" )+
-  geom_point(data=data.amr.test, aes(x=lnBWg, y=lnAMR, fill=tempTest), alpha=0.9,  size=2, pch=21, show.legend = FALSE)+
+  geom_point(data=data.amr.test, aes(x=lnBWg, y=lnAMR, fill=tempTest),
+             alpha=0.9,  size=2, pch=21, show.legend = FALSE)+
   geom_line(data=data.plotAMR_warm[round(data.plotAMR_warm$tempTestK1000,2)==3.39,],
             aes(y = model_predFE, x=lnBWg,  group=tempTestK1000), color="#002E53", linewidth=1, lty=1, show.legend=FALSE) +
   annotate("text",  x = -5.5, y = 11.5, label = bquote(Optimal:~italic(b)[MMR] == change~with~degree*C),size=5, hjust=0, family="Arial", color = "black")+
@@ -181,7 +110,7 @@ ggsave(filename = paste("./Figures/Fig1_Scaling_aLL_", Sys.Date(), ".png", sep="
        plot=scaling, width = 8.5, height = 8.5, units = "in")
 
 
-# Both Activation energies together:
+# Both Activation energies together: -------
 # model_predFE << is in lnMR units 
 # MMR
 AMRmodel_plot3.E_ALL<-ggplot(data.amrER[data.amrER$lnBWg==0,]) +
@@ -230,7 +159,6 @@ ASmodel_plot3.E_ALL<-ggplot(data.asER[data.asER$lnBWg==0,]) +
   geom_line(data = data.plotAS_warm[which(round(data.plotAS_warm$lnBWg, 1) == round(log(1.4), 1)),], aes(y = log((exp(model_predFE)/exp(lnBWg))), x=tempTestK1000, group=lnBWg), color = cols.as[2], linewidth=1, lty=1, show.legend=FALSE)
 ggformat(ASmodel_plot3.E_ALL, x_title= expression(Temperature^-1~(1000/K)), y_title=expression(italic(ln)*AS~(mg~O[2]~h^-1~g^-1)), print = T)
 
-
 Arh.plot<-cowplot:::plot_grid(AMRmodel_plot3.E_ALL, RMRmodel_plot3.E_ALL, ASmodel_plot3.E_ALL, 
           align = "hv",
           axis = "l",
@@ -242,7 +170,6 @@ ggsave(filename = paste("./Figures/Fig_ArrheniusFigMMR-RMR-AS_", Sys.Date(), ".p
 
 
 # Both MMR and RMR together - AS punchline plots ---------
-
 # Overall all fish together:
 MRmodel_plot1<-ggplot() +
   geom_ribbon(data=data.plotRMR_ER, mapping = aes(y = model_predFE, x=lnBWg, ymin=CI_2.5, ymax=CI_97.5, group = tempTestK1000), linetype=2, alpha=0.1, fill = "grey30")+
@@ -286,7 +213,7 @@ ggformat(MRmodel_plot2, x_title=expression(italic(ln)*Body~mass~(g)), y_title=ex
 ggsave(filename = paste("./Figures/Fig5-final_MMR-RMR_", Sys.Date(), ".png", sep=""),
        plot=MRmodel_plot2, width = 4, height = 4, units = "in")
 
-# Ecology specific groupings (sufficient for scaling ): 
+# Ecology specific groupings (sufficient for scaling ):  -------
 ecol_rmr_sum1<-ggplot(ecology_data.RMRd.g, aes(color = test_category3)) +
   geom_segment(aes(x = log(size_min), xend = log(size_max), y = intercept + slope*log(size_min), yend = intercept + slope*log(size_max)), show.legend = FALSE )+
   ylim(x = -7,12 )+
@@ -333,7 +260,7 @@ ggsave(filename = paste("./Figures/FigVAR_speciesRMR_v2_", Sys.Date(), ".png", s
 
 
 # SUPPLEMENTAL-----------
-## GOOD Sum plots: histograms of fish at different size suppl ----------
+## Histograms of fish at different size suppl ----------
 
 plot_hist_amr<-ggplot(data.amr, aes(x=BW_g)) +
   # geom_vline(xintercept = mean(d_bind.rmr$MLEslope[d_bind.rmr$parameter=="lnBWg"]), colour="black", lty=2, lwd=1)+
@@ -538,8 +465,6 @@ ggformat(FAS_size, y_title = expression(Factorial~aerobic~scope), x_title = expr
 # ecolFAS1 <- ecolFAS1+theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
 
 # Plots: Correlations metabolic rates ---------
-
-#
 MRcorrel1.small<-ggplot(data.amr[data.amr$BW_g<100,], aes(x=RMR, y=AMR, group=test_category3, color = tempTest, shape=test_category3, fill=tempTest)) +
   geom_point(alpha=0.6, pch=21,  show.legend = FALSE, size=2)+
   scale_fill_gradient2(low="blue", high="black", mid = "red", midpoint = 20)+
@@ -574,25 +499,60 @@ cowplot:::plot_grid(MRcorrel1.large, MRcorrel1.small,
                     ) %>%
 ggsave(filename = paste("./Figures/AMR_RMR_correl", Sys.Date(),".png"), width = 5, height = 7)
 
-AScorrel1.small<-ggplot(data.amr[data.amr$BW_g<100,], aes(x=AMR, y=AS, group=test_category3, color = tempTest, shape=test_category3, fill=tempTest)) +
+AScorrel1.small<-ggplot(data.amr[data.amr$BW_g<100,],
+                        aes(x=AMR, y=AS, group=test_category3, color = BW_g,
+                            shape=test_category3, fill=BW_g)) +
   geom_point(alpha=0.6, pch=21,  show.legend = FALSE, size=2)+
-  scale_fill_gradient2(low="blue", high="black", mid = "red", midpoint = 20)+
-  scale_color_gradient2(low="blue", high="black", mid = "red", midpoint = 20)+
+  # scale_fill_gradient2(low="blue", high="black", mid = "red", midpoint = 20)+
+  # scale_color_gradient2(low="blue", high="black", mid = "red", midpoint = 20)+
   scale_shape_manual(values= c(22,23))+
   facet_grid(.~test_category3)+
   geom_abline(slope = 1, intercept = 0, lty = "dashed")
 ggformat(AScorrel1.small, title = "",x_title = expression(MMR~(mg~O[2]~h^-1)), y_title = expression(AS~(mg~O[2]~h^-1)), print = F)
 
-AScorrel1.large<-ggplot(data.amr, aes(y=AS, x=AMR, group=test_category, fill=tempTest, shape=test_category)) +
+AScorrel1.large<-ggplot(data.amr,
+                        aes(y=AS, x=AMR, group=test_category, fill=tempTest, shape=test_category)) +
   geom_point(alpha=0.6,shape=21,  show.legend = FALSE, size=3)+
   geom_point(data.amr[data.amr$species=="Somniosus microcephalus",],  mapping=aes(x=AS, y=AMR, group=test_category, fill=tempTest, shape=test_category), shape=23,  show.legend = FALSE, size=3, stroke=2)+
-  scale_color_gradient2(low="blue", high="black", mid = "red", midpoint = 20)+
-  scale_fill_gradient2(low="blue", high="black", mid = "red", midpoint = 20)+
+  # scale_color_gradient2(low="blue", high="black", mid = "red", midpoint = 20)+
+  # scale_fill_gradient2(low="blue", high="black", mid = "red", midpoint = 20)+
   scale_shape_manual(values= c(22,23,24))+
   facet_grid(.~test_category3)+
   scale_x_continuous(breaks = c(0, 1000, 3000, 5000))+
   geom_abline(slope = 1, intercept = 0, lty = "dashed")
 ggformat(AScorrel1.large, title = "", x_title = expression(MMR~(mg~O[2]~h^-1)), y_title = expression(AS~(mg~O[2]~h^-1)), print = F)
+
+cowplot:::plot_grid(AScorrel1.large, AScorrel1.small,
+                    align = "hv",
+                    axis = "l",
+                    nrow = 2,
+                    ncol = 1) %>%
+  # fig_part4.1
+  ggsave(filename = "./Figures/AMR_AS_correl_march232022.png", width = 5, height = 7)
+
+AScorrel1.small.rmr<-ggplot(data.amr[data.amr$BW_g<100,],
+                            aes(x=RMR, y=AS, group=test_category3,
+                                color = BW_g, shape=test_category3,
+                                fill=BW_g)) +
+  geom_point(alpha=0.6, pch=21,  show.legend = FALSE, size=2)+
+  # scale_fill_gradient2(low="blue", high="black", mid = "red", midpoint = 20)+
+  # scale_color_gradient2(low="blue", high="black", mid = "red", midpoint = 20)+
+  scale_shape_manual(values= c(22,23))+
+  facet_grid(.~test_category3)+
+  geom_abline(slope = 1, intercept = 0, lty = "dashed")
+ggformat(AScorrel1.small.rmr, title = "",x_title = expression(RMR~(mg~O[2]~h^-1)), y_title = expression(AS~(mg~O[2]~h^-1)), print = F)
+
+AScorrel1.large.rmr<-ggplot(data.amr,
+                            aes(y=AS, x=RMR, group=test_category,
+                                fill=BW_g, shape=test_category)) +
+  geom_point(alpha=0.6,shape=21,  show.legend = FALSE, size=3)+
+  # scale_color_gradient2(low="blue", high="black", mid = "red", midpoint = 20)+
+  # scale_fill_gradient2(low="blue", high="black", mid = "red", midpoint = 20)+
+  scale_shape_manual(values= c(22,23,24))+
+  facet_grid(.~test_category3)+
+  scale_x_continuous(breaks = c(0, 1000, 3000, 5000))+
+  geom_abline(slope = 1, intercept = 0, lty = "dashed")
+ggformat(AScorrel1.large.rmr, title = "", x_title = expression(RMR~(mg~O[2]~h^-1)), y_title = expression(AS~(mg~O[2]~h^-1)), print = F)
 
 cowplot:::plot_grid(AScorrel1.large, AScorrel1.small,
                     align = "hv",
@@ -662,43 +622,101 @@ ecolhist.plot<-cowplot:::plot_grid(plot_hist2_amrlm, plot_hist2_rmrlm,plot_hist2
                                    ncol = 1) 
 save_plot(filename = paste("./Figures/Suppl_ecol_hist", Sys.Date(), ".png", sep=""),
           ecolhist.plot, base_width = 8, base_height = 12, units = "in")
+# 
+# 
+# # good for scaling only & pairs:
+# scopeWARM.ER.good<-ggplot(ecology_data.AMRd.g,
+#                           aes(x=slope, y=ecol_temp_cat),
+#                           color=test_category3, fill=MR,
+#                           group = ecology_subgroup)+
+#   # geom_text(aes(label = n_data_n_species,  x = 0.61),   family = "Arial", size=4, fontface="bold")+
+#   # geom_text(data = ecology_data.AMRd.g, aes(label = n_data_n_species,  x = 0.5),  family = "Arial", size=4, fontface="bold")+
+#   geom_linerange(data = ecology_data.RMRd.g,
+#                  aes(xmin = as.numeric(slope.ciL) , xmax = as.numeric(slope.ciH)))+
+#   geom_point(pch=21, size=1, stroke=1, fill="grey", alpha=1)+
+#   geom_linerange(data = ecology_data.AMRd.g, mapping=aes(xmin = slope.ciL, xmax = slope.ciH), alpha=1)+
+#   geom_point(data=ecology_data.AMRd.g, mapping = aes(x=slope, y=ecol_temp_cat, color=test_category3),
+#              pch=23, size=1, stroke=1, fill="black", alpha=1)+
+#   geom_line(arrow = arrow(length=unit(0.30,"cm"), ends="first", type = "closed"), size = 1)+
+#   scale_color_manual(values=c("black", "red"))+
+#   xlab(expression(Slope~value~(italic(b))))+
+#   scale_x_continuous(limits = c(0.46,1.1), breaks = c(0.66, 0.75, 0.82, 0.9, 1))+
+#   theme_classic()+
+#   geom_vline(xintercept = c(0.66, 0.75,1), lty = "dashed", color = "grey", size = 0.6)+
+#   theme(axis.text.y = element_text(face = "italic", color = "black", size = 15),
+#         axis.text.x = element_text( color = "black", size = 15),
+#         axis.title.y = element_blank(),
+#         legend.position = "none",
+#         axis.line.y=element_line(colour = 'black',size=0.5),
+#         axis.line.x=element_line(colour = 'black',size=0.5),
+#         axis.ticks.y=element_line(size=0.5),
+#         axis.ticks.x=element_line(size=0),
+#         text=element_text(size=20,  family="Arial"))
+# scopeWARM.ER.good
+# ggsave(filename = paste("./Figures/Figxx_ecology1_ScalingSuited", Sys.Date(), ".png", sep=""),
+       # plot=scopeWARM.ER.good, width = 8, height = 8, units = "in")
 
 
-# good for scaling only & pairs:
-scopeWARM.ER.good<-ggplot(ecology_data.RMRd.g, aes(x=slope, y=factor(ecol_temp_cat, level = c(as.character(ecol_temp_cat))), color=test_category3, fill=test_category3))+
-  scale_y_discrete(
-    labels = c("Fusiform","Fusiform",
+rmr.WARM.ER.good<-ggplot(data=ecology_data.RMRd.g,
+                         aes(x=slope,
+                             y=factor(ecol_temp_cat, level = c(as.character(ecol_temp_cat))),
+                             color=interaction(test_category3, MR),
+                             fill=interaction(test_category3, MR), 
+                             group= ecology_subgroup))+
+  scale_y_discrete(limits=rev,
+    labels = c("",
+               "Any salinity", 
                "",
-               "Suptropical", "Suptropical",
-               "Temperate", "Temperate",
-               "Tropical" , "Tropical",
+               "Marine",
                "",
-               "Benthopelagic", "Benthopelagic",
-               "Demersal" , "Demersal",
-               "Reef-associated", "Reef-associated",
+               "Reef-associated",
+              "",
+               "Demersal",
+              "",
+               "Benthopelagic", 
                "",
-               "Marine", "Marine","Any salinity", "Any salinity"),
-    # labels = factor(ecology_data.RMRd.g$ecol_temp_cat, level = c(as.character(ecology_data.RMRd.g$ecol_temp_cat))),
-    # breaks = factor(ecology_data.RMRd.g$ecol_temp_cat, level = c(as.character(ecology_data.RMRd.g$ecol_temp_cat))),
-    limits = c(as.character(factor(ecology_data.RMRd.g$ecol_temp_cat)[1:2]),
+               "Tropical",
                "",
-               as.character(factor(ecology_data.RMRd.g$ecol_temp_cat)[3:8]),
+               "Temperate",
                "",
-               as.character(factor(ecology_data.RMRd.g$ecol_temp_cat)[9:14]),
+               "Suptropical",
                "",
-               as.character(factor(ecology_data.RMRd.g$ecol_temp_cat)[15:18])))+
-  geom_text(aes(label = n_data_n_species,  x = 0.61),   family = "Arial", size=4, fontface="bold")+
-  geom_text(data = ecology_data.AMRd.g, aes(label = n_data_n_species,  x = 0.5),  family = "Arial", size=4, fontface="bold")+
-  geom_linerange(data = ecology_data.RMRd.g, aes(xmin = as.numeric(slope.ciL) , xmax = as.numeric(slope.ciH)))+
-  geom_point(pch=21, size=4, stroke=1, fill="grey", alpha=1)+
-  geom_linerange(data = ecology_data.AMRd.g, mapping=aes(xmin = slope.ciL, xmax = slope.ciH), alpha=1)+
-  geom_point(data=ecology_data.AMRd.g, mapping = aes(x=slope, y=factor(ecol_temp_cat, level = c(as.character(ecol_temp_cat))), color=test_category3),
-             pch=23, size=4, stroke=1, fill="black", alpha=1)+
-  scale_color_manual(values=c("black", "red"))+
+               "Fusiform"))+
+  geom_text(aes(label = slope,  x = 0.25),
+            family = "Arial", fontface ="bold", size=3.5, color = cols.rmr[1], hjust = 1)+
+  geom_text(data = ecology_data.AMRd.g, aes(label = slope,  x = 0.3),
+            family = "Arial", fontface ="bold", size=3.5, color = cols.amr[1], hjust = 0)+
+  
+  geom_text(data = ecology_data.RMRd.g,
+            mapping = aes(label =  n_data_n_species, x = 1.5),
+            family = "Arial", size=3.5, color = cols.rmr[1], hjust = 1)+
+  geom_text(data = ecology_data.AMRd.g,
+            mapping = aes(label =  n_data_n_species, x = 1.55),
+            family = "Arial", size=3.5, color = cols.amr[1], hjust = 0)+
+  
+  geom_linerange(data = ecology_data.RMRd.g,
+                 aes(xmin = as.numeric(slope.ciL),
+                     xmax = as.numeric(slope.ciH)), alpha = 0.4)+
+  geom_vline(xintercept = 1, lty = "dotted", color="grey")+
+  geom_linerange(aes(xmin = slope.ciL, xmax = slope.ciH),
+                 alpha = 0.4)+
+  geom_linerange(data = ecology_data.AMRd.g,
+                 mapping = aes(xmin = as.numeric(slope.ciL), xmax = as.numeric(slope.ciH)),
+                 alpha = 0.4)+
+  geom_point(pch=21, size=4, stroke=0.6, alpha=1)+
+  geom_point(data = ecology_data.AMRd.g,
+             pch=21, size=4, stroke=0.6, alpha=1)+
+  geom_line(arrow = arrow(length=unit(0.20,"cm"), ends="last", type = "closed"),
+            size = 0.7, color = cols.rmr[1])+
+  geom_line(data = ecology_data.AMRd.g,
+            arrow = arrow(length=unit(0.20,"cm"), ends="last", type = "closed"),
+            size = 0.7, color = cols.amr[1])+
+  scale_color_manual(values=c("black", "black",cols.amr[1], cols.rmr[1]))+
+  scale_fill_manual(values=c(cols.amr[1],cols.rmr[1],cols.amr[2], cols.rmr[2]))+
   xlab(expression(Slope~value~(italic(b))))+
-  scale_x_continuous(limits = c(0.46,1.1), breaks = c(0.66, 0.75, 0.82, 0.9, 1))+
+  scale_x_continuous(limits = c(0.1,1.8))+
+  # scale_y_discrete(limits=rev)+
   theme_classic()+
-  geom_vline(xintercept = c(0.66, 0.75,1), lty = "dashed", color = "grey", size = 0.6)+
   theme(axis.text.y = element_text(face = "italic", color = "black", size = 15),
         axis.text.x = element_text( color = "black", size = 15),
         axis.title.y = element_blank(),
@@ -708,213 +726,70 @@ scopeWARM.ER.good<-ggplot(ecology_data.RMRd.g, aes(x=slope, y=factor(ecol_temp_c
         axis.ticks.y=element_line(size=0.5),
         axis.ticks.x=element_line(size=0),
         text=element_text(size=20,  family="Arial"))
-# scopeWARM.ER.good
-ggsave(filename = paste("./Figures/Figxx_ecology1_ScalingSuited", Sys.Date(), ".png", sep=""),
-       plot=scopeWARM.ER.good, width = 8, height = 8, units = "in")
+rmr.WARM.ER.good
 
 
-fas.WARM.ER.good<-ggplot(data=ecology_data.FASd.g, aes(x=slope, y=factor(ecol_temp_cat, level = c(as.character(ecol_temp_cat))), color=test_category3, fill=test_category3))+
-  # scale_y_discrete(
-    # labels = c("Fusiform","Fusiform",
-    #            "",
-    #            "Suptropical", "Suptropical",
-    #            "Temperate", "Temperate",
-    #            "Tropical" , "Tropical",
-    #            "",
-    #            "Benthopelagic", "Benthopelagic",
-    #            "Demersal" , "Demersal",
-    #            "Reef-associated", "Reef-associated",
-    #            "",
-    #            "Marine", "Marine","Any salinity", "Any salinity"),
-    # limits = c(as.character(factor(ecology_data.FASd.g$ecol_temp_cat))[1:2],
-    #            "",
-    #            as.character(factor(ecology_data.FASd.g$ecol_temp_cat))[3:8],
-    #            "",
-    #            as.character(factor(ecology_data.FASd.g$ecol_temp_cat))[9:14],
-    #            "",
-    #            as.character(factor(ecology_data.FASd.g$ecol_temp_cat))[15:18]))+
-  geom_text(aes(label = n_data_n_species,  x = -0.25),   family = "Arial", size=4, fontface="bold")+
-  geom_text(aes(label = paste(round(size_min, 2), "-", round(size_max, 2)),  x = 0.3),   family = "Arial", size=4)+
-  geom_linerange(data = ecology_data.FASd.g, aes(xmin = as.numeric(slope.ciL) , xmax = as.numeric(slope.ciH)))+
-  geom_vline(xintercept = 0, lty = "dashed", color="black")+
-  geom_linerange(aes(xmin = slope.ciL, xmax = slope.ciH))+
-  geom_point(pch=25, size=4, stroke=1, fill="grey", alpha=1)+
-  scale_color_manual(values=c("black", "red"))+
+fas.WARM.ER.good<-ggplot(data=ecology_data.FASd.g,
+                         aes(x=slope,
+                             y=factor(ecol_temp_cat, level = c(as.character(ecol_temp_cat))),
+                             color=test_category3,
+                             fill=test_category3, 
+                             group= ecology_subgroup))+
+  scale_y_discrete(limits=rev,
+    labels = c("",
+               "Any salinity", 
+               "",
+               "Marine",
+               "",
+               "Reef-associated",
+              "",
+               "Demersal",
+              "",
+               "Benthopelagic", 
+               "",
+               "Tropical",
+               "",
+               "Temperate",
+               "",
+               "Suptropical",
+               "",
+               "Fusiform"))+
+  geom_text(aes(label = n_data_n_species,  x = 0.2), family = "Arial", size=3.5, hjust=0)+
+  geom_text(aes(label = slope, x = -0.2, family = "Arial"), size=3.5, hjust=1, fontface="bold")+
+  geom_linerange(data = ecology_data.FASd.g,
+                 aes(xmin = as.numeric(slope.ciL) , xmax = as.numeric(slope.ciH)), alpha = 0.4)+
+  geom_vline(xintercept = 0, lty = "dotted", color="grey")+
+  geom_linerange(aes(xmin = slope.ciL, xmax = slope.ciH), alpha = 0.4)+
+  geom_point(pch=21, size=4, stroke=0.6, alpha=1)+
+  geom_line(arrow = arrow(length=unit(0.20,"cm"), ends="first", type = "closed"), size = 0.7)+
+  scale_color_manual(values=c("black", cols.fas[1]))+
+  scale_fill_manual(values=c("black", cols.fas[2]))+
   xlab(expression(Slope~value~(italic(b))))+
   scale_x_continuous(limits = c(-0.3,0.4))+
+  # scale_y_discrete(limits=rev)+
   theme_classic()+
-  theme(axis.text.y = element_text(face = "italic", color = "black", size = 15),
+  theme(
+    # axis.text.y = element_text(face = "italic", color = "black", size = 15),
         axis.text.x = element_text( color = "black", size = 15),
         axis.title.y = element_blank(),
         legend.position = "none",
         axis.line.y=element_line(colour = 'black',size=0.5),
         axis.line.x=element_line(colour = 'black',size=0.5),
         axis.ticks.y=element_line(size=0.5),
+        axis.text.y = element_blank(),
         axis.ticks.x=element_line(size=0),
         text=element_text(size=20,  family="Arial"))
 fas.WARM.ER.good
-ggsave(filename = paste("./Figures/FigSUP_ecology1_ScalingSuited_FAS", Sys.Date(), ".png", sep=""),
-       plot=fas.WARM.ER.good, width = 7, height = 8, units = "in")
 
-
-fas.WARM.ER.order<-ggplot(data=order.ecology_data.FASd,
-                          aes(x=slope, y=ecol_temp_cat, color=test_category3, fill=factor(test_category3)))+
-        #   scale_y_discrete(
-        #     labels = c(
-        # "Marine-brackish", 
-        # "Short/Deep",                        
-        # "Elongated",
-        # "Temperate",                         
-        # "Freshwater-brackish",              
-        # "Benthopelagic",
-        # "Pelagic" ,                          
-        # "Freshwater"  ,                      
-        # "Reef-associated" ,                  
-        # "Marine"           ,                 
-        # "Polar",                       
-        # "Marine-brackish"    ,         
-        # "Freshwater-brackish" ,       
-        # "Tropical"    ,                      
-        # "Short/deep"  ,                
-        # "Demersal",
-        # "Tropical",
-        # "Benthopelagic",
-        # "Freshwater",
-        # "Demersal",
-        # "Elongated" ,                  
-        # "Reef-associated"  ,           
-        # "Fusiform",
-        # "Pelagic"    ,                 
-        # "All salinities",
-        # "Marine"  ,                    
-        # "Temperate"  ,                 
-        # "Fusiform"     ,               
-        # "Subtropical",
-        # "Polar"         ,                    
-        # "All salinities",
-        # "Subtropical"))+
-  geom_vline(xintercept = 0, lty = "dashed", color="black")+
-  geom_linerange(aes(xmin = slope.ciL , xmax = slope.ciH))+
-  geom_linerange(aes(xmin = slope.ciL, xmax = slope.ciH))+
-  # geom_point(pch="|", size=4,  alpha=1, stroke = 6)+
-  geom_point(pch=25, size=4,  alpha=1)+
-  geom_text(aes(label =n_data_n_species, y=c(1:32), x = -0.5),   family = "Arial", size=4, fontface="bold")+
-  scale_color_manual(values=c("black", "red"))+
-  scale_fill_manual(values=c("black", "red"))+
-  xlab(expression(Slope~value~(italic(b))))+
-  # scale_x_continuous(limits = c(-0.4,0.5))+
-  theme_classic()+
-  theme(axis.text.y = element_text(face = "italic", color = "black", size = 15),
-        axis.text.x = element_text( color = "black", size = 15),
-        axis.title.y = element_blank(),
-        legend.position = "none",
-        axis.line.y=element_line(colour = 'black',size=0.5),
-        axis.line.x=element_line(colour = 'black',size=0.5),
-        axis.ticks.y=element_line(size=0.5),
-        axis.ticks.x=element_line(size=0),
-        text=element_text(size=20,  family="Arial"))
-ggsave(filename = paste("./Figures/FigXX_ecology1_FAS_ER_", Sys.Date(), ".png", sep=""),
-       plot=fas.WARM.ER.order, width = 6, height = 7.5, units = "in")
-
-
-
-fas.WARM.ER.order.W<-ggplot(data=order.ecology_data.FASd.W,
-                            aes(x=slope, y=ecol_temp_cat))+
-      # scale_y_discrete(
-      #   labels = c(
-      #         "Marine-brackish" ,
-      #         "Short/Deep",
-      #         "Elongated",
-      #         "Temperate",
-      #         "Freshwater-brackish",
-      #         "Benthopelagic",
-      #         "Pelagic" ,
-      #         "Freshwater"  ,
-      #         "Reef-associated" ,
-      #         "Marine"           ,
-      #         "Tropical"    ,
-      #         "Demersal" ,
-      #         "Fusiform"     ,
-      #         "All salinities",
-      #         "Subtropical",
-      #         "Polar" ))+
-  geom_vline(xintercept = 0, lty = "dashed", color="black")+
-  geom_linerange(aes(xmin = slope.ciL , xmax = slope.ciH))+
-  geom_linerange(aes(xmin = slope.ciL, xmax = slope.ciH))+
-  geom_point(pch=25, size=3, stroke=1, fill="black", alpha=1, color = "red")+
-  geom_point(data=order.ecology_data.FASd.W[order.ecology_data.FASd.W$slope<0, ] , aes(x=slope, y=factor(ecol_temp_cat, level = c(as.character(ecol_temp_cat)))),
-             pch=25, size=3, stroke=1, fill="grey", alpha =1, color = "red")+
-  geom_text(data = order.ecology_data.FASd.W, 
-            aes(label = n_data_n_species, y=c(1:16), x = -1),   family = "Arial", size=4, fontface="bold", color="black")+
-  xlab(expression(Slope~value~(italic(b))))+
-  theme_classic()+
-  theme(axis.text.y = element_text(face = "italic", color = "black", size = 15),
-        axis.text.x = element_text( color = "black", size = 15),
-        axis.title.y = element_blank(),
-        legend.position = "none",
-        axis.line.y=element_line(colour = 'black',size=0.5),
-        axis.line.x=element_line(colour = 'black',size=0.5),
-        axis.ticks.y=element_line(size=0.5),
-        axis.ticks.x=element_line(size=0),
-        text=element_text(size=20,  family="Arial"))
-# ggsave(filename = paste("./Figures/FigXX_ecology1_FAS_ER_", Sys.Date(), ".png", sep=""),
-#        plot=fas.WARM.ER.order.W, width = 7, height = 8, units = "in")
-
-
-
-fas.WARM.ER.order.ER<-ggplot(data=order.ecology_data.FASd.ER,
-                             aes(x=slope, y=ecol_temp_cat))+
-  # scale_y_discrete(
-  #   labels = c(
-  #     "Polar",
-  #     "Marine-brackish"   ,
-  #     "Freshwater-brackish" ,
-  #     "Short/deep"  ,
-  #     "Tropical"  ,
-  #     "Benthopelagic"  ,
-  #     "Freshwater",
-  #     "Demersal"    ,
-  #     "Elongated" ,
-  #     "Reef-associated"  ,
-  #     "Pelagic"    ,
-  #     "Marine"  ,
-  #     "Temperate"  ,
-  #     "Fusiform"     ,
-  #     "All salinities",
-  #     "Subtropical"
-  #   )
-  #   )+
-  geom_vline(xintercept = 0, lty = "dashed", color="black")+
-  geom_linerange(aes(xmin = slope.ciL , xmax = slope.ciH))+
-  geom_linerange(aes(xmin = slope.ciL, xmax = slope.ciH))+
-  geom_point(pch=25, size=3, stroke=1, fill="black", alpha=1)+
-  geom_point(data=order.ecology_data.FASd.ER[order.ecology_data.FASd.ER$slope<0, ] ,
-             aes(x=slope, y=factor(ecol_temp_cat, level = c(as.character(ecol_temp_cat)))),
-             pch=25, size=3, stroke=1, fill="grey", alpha = 1)+
-  geom_text(aes(label =n_data_n_species, y=c(1:16), x = -0.51),   family = "Arial", size=4, fontface="bold", color="black")+
-  xlab(expression(Slope~value~(italic(b))))+
-  scale_x_continuous(limits = c(-0.6,0.5))+
-  theme_classic()+
-  theme(axis.text.y = element_text(face = "italic", color = "black", size = 15),
-        axis.text.x = element_text( color = "black", size = 15),
-        axis.title.y = element_blank(),
-        legend.position = "none",
-        axis.line.y=element_line(colour = 'black',size=0.5),
-        axis.line.x=element_line(colour = 'black',size=0.5),
-        axis.ticks.y=element_line(size=0.5),
-        axis.ticks.x=element_line(size=0),
-        text=element_text(size=20,  family="Arial"))
-fas.WARM.ER.order.ER
-
-plot.fas<-cowplot:::plot_grid(fas.WARM.ER.order.ER, fas.WARM.ER.order.W, 
-                              align = "hv",
-                              axis = "l",
-                              # labels = c("A: Optimal","B: Warm"), 
-                              nrow = 1,
-                              ncol = 2) 
-ggsave(filename = paste("./Figures/Figxx_ecology-FAS1_", Sys.Date(), ".png", sep=""),
-       plot=plot.fas, width = 12, height = 6, units = "in")
-
+cowplot::plot_grid(rmr.WARM.ER.good,
+                   fas.WARM.ER.good,
+                  nrow = 1, 
+                  labels = "AUTO", 
+                  rel_widths = c(1, 0.5),
+                  label_x = c(0.435, 0.25),
+                  label_y = c(0.98, 0.98)) %>% 
+  ggsave(filename = paste("./Figures/Fig_ecology1_ScalingSuited_FAS", Sys.Date(), ".png", sep=""),
+         width = 9.5, height = 6)
 
 
 # Violin plots: AS and FAS ecology size independent -------------

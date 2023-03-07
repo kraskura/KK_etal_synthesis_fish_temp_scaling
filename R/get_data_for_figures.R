@@ -1,12 +1,7 @@
 
-# Sys.Date()
-date.imports<-"2023-01-23"
-getModelParameters<-"NO" 
+
 # ^ this is computationally heavy task, to get saved data: "NO" or 2
 # to get compute now: "YES" or 1 
-
-setwd("/Users/kristakraskura/Github_repositories/KK_etal_synthesis_fish_temp_scaling/")
-source("./R/phylo_mixed model.R")
 
 # 2. DATA update with mass specific values  --------
 data.list<-get_scaling_data_temp(data.amr = "/Users/kristakraskura/Github_repositories/Metabolic-scaling-fish/Data/MR-fish-metadata-data/Fish_AMR_temp_dataset_mar2022.csv",
@@ -74,7 +69,6 @@ data.as.test<-data.amr.test[c(!is.na(data.amr.test$lnAS) & is.finite(data.amr.te
 data.amrER$tempTestK1000_inC<-((1000/data.amrER$tempTestK1000))-273.15
 
 
-
 # Ecology groups -----
 ecology_data.FAS <- read.csv(file = "./Data_exports/Ecologies/ecologies_FAS.csv")
 ecology_data.RMR <- read.csv(file = "./Data_exports/Ecologies/ecologies_RMR.csv")
@@ -118,7 +112,7 @@ ecology_data.RMRd_w[ecology_data.RMRd_w$Ecol == "salintyComb",]
 ecology_data.RMRd_er[ecology_data.RMRd_er$Ecol == "salintyComb",]
 ecology_data.AMRd_er[ecology_data.AMRd_er$Ecol == "salintyComb",]
 
-ecology_data.RMRd.g<-ecology_data.RMRd[c(ecology_data.RMRd$scalingGood=="fusiform" | 
+ecology_data.RMRd.g<-ecology_data.RMRd[c(ecology_data.RMRd$ecology_subgroup=="fusiform" | 
                                            ecology_data.RMRd$ecology_subgroup=="Subtropical"|
                                            ecology_data.RMRd$ecology_subgroup=="Temperate"|
                                            ecology_data.RMRd$ecology_subgroup=="Tropical"|
