@@ -12,6 +12,7 @@
 "Chromis atripectoralis_warm",1.282,0.269,0.751,-0.159,1.813,0.697,"Chromis atripectoralis","warm",1.6,5.51,32,29,35,"FAS"
 "Ctenopharyngodon idella_ecol_relev",1.246,-0.04,0.362,-0.628,2.129,0.548,"Ctenopharyngodon idella","ecol_relev",2.9,6.7,8,25,25,"FAS"
 "Cyprinus carpio_ecol_relev",2.291,-0.328,0.648,-1.067,3.935,0.41,"Cyprinus carpio","ecol_relev",4.7,16.7,8,25,25,"FAS"
+"Danio rerio_ecol_relev",1.951,0.069,1.864,-0.013,2.039,0.151,"Danio rerio","ecol_relev",0.04,1.912,355,30,30,"FAS"
 "Discogobio yunnanensis_ecol_relev",2.922,-0.401,1.114,-1.161,4.731,0.359,"Discogobio yunnanensis","ecol_relev",8.3,17,8,25,25,"FAS"
 "Enteromius neumayeri_ecol_relev",0.995,0.021,0.611,-0.272,1.378,0.313,"Enteromius neumayeri","ecol_relev",1.6,6.86,70,18,23,"FAS"
 "Fundulus grandis_ecol_relev",1.18,0.115,1.02,0.006,1.34,0.224,"Fundulus grandis","ecol_relev",2.06,8.61,170,25,25,"FAS"

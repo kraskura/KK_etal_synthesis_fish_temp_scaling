@@ -1,7 +1,7 @@
 "ecol_temp_cat","intercept","slope","temp","intercept.ciL","slope.ciL","temp.ciL","intercept.ciH","slope.ciH","temp.ciH","ecology_subgroup","test_category3","size_min","size_max","n","temp_min","temp_max","species_n","MR","Ecol","n_data_n_species","scalingGood"
 "elongated_ecol_relev",-2.172,0.981,0.068,-2.546,0.932,0.055,-1.797,1.03,0.081,"elongated","ecol_relev",0.45,155000,363,0,28,20,"AMR","BodyShapeI","363 (20)",1
 "elongated_warm",-0.683,0.746,0.021,-1.427,0.61,-0.006,0.061,0.883,0.047,"elongated","warm",0.38,61.7,92,8,32,5,"AMR","BodyShapeI","92 (5)",0
-"fusiform_ecol_relev",-0.364,0.941,-0.006,-0.423,0.932,-0.008,-0.306,0.95,-0.003,"fusiform","ecol_relev",0.058,7200,2555,8.827,31,44,"AMR","BodyShapeI","2555 (44)",1
+"fusiform_ecol_relev",-0.566,0.861,0.021,-0.635,0.852,0.018,-0.498,0.87,0.024,"fusiform","ecol_relev",0.029,7200,2913,8.827,31,45,"AMR","BodyShapeI","2913 (45)",1
 "fusiform_warm",-0.249,0.942,0.003,-0.354,0.933,-0.001,-0.143,0.952,0.006,"fusiform","warm",0.198,6795.93,735,12,39,16,"AMR","BodyShapeI","735 (16)",1
 "short/deep_ecol_relev",-0.612,0.709,0.029,-0.9,0.691,0.018,-0.324,0.727,0.04,"short/deep","ecol_relev",0.041,119,187,12,30,7,"AMR","BodyShapeI","187 (7)",1
 "short/deep_warm",-2.279,0.838,0.07,-3.311,0.769,0.037,-1.247,0.906,0.103,"short/deep","warm",1.6,119,64,29,39,3,"AMR","BodyShapeI","64 (3)",0
@@ -11,9 +11,9 @@
 "Subtropical_warm",-0.821,0.972,0.033,-0.976,0.96,0.026,-0.665,0.983,0.04,"Subtropical","warm",0.198,6795.93,340,12,39,9,"AMR","Climate","340 (9)",1
 "Temperate_ecol_relev",-0.7,0.925,0.008,-0.805,0.912,0.001,-0.594,0.937,0.014,"Temperate","ecol_relev",0.45,3450,915,10,28,19,"AMR","Climate","915 (19)",1
 "Temperate_warm",0.421,1.02,-0.048,-0.181,0.987,-0.067,1.024,1.053,-0.029,"Temperate","warm",7.1,3190,148,21,30.2,5,"AMR","Climate","148 (5)",1
-"Tropical_ecol_relev",-3.662,0.753,0.137,-3.892,0.741,0.128,-3.432,0.766,0.145,"Tropical","ecol_relev",0.041,176.91,788,18,31,13,"AMR","Climate","788 (13)",1
+"Tropical_ecol_relev",-3.893,0.736,0.147,-4.11,0.726,0.14,-3.677,0.747,0.155,"Tropical","ecol_relev",0.029,176.91,1146,18,31,14,"AMR","Climate","1146 (14)",1
 "Tropical_warm",-3.41,0.833,0.105,-3.928,0.805,0.089,-2.891,0.86,0.122,"Tropical","warm",0.326,176.91,398,27,39,9,"AMR","Climate","398 (9)",1
-"benthopelagic_ecol_relev",-0.126,0.879,-0.014,-0.254,0.859,-0.02,0.003,0.899,-0.008,"benthopelagic","ecol_relev",0.181,155000,1043,3.8,30,38,"AMR","DemersPelag","1043 (38)",1
+"benthopelagic_ecol_relev",-0.623,0.751,0.027,-0.762,0.732,0.022,-0.485,0.769,0.033,"benthopelagic","ecol_relev",0.029,155000,1401,3.8,30,39,"AMR","DemersPelag","1401 (39)",1
 "benthopelagic_warm",-0.376,0.972,0.005,-0.522,0.958,-0.001,-0.231,0.985,0.011,"benthopelagic","warm",0.38,6795.93,299,12,39,7,"AMR","DemersPelag","299 (7)",1
 "demersal_ecol_relev",-0.756,0.766,0.034,-0.832,0.752,0.03,-0.681,0.781,0.037,"demersal","ecol_relev",0.058,882,893,0,31,20,"AMR","DemersPelag","893 (20)",1
 "demersal_warm",-1.088,0.712,0.053,-1.211,0.693,0.048,-0.966,0.73,0.057,"demersal","warm",0.198,591,329,8,39,7,"AMR","DemersPelag","329 (7)",1
@@ -21,7 +21,7 @@
 "pelagic_warm",2.096,0.738,-0.019,1.095,0.664,-0.043,3.097,0.813,0.004,"pelagic","warm",16.5,3190,79,17.761,32,3,"AMR","DemersPelag","79 (3)",0
 "reef-associated_ecol_relev",-1.187,0.788,0.05,-1.278,0.777,0.046,-1.096,0.8,0.055,"reef-associated","ecol_relev",0.041,602.3,596,13,30,9,"AMR","DemersPelag","596 (9)",1
 "reef-associated_warm",-1.545,0.841,0.046,-3.099,0.803,-0.003,0.008,0.878,0.095,"reef-associated","warm",0.326,700.4,184,27,35,7,"AMR","DemersPelag","184 (7)",1
-"Freshwater_ecol_relev",-3.362,1,0.108,-3.884,0.938,0.085,-2.839,1.061,0.131,"Freshwater","ecol_relev",0.45,119,371,18,31,25,"AMR","salintyComb","371 (25)",1
+"Freshwater_ecol_relev",-4.36,0.814,0.165,-4.723,0.79,0.152,-3.997,0.838,0.178,"Freshwater","ecol_relev",0.029,119,729,18,31,26,"AMR","salintyComb","729 (26)",1
 "Freshwater_warm",-0.968,0.773,0.048,-1.652,0.709,0.027,-0.284,0.837,0.07,"Freshwater","warm",4.62,119,55,31,39,2,"AMR","salintyComb","55 (2)",0
 "Freshwater; brackish_ecol_relev",-0.382,0.827,0.001,-0.512,0.809,-0.004,-0.253,0.845,0.007,"Freshwater; brackish","ecol_relev",0.181,882,783,10,30,20,"AMR","salintyComb","783 (20)",1
 "Freshwater; brackish_warm",-2.52,0.955,0.068,-3.016,0.924,0.053,-2.024,0.986,0.083,"Freshwater; brackish","warm",2.42,591,84,28,39,3,"AMR","salintyComb","84 (3)",0

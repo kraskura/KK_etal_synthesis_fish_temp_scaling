@@ -15,6 +15,7 @@
 "Coryphaena hippurus_warm",0.293,1.077,-0.667,0.811,1.252,1.343,"Coryphaena hippurus","warm",16.5,61.7,13,32,32,"AMR"
 "Ctenopharyngodon idella_ecol_relev",1.323,-0.272,0.176,-0.937,2.471,0.394,"Ctenopharyngodon idella","ecol_relev",2.9,8.8,15,25,25,"AMR"
 "Cyprinus carpio_ecol_relev",-1.949,1.598,-3.124,0.997,-0.774,2.199,"Cyprinus carpio","ecol_relev",4.7,16.7,16,25,25,"AMR"
+"Danio rerio_ecol_relev",0.59,0.759,0.531,0.705,0.648,0.814,"Danio rerio","ecol_relev",0.029,1.912,358,30,30,"AMR"
 "Dicentrarchus labrax_ecol_relev",-1.699,-0.264,-2.859,-0.894,-0.539,0.366,"Dicentrarchus labrax","ecol_relev",0.058,0.294,12,17,17,"AMR"
 "Dicentrarchus labrax_warm",-1.252,-0.257,-2.091,-0.943,-0.413,0.43,"Dicentrarchus labrax","warm",0.198,0.595,16,19,19,"AMR"
 "Discogobio yunnanensis_ecol_relev",1.782,0.364,0.102,-0.342,3.462,1.07,"Discogobio yunnanensis","ecol_relev",8.3,17,8,25,25,"AMR"

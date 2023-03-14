@@ -14,6 +14,21 @@ output:
 library(knitr)
 library(formatR)
 library(tidyverse)
+library(lme4)
+library(evolvability) # Almer function
+library(ape)
+library(rotl)
+library(Matrix)
+library(emmeans)
+library(pryr)
+library(ggtree)
+library(TDbook)
+library(ggimage)
+library(phylobase)
+library(ggformatKK) # from github
+library(here)
+library(weathermetrics)
+library(here)
 opts_chunk$set(tidy.opts=list(width.cutoff=80),tidy=TRUE)
 ```
 
@@ -69,6 +84,15 @@ library(TDbook)
 library(ggimage)
 library(phylobase)
 
+
+# function to order model selection based on the lowest BIC score
+BICdelta<-function(BICtable){
+  BIC.t <- BICtable [order(BICtable$BIC), ]
+  BIC.t$delta <- round(abs(BIC.t$BIC[1] -  BIC.t$BIC), 5)
+  return( BIC.t)
+}
+
+
 ```
 
 
@@ -92,16 +116,12 @@ Just a glimpse of what kind of data are available. (Not all columns are shown he
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE, inlucde =FALSE}
 
-source("/Users/kristakraskura/Github_repositories/Metabolic-scaling-fish/Codes/Metadata-temperature/JEB/get_scaling_data_temp.R")
-source("/Users/kristakraskura/Github_repositories/Metabolic-scaling-fish/Codes/MR-fish-metadata/deltaIC_BICdelta_ggformat.R")
-source("/Users/kristakraskura/Github_repositories/Plots-formatting/ggplot_format.R")
-
-data.list<-get_scaling_data_temp(data.amr = "/Users/kristakraskura/Github_repositories/Metabolic-scaling-fish/Data/MR-fish-metadata-data/Fish_AMR_temp_dataset_mar2022.csv",
-                                 data.rmr = "/Users/kristakraskura/Github_repositories/Metabolic-scaling-fish/Data/MR-fish-metadata-data/Fish_RMR_temp_dataset_mar2022.csv",
-                                 ecology.data = "/Users/kristakraskura/Github_repositories/Metabolic-scaling-fish/Data/MR-fish-metadata-data/Kraskura_species_ecologies_mar2022.csv", 
-                                 onlyTop.above = TRUE, save.FishBase.species.data = F, 
-                                 exp_rmr = 0.81, exp_amr = 0.81, exp_rmr_warm = 0.84, exp_amr_warm = 0.82,
-                                 exp_as = 0.82, exp_as_warm = 0.78)
+source("get_data_temp.R")
+data.list<-get_data_temp(data.amr = "../Data/Fish_AMR_temp_dataset_mar2022.csv",
+                                 data.rmr = "../Data//Fish_RMR_temp_dataset_mar2022.csv",
+                                 ecology.data = "../Data/Kraskura_species_ecologies_mar2022.csv",
+                                 onlyTop.above = TRUE, save.FishBase.species.data = F,
+                                 calc_mass_specific = FALSE)
 
 
 data.amrAC<-data.frame(data.list[1]) 
@@ -555,23 +575,15 @@ The 90% CI were calculated for the best models and the corresponding phylo model
   
 ```{r, echo = FALSE, message=FALSE, warning = FALSE}
 
+CI.rmr.ER<-as.data.frame(confint.merMod(RMR_model5, level = 0.90))
+Phylo_CI.rmr.ER<-as.data.frame(confint.merMod(Phylo_RMR_model5, level = 0.90))
+CI.rmr.ER$var<-rownames(CI.rmr.ER)
+Phylo_CI.rmr.ER$var<-rownames(Phylo_CI.rmr.ER)
+CI.rmr.ER$model<-"regular"
+Phylo_CI.rmr.ER$model<-"phylo"
 
-### !!! RUN THIS ONLY ONCE  (long compouting time, save results) --- 
-        
-        # CI.rmr.ER<-as.data.frame(confint.merMod(RMR_model5, level = 0.90))
-        # Phylo_CI.rmr.ER<-as.data.frame(confint.merMod(Phylo_RMR_model5, level = 0.90))
-        # CI.rmr.ER$var<-rownames(CI.rmr.ER)
-        # Phylo_CI.rmr.ER$var<-rownames(Phylo_CI.rmr.ER)
-        # CI.rmr.ER$model<-"regular"
-        # Phylo_CI.rmr.ER$model<-"phylo"
-        # 
-        # CI_table<-rbind(CI.rmr.ER, Phylo_CI.rmr.ER)
-        # colnames(CI_table)<-c("CI.l", "CI.h", "var","model")
-
-### !!! RUN THIS ONLY ONCE  (long compouting time, save results) --- 
-# VarCorr(RMR_model5)
-# write.csv(x = CI_table, file = "./Data/MR-fish-metadata-data/Fish_RMR_temp_phyloCIs_oct19.csv", row.names = FALSE)
-CI_table<-read.csv("./Data/MR-fish-metadata-data/Fish_RMR_temp_phyloCIs_oct19.csv")
+CI_table<-rbind(CI.rmr.ER, Phylo_CI.rmr.ER)
+colnames(CI_table)<-c("CI.l", "CI.h", "var","model")
 
 knitr:::kable(CI_table)
 
@@ -674,18 +686,6 @@ re.plot
 ```
 
 
-<!-- ```{r, include = FALSE} -->
-
-<!-- prof.mod<-profile(RMR_model5) -->
-<!-- Phylo_prof.mod<-profile(Phylo_RMR_model5) -->
-
-<!-- # densityplot(prof.mod) -->
-<!-- # densityplot(Phylo_prof.mod) -->
-<!-- splom(prof.mod) -->
-<!-- splom(Phylo_prof.mod) -->
-
-<!-- ``` -->
-
 
 ## 8. Some more plots with some phylo + ecology and morphology correlates  
 
@@ -693,9 +693,9 @@ re.plot
 ```{r, include = FALSE, message=FALSE, warning=FALSE, echo = FALSE }
 # add Climate, and intercept data to the Phylo tree
 # One dataset with species-specific info
-species.fas<-read.csv("/Users/kristakraskura/Desktop/BOX/UCSB/Research/Metabolic_scaling/ms-AMR-RMR-Temperature/thesis/data files/species_FAS.csv")
-species.rmr<-read.csv("/Users/kristakraskura/Desktop/BOX/UCSB/Research/Metabolic_scaling/ms-AMR-RMR-Temperature/thesis/data files/species_RMR.csv")
-species.amr<-read.csv("/Users/kristakraskura/Desktop/BOX/UCSB/Research/Metabolic_scaling/ms-AMR-RMR-Temperature/thesis/data files/species_MMR.csv")
+species.fas<-read.csv("../Data_exports/species_FAS.csv")
+species.rmr<-read.csv("../Data_exports/species_RMR.csv")
+species.amr<-read.csv("../Data_exports/species_MMR.csv")
 
 species.fas.w<-species.fas[species.fas$test_category3=="warm", ]
 species.fas.er<-species.fas[species.fas$test_category3=="ecol_relev", ]
@@ -725,26 +725,6 @@ species.rmr.optT$salintyComb <- factor(species.rmr.optT$salintyComb)
 
 # species.rmr.optT$species <- factor(species.rmr.optT$species, levels=tree.kk$tip.label)
 species.rmr.optT$Newick_label <- species.rmr.optT$species
-
-
-# p <- ggtree(tree.kk)  %<+% species.rmr.optT + geom_tiplab(as_ylab = TRUE, align = TRUE, offset = .6, hjust = .5)
-#     
-#     p2 <- p + geom_tippoint(aes(shape = salintyComb, fill = Climate, color = Climate), size = 2) + 
-#     theme(legend.position = "right") + 
-#     scale_size_continuous(range = c(1, 3))+
-#     scale_shape_manual(values = c(21,22,23,24,25))+
-#     scale_fill_viridis_d(na.translate = F, option = "C")+
-#     scale_color_viridis_d(na.translate = F, option = "C")
-  
-
-# df <- data.frame(tree.kk$tip.label, species.rmr.optT)
-
-# p0 <- ggtree(tree.kk) + geom_tiplab(align = TRUE, hjust = 0)
-# p0 + geom_facet(panel = "Trait",
-#                 data = species.rmr.optT,
-#                 geom = geom_point,
-#                 mapping = aes(x = intercept), stat = "identity") +
-#   scale_x_ggtree()
 
 g1 <- as(tree.kk, "phylo4")
 
@@ -930,9 +910,105 @@ cowplot::plot_grid(sp1_rmr, sp1.indep_rmr, sp2_rmr, sp2.indep_rmr, nrow =2, ncol
 Visual represeantation of the scaling relationships differences between **non phylogenetics model** (black), and **Phylogenetics model** (orange). _sidenote_: the intercepts change with temperature, they are adjusted for visual presentation)
 
 
-```{r, echo=FALSE,  out.width = '100%'}
-knitr::include_graphics("/Users/kristakraskura/Github_repositories/Metabolic-scaling-fish/Codes/Metadata-temperature/Phylogenetics/Phyo_not_phylo_plot_oct192022.png")
+```{r, include = FALSE, message=FALSE, warning=FALSE}
+
+### DONE ONCE AND SAVED TO SHOW AT THE START
+
+# Plotting
+RMRmodel_plot1<-ggplot(data=data.rmrER, aes(x=lnBWg, y=lnRMR)) +
+  # ylim(10, 20)+
+  ylim(x = -6.5, 12)+
+  xlim(x = -6.5, 12)+
+  # geom_point()+
+  annotate("text",  x = -5.5, y = 10.5, label = "OPTIMAL",size=3, hjust=0, family="Arial", color = "black")+
+  geom_abline(slope = fixef(RMR_model5)[2] , intercept = fixef(RMR_model5)[1]-18, color="black", size=0.5, lty=1, show.legend=FALSE) +
+  geom_abline(slope = fixef(Phylo_RMR_model5)[2] , intercept = fixef(Phylo_RMR_model5)[1]-18, color="#E69F00", size=0.5, lty=1, show.legend=FALSE)
+ggformat(RMRmodel_plot1, x_title="ln(Mass)", y_title="ln(RMR)", print = T, size_text = 8)
+
+RMRmodel_plot2<-ggplot(data=data.rmr.test, aes(x=lnBWg, y=lnRMR)) +
+  # ylim(10, 20)+
+  ylim(x = -6.5, 12)+
+  xlim(x = -6.5, 12)+
+  # geom_point()+
+  annotate("text",  x = -5.5, y = 10.5, label = "WARM",size=3, hjust=0, family="Arial", color = "black")+
+  geom_abline(slope = fixef(RMR_MultReg_W_model1)[2] , intercept = fixef(RMR_MultReg_W_model1)[1]-18, color="black", size=0.5, lty=1, show.legend=FALSE) +
+  geom_abline(slope = fixef(Phylo_RMR_MultReg_W_model1)[2] , intercept = fixef(Phylo_RMR_MultReg_W_model1)[1]-18, color="#E69F00", size=0.5, lty=1, show.legend=FALSE)
+ggformat(RMRmodel_plot2, x_title="ln(Mass)", y_title="ln(RMR)", print = T, size_text = 8)
+
+
+MMRmodel_plot1<-ggplot(data=data.amr.test, aes(x=lnBWg, y=lnAMR)) +
+  # ylim(10, 20)+
+  ylim(x = -6.5, 12)+
+  xlim(x = -6.5, 12)+
+  annotate("text",  x = -5.5, y = 10.5, label = "OPTIMAL",size=3, hjust=0, family="Arial", color = "black")+
+  annotate("text",  x = -2, y = 5, label = "Interaction model",size=3, hjust=0, family="Arial", color = "black")+
+  annotate("text",  x = -2, y = 3, label = "not very different",size=3, hjust=0, family="Arial", color = "black")
+ggformat(MMRmodel_plot1, x_title="ln(Mass)", y_title="ln(MMR)", print = T, size_text = 8)
+
+MMRmodel_plot2<-ggplot(data=data.amr.test, aes(x=lnBWg, y=lnAMR)) +
+  # ylim(10, 20)+
+  ylim(x = -6.5, 12)+
+  xlim(x = -6.5, 12)+
+  annotate("text",  x = -5.5, y = 10.5, label = "WARM",size=3, hjust=0, family="Arial", color = "black")+
+  geom_abline(slope = fixef(AMR_MultReg_W_model4)[2] , intercept = fixef(AMR_MultReg_W_model4)[1]-8, color="black", size=0.5, lty=1, show.legend=FALSE) +
+  geom_abline(slope = fixef(Phylo_AMR_MultReg_W_model4)[2] , intercept = fixef(Phylo_AMR_MultReg_W_model4)[1]-8, color="#E69F00", size=0.5, lty=1, show.legend=FALSE)
+ggformat(MMRmodel_plot2, x_title="ln(Mass)", y_title="ln(MMR)", print = T, size_text = 8)
+
+
+ASmodel_plot1<-ggplot(data=data.asER, aes(x=lnBWg, y=lnAS)) +
+  # ylim(10, 20)+
+  ylim(x = -6.5, 12)+
+  xlim(x = -6.5, 12)+
+  # geom_point()+
+  annotate("text",  x = -5.5, y = 10.5, label = "OPTIMAL",size=3, hjust=0, family="Arial", color = "black")+
+  geom_abline(slope = fixef(AS_MultReg_ER_model4)[2] , intercept = fixef(AS_MultReg_ER_model4)[1]-8, color="black", size=0.5, lty=1, show.legend=FALSE) +
+  geom_abline(slope = fixef(Phylo_AS_MultReg_ER_model4)[2] , intercept = fixef(Phylo_AS_MultReg_ER_model4)[1]-8, color="#E69F00", size=0.5, lty=1, show.legend=FALSE)
+ggformat(ASmodel_plot1, x_title="ln(Mass)", y_title="ln(AS)", print = T, size_text = 8)
+
+ASmodel_plot2<-ggplot(data=data.as.test, aes(x=lnBWg, y=lnAS)) +
+  # ylim(10, 20)+
+  ylim(x = -6.5, 12)+
+  xlim(x = -6.5, 12)+
+  # geom_point()+
+  annotate("text",  x = -5.5, y = 10.5, label = "WARM",size=3, hjust=0, family="Arial", color = "black")+
+  geom_abline(slope = fixef(AS_MultReg_W_model1)[2] , intercept = fixef(AS_MultReg_W_model1)[1]+5, color="black", size=0.5, lty=1, show.legend=FALSE) +
+  geom_abline(slope = fixef(Phylo_AS_MultReg_W_model1)[2] , intercept = fixef(Phylo_AS_MultReg_W_model1)[1]+5, color="#E69F00", size=0.5, lty=1, show.legend=FALSE)
+ggformat(ASmodel_plot2, x_title="ln(Mass)", y_title="ln(AS)", print = T, size_text = 8)
+
+
+FASmodel_plot1<-ggplot(data=data.fasER, aes(x=lnBWg, y=lnFAS)) +
+  # ylim(10, 20)+
+  ylim(x = -6.5, 12)+
+  xlim(x = -6.5, 12)+
+  # geom_point(alpha = 0.1)+
+  annotate("text",  x = -5.5, y = 10.5, label = "OPTIMAL",size=3, hjust=0, family="Arial", color = "black")+
+  geom_abline(slope = fixef(FAS_MultReg_ER_model4)[2] , intercept = fixef(FAS_MultReg_ER_model4)[1], color="black", size=0.5, lty=1, show.legend=FALSE) +
+  geom_abline(slope = fixef(Phylo_FAS_MultReg_ER_model4)[2] , intercept = fixef(Phylo_FAS_MultReg_ER_model4)[1], color="#E69F00", size=0.5, lty=1, show.legend=FALSE)
+ggformat(FASmodel_plot1, x_title="ln(Mass)", y_title="ln(FAS)", print = T, size_text = 8)
+
+FASmodel_plot2<-ggplot(data=data.fas.test, aes(x=lnBWg, y=lnFAS)) +
+  # ylim(10, 20)+
+  ylim(x = -6.5, 12)+
+  xlim(x = -6.5, 12)+
+  # geom_point(alpha = 0.1)+
+  annotate("text",  x = -5.5, y = 10.5, label = "WARM ",size=3, hjust=0, family="Arial", color = "black")+
+  annotate("text",  x = -5.5, y = 8, label = "(polynomials not plotted;",size=2.5, hjust=0, family="Arial", color = "black")+
+  annotate("text",  x = -5.5, y = 6, label = "virtually no effect)",size=2.5, hjust=0, family="Arial", color = "black")+
+  geom_abline(slope = fixef(FAS_MultReg_W_model2.POLY)[2] , intercept = fixef(FAS_MultReg_W_model2.POLY)[1], color="black", size=0.5, lty=1, show.legend=FALSE) +
+  geom_abline(slope = fixef(Phylo_FAS_MultReg_W_model2.POLY)[2] , intercept = fixef(Phylo_FAS_MultReg_W_model2.POLY)[1], color="#E69F00", size=0.5, lty=1, show.legend=FALSE)
+
+ggformat(FASmodel_plot2, x_title="ln(Mass)", y_title="ln(FAS)", print = T, size_text = 8)
+
+
+cowplot::plot_grid(RMRmodel_plot1, RMRmodel_plot2,
+                   MMRmodel_plot1, MMRmodel_plot2,
+                   ASmodel_plot1, ASmodel_plot2,
+                   FASmodel_plot1, FASmodel_plot2,
+                   nrow = 4, ncol = 2)
+
+
 ```
+ 
 
 ## Summary Tables 
 
@@ -975,15 +1051,5 @@ knitr::include_graphics("/Users/kristakraskura/Github_repositories/Metabolic-sca
 
 <br>
 
-
-
-<!-- ## EXTRA: The table for taxon search. This is an output from `ape` package, function. All our study species are included.  -->
-
-<!-- <br> -->
-
-<!-- ```{r echo=, message=FALSE, warning=FALSE} -->
-<!-- knitr::kable(tnrs_match_names(names=unique(levels(dataMR$species)), context_name="Vertebrates")) -->
-
-<!-- ``` -->
 
 `

@@ -1,6 +1,6 @@
-library(weathermetrics)
 
-get_scaling_data_temp <- function(data.amr, data.rmr,
+
+get_data_temp <- function(data.amr, data.rmr,
                                   ecology.data,
                                   onlyTop.above = TRUE,
                                   save.FishBase.species.data = FALSE, 

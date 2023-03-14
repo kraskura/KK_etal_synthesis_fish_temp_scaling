@@ -2,8 +2,13 @@
 title: "Synthesis: model parameters, data table, and data summaries"
 author: "K. Kraskura"
 date: "`r Sys.Date()`"
-output: html_document
-
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: false
+    code_folding: hide
+---
 ---
 
 ```{r setup, include=FALSE}
@@ -16,8 +21,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ### Metabolic scaling with temperature and species ecologies 
 
 ```{r Prep runs, include = F}
-date.imports<-substr(list.files("../Data_exports/Phylo/")[1], start = 17, stop = 26)
-getModelCIs<-FALSE
 source("phylo_mixed model.R")
 ```
 
@@ -54,7 +57,6 @@ RMR_BIC %>%
 <br>
 
 ### 2. BIC RMR - warm temperatures
-
 ```{r, echo = FALSE}
 RMR_W_BIC %>%
   kbl(digits = 2) %>%
@@ -66,7 +68,6 @@ RMR_W_BIC %>%
 <br>
 
 ### 3. BIC MMR - optimal temperatures
-
 ```{r, echo = FALSE}
 MMR_BIC %>%
   kbl(digits = 2) %>%
@@ -123,7 +124,7 @@ FAS_W_BIC %>%
     # Phylo model can be used in model selection 
 ```
 
-## Best models summries:
+## Best models summries and resid plots :
 
 ### Ecologically relevant 
 ```{r model summaries, echo =F }
@@ -134,7 +135,6 @@ summary(fas_mod_ER)
 summary(as_mod_ER)
 ```
 
-
 ### Warm fish
 ```{r model summaries warm, echo = F}
 # warm
@@ -144,7 +144,42 @@ summary(fas_mod_W)
 summary(as_mod_W)
 ```
 
- 
+### Ecologically relevant 
+```{r model performance plots warm, echo = F}
+par(mfrow=c(4,4))
+
+plot(rmr_mod_ER)
+hist(resid(rmr_mod_ER))
+
+plot(amr_mod_ER)
+hist(resid(amr_mod_ER))
+
+plot(fas_mod_ER)
+hist(resid(fas_mod_ER))
+
+plot(as_mod_ER)
+hist(resid(as_mod_ER))
+```
+
+### Warm fish
+```{r model performance plots warm, echo = F}
+par(mfrow=c(4,4))
+
+plot(amr_mod_W)
+hist(resid(amr_mod_W))
+
+plot(rmr_mod_W)
+hist(resid(rmr_mod_W))
+
+plot(fas_mod_W)
+hist(resid(fas_mod_W))
+
+plot(as_mod_W)
+hist(resid(as_mod_W)) # little skew not too bad, only 5 measurements, all reasonable biologically
+
+```
+
+
 ## Summary data 
 ```{r min max data, echo = F}
 sum_data %>%
@@ -173,4 +208,8 @@ sum_CItable %>%
   kable_classic_2(full_width = F)
 
 ```
+
+<br>
+<br>
+
 
