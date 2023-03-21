@@ -672,3 +672,165 @@ data.plotAMR_warm$model_predFE <- predict(amr_mod_W, re.form = NA, newdata = dat
         # 
         # 
         # 
+
+
+
+# Violin plots --- not used anymore ---
+
+ecolFAS1<-ggplot(data=data.fas, aes(y=FAS, x=DemersPelag, size=BW_g, fill=test_category3, group = interaction(test_category3, DemersPelag), color=tempTest))+
+  geom_point(position=position_jitterdodge(jitter.width = 0.3, seed = 1), pch=19, alpha=0.6, show.legend = FALSE)+
+  geom_violin(show.legend = FALSE, alpha=0.4)+
+  scale_fill_manual(values = c("black", "red"))+
+  scale_color_gradient2(low="#004490", high="#C34264", mid = "#FFB654", midpoint = 15)+
+  scale_size(breaks=c(10, 1000,75000), range=c(1,8))+
+  scale_x_discrete(labels=c("Bentho- \n pelagic", "Demersal", "Pelagic", "Reef- \n associated"))+ 
+  annotate("text", x = 3.5, y = 16, label = "Lifestyle", hjust=0, family="Arial", size=5)+
+  ylim(0,16.5)+
+  labs(fill = expression(degree*C), color=  expression(degree*C), size = "g")
+ggformat(ecolFAS1, y_title = expression(FAS~(MMR/RMR)), x_title = element_blank() , print=FALSE)
+ecolFAS1 <- ecolFAS1 + theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5,  size = 15, family = "Arial"), 
+                             axis.text.y = element_text( color = "black", size = 15), 
+                             text = element_text( color = "black", size = 15),
+                             legend.position = "right",
+                             legend.direction = "vertical",
+                             legend.justification='center',
+                             legend.margin=margin(0,0,0,0),
+                             legend.box.margin=margin(0,0,6,0),
+                             plot.margin = margin(5.5, 5.5, 5.35, 5.5))
+# ecolFAS1
+
+# Body shape
+ecolAS2<-ggplot(data=data.as, aes(y=mass_specas, x=BodyShapeI, size=BW_g, fill=test_category3, group = interaction(test_category3, BodyShapeI), color=tempTest))+
+  geom_point(position=position_jitterdodge(jitter.width = 0.3, seed = 1), pch=19, alpha=0.6, show.legend = TRUE)+
+  geom_violin(show.legend = FALSE, alpha=0.4)+
+  scale_fill_manual(values = c("black", "red"), guide = "none" )+
+  scale_color_gradient2(low="#004490", high="#C34264", mid = "#FFB654", midpoint = 15)+# , guide = "none"
+  scale_size(breaks=c(10, 1000,75000), range=c(1,8))+
+  scale_x_discrete(labels=c("Elongated", "Fusiform", "Short- \n deep"))+
+  labs(fill = expression(degree*C), color=  expression(degree*C), size = "g")+
+  ylim(0,5)+
+  annotate("text", label = "Morphology", x= 2.8, y=4.8, hjust=0.5, size=5)
+ggformat(ecolAS2, y_title =  bquote("Aerobic scope" ~ (mgO[2] ~ g^- 1 ~ h^-1)), x_title = element_blank() , print=FALSE)
+ecolAS2 <- ecolAS2 + theme(
+  axis.title.x = element_blank(), 
+  axis.title.y = element_blank(), 
+  axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5,  size = 15, family = "Arial"),
+  axis.text.y = element_text( color = "black", size = 15, family="Arial"),
+  legend.position = "none",
+  plot.margin = margin(unit(c(5.5, 100,5.5,5.5), "points")))
+# ecolAS2
+
+
+# ecolAS2<- ecolAS2<-theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5, family="Arial"), 
+#                          axis.text.y = element_text(face = "italic", color = "black", size = 10, family="Arial"),
+#                           text=element_text(size=15,  family="Arial"), 
+#                          legend.position = "none")
+
+ecolFAS2 <- ggplot(data=data.fas, aes(y=FAS, x=BodyShapeI, size=BW_g, fill=test_category3, group = interaction(test_category3, BodyShapeI), color=tempTest))+
+  geom_point(position=position_jitterdodge(jitter.width = 0.3, seed = 1), pch=19, alpha=0.6, show.legend = FALSE)+
+  geom_violin(show.legend = FALSE, alpha=0.4)+
+  scale_fill_manual(values = c("black", "red"))+
+  scale_color_gradient2(low="#004490", high="#C34264", mid = "#FFB654", midpoint = 15)+
+  scale_x_discrete(labels=c("Elongated", "Fusiform", "Short-\n deep"))+
+  ylim(0,16.5)+
+  annotate("text", label = "Morphology", x= 2.8, y=16, hjust=0.5, size=5)
+ggformat(ecolFAS2, y_title = expression(FAS~(MMR/RMR)), x_title = element_blank() , print=FALSE)
+ecolFAS2 <- ecolFAS2 + theme( axis.title.x = element_blank(), 
+                              axis.title.y = element_blank(), 
+                              axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5,  size = 15, family = "Arial"),
+                              axis.text.y = element_text( color = "black", size = 15, family="Arial"),
+                              text = element_text( color = "black", size = 15),
+                              legend.position = "top",
+                              legend.direction = "horizontal",
+                              legend.justification='left',
+                              plot.margin = margin(unit(c(5.5, 100,5.5, 5.5), "points")))
+# ecolFAS2
+
+# Climate
+ecolAS3 <-ggplot(data=data.as, aes(y=mass_specas, x=Climate, size=BW_g, fill=test_category3, group = interaction(test_category3, Climate), color=tempTest))+
+  geom_point(position=position_jitterdodge(jitter.width = 0.3, seed = 1), pch=19, alpha=0.6, show.legend = FALSE)+
+  geom_violin(show.legend = FALSE, alpha=0.4, color = "black")+
+  scale_fill_manual(values = c("black", "red"))+
+  scale_color_gradient2(low="#004490", high="#C34264", mid = "#FFB654", midpoint = 15, guide="none")+
+  labs(fill = expression(degree*C), color=  expression(degree*C), size = "g")+
+  ylim(0,5)+
+  annotate("text", label = "Climate", x= 3.8, y=4.8, hjust=0.3, size=5)
+  # annotate("text", label = "***",  x= 2.5,y=4.8, hjust=-0.5, size=5)
+ggformat(ecolAS3, y_title =  bquote("AS" ~ (mgO[2] ~ g^- 1 ~ h^-1)), x_title = element_blank() , print=FALSE)
+ecolAS3 <- ecolAS3 + theme(
+  axis.title.x = element_blank(), 
+  axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5,  size = 15, family = "Arial"),
+  axis.text.y = element_text( color = "black", size = 15, family="Arial"),
+  text = element_text( color = "black", size = 15),
+  plot.title = element_text(face = "bold", size=15, hjust = 0.5),
+  legend.position = "top",
+  legend.direction = "horizontal",
+  legend.justification='left')
+# ecolAS3
+
+
+ecolFAS3<- ggplot(data=data.fas, aes(y=FAS, x=Climate, size=BW_g, fill=test_category3, group = interaction(test_category3, Climate), color=tempTest))+
+  geom_point(position=position_jitterdodge(jitter.width = 0.3, seed = 1), pch=19, alpha=0.6, show.legend = FALSE)+
+  ylim(0,16.5)+
+  geom_violin(show.legend = FALSE, alpha=0.4, color = "black")+
+  scale_fill_manual(values = c("black", "red"))+
+  scale_color_gradient2(low="#004490", high="#C34264", mid = "#FFB654", midpoint = 15)+
+  annotate("text", label = "Climate", x= 3.8, y=16, hjust=0.3, size=5)+
+  annotate("text", label = "*** (ecol subgr)",  x= 0.6, y=16.1, hjust=-0.5, size=3.5)+
+  annotate("text", label = "*** (temp categ)",  x= 0.57, y=14.9, hjust=-0.5, size=3.5)
+ggformat(ecolFAS3, y_title = expression(FAS~(MMR/RMR)), x_title = element_blank() , print=FALSE)
+ecolFAS3 <- ecolFAS3 + theme(
+  axis.title.x = element_blank(),
+  axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5,  size = 15, family = "Arial"), 
+  axis.text.y = element_text( color = "black", size = 15, family="Arial"),
+  text = element_text( color = "black", size = 15),
+  plot.title = element_text(face = "bold", size=15, hjust = 0.5),
+  legend.position = "top",
+  legend.direction = "horizontal",
+  legend.justification='left')
+# ecolFAS3
+
+# Salinity
+ecolAS4 <- ggplot(data=data.as, aes(y=mass_specas, x=salintyComb, size=BW_g, fill=test_category3, group = interaction(test_category3, salintyComb), color=tempTest))+
+  geom_point(position=position_jitterdodge(jitter.width = 0.3, seed = 1), pch=19, alpha=0.6, show.legend = FALSE)+
+  scale_fill_manual(values = c("black", "red"))+
+  scale_color_gradient2(low="#004490", high="#C34264", mid = "#FFB654", midpoint = 15)+
+  scale_size(breaks=c(10, 1000,75000), range=c(1,8), guide="none")+
+  geom_violin(show.legend = FALSE, alpha=0.4)+
+  labs(fill = expression(degree*C), color=  expression(degree*C), size = "g")+
+  scale_x_discrete(labels=c("Freshwater" , "Freshwater-\n brackish", "Marine", "Marine-\n brackish" ,"All salinities"))+
+  ylim(0,5)+
+  annotate("text", label = "Salinity",  x= 4.2 ,y=4.8, hjust=-0.5, size=5)
+ggformat(ecolAS4, y_title =  bquote("Aerobic scope" ~ (mgO[2] ~ g^- 1 ~ h^-1)), x_title = element_blank() , print=FALSE)
+ecolAS4 <- ecolAS4 + theme(
+  axis.title.x = element_blank(), 
+  axis.title.y = element_blank(), 
+  axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5,  size = 15, family = "Arial"),
+  axis.text.y = element_text( color = "black", size = 15, family="Arial"),
+  text = element_text( color = "black", size = 15), 
+  plot.title = element_text(face = "bold", size=15, hjust = 0.5),
+  legend.position = "top",
+  legend.direction = "horizontal",
+  legend.justification='left')
+# ecolAS4
+
+
+ecolFAS4 <- ggplot(data=data.fas, aes(y=FAS, x=salintyComb, size=BW_g, color=tempTest, fill=test_category3, group = interaction(test_category3, salintyComb)))+
+  geom_point(position=position_jitterdodge(jitter.width = 0.3, seed = 1), pch=19, alpha=0.6, show.legend = FALSE)+
+  geom_violin(show.legend = FALSE, alpha=0.4)+
+  scale_fill_manual(values = c("black", "red"))+
+  scale_color_gradient2(low="#004490", high="#C34264", mid = "#FFB654", midpoint = 15)+
+  scale_x_discrete(labels=c("Freshwater" , "Freshwater-\n brackish", "Marine", "Marine-\n brackish" ,"All salinities"))+
+  # annotate("text", label = "***",  x= 2.5,y=16, hjust=-0.5, size=5)+
+  annotate("text", label = "Salinity",  x= 4.3 ,y=16, hjust=-0.5, size=5)+
+  ylim(0,16.5)
+ggformat(ecolFAS4, y_title = expression(FAS~(MMR/RMR)), x_title = element_blank() , print=FALSE)
+ecolFAS4 <- ecolFAS4 + theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5,  size = 15, family = "Arial"), 
+                             axis.title.x = element_blank(), 
+                             axis.title.y = element_blank(),
+                             text = element_text( color = "black", size = 15),
+                             plot.title = element_text(face = "bold", size=15, hjust = 0.5),
+                             legend.position = "none",
+                             legend.direction = "horizontal",
+                             legend.justification='left')
+# ecolFAS4

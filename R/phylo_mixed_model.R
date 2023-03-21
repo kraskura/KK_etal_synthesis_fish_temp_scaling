@@ -1,23 +1,45 @@
 
 library(lme4)
+library(emmeans)
+library(car)
+
 library(evolvability) # Almer function
 library(ape)
 library(rotl)
-library(Matrix)
-library(emmeans)
-library(pryr)
 library(ggtree)
+library(Matrix)
+library(phylobase)
+
+library(pryr)
 library(TDbook)
 library(ggimage)
-library(phylobase)
+
 library(ggformatKK) # from github
-library(here)
 library(weathermetrics)
+library(ggplot2)
+library(ggpubr)
+library(cowplot)
+library(forcats)
+
+library(here)
+
+# **************************************************
+# run full model comparison analysis ( run = TRUE), or figures, best models, only (run = FALSE)?
+
+run = FALSE
+# run = TRUE
+
+# **************************************************
+
+if(run){
+  message("running all models and BIC comparison: this will take a while")
+}else{
+  message("not re-running all models and BIC comparison: using models run before")
+}
 
 ## Source the data ------------
 source("./R/get_data_temp.R") 
 source("./R/mixed_model_outputs.R")
-
 
 # function to order model selection based on the lowest BIC score
 BICdelta<-function(BICtable){
@@ -68,8 +90,7 @@ get_phylo_matrix<-function(species.list, matrix.name, tree.name, dataset.ID){
 
 }
 
-
-# 1. DATA FOR MODELS ------
+# 1. Data for models ------
 data.list<-get_data_temp(data.amr = "./Data/Fish_AMR_temp_dataset_mar2022.csv",
                                  data.rmr = "./Data//Fish_RMR_temp_dataset_mar2022.csv",
                                  ecology.data = "./Data/Kraskura_species_ecologies_mar2022.csv",
@@ -112,6 +133,7 @@ data.as.test<-droplevels(data.as.test)
 data.fasER<-droplevels(data.fasER)
 data.fas.test<-droplevels(data.fas.test)
 
+# get model specific matrices
 get_phylo_matrix(species.list = unique(levels(data.rmrER$species)), matrix.name = "A", tree.name = "tree.kk", dataset.ID = "RMR optimal")
 get_phylo_matrix(species.list = unique(levels(data.rmr.test$species)), matrix.name = "A.rmr.w", tree.name = "tr.rmr.w", dataset.ID = "RMR warm")
 
@@ -124,351 +146,364 @@ get_phylo_matrix(species.list = unique(levels(data.as.test$species)), matrix.nam
 get_phylo_matrix(species.list = unique(levels(data.fasER$species)), matrix.name = "A.fas.er", tree.name = "tr.fas.er", dataset.ID = "FAS optimal")
 get_phylo_matrix(species.list = unique(levels(data.fas.test$species)), matrix.name = "A.fas.w", tree.name = "tree.fas.w", dataset.ID = "FAS warm")
 
-# phylo models ---------
-## RMR: ecologically relevant -----------------
-Phylo_RMR_model0 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (1|species) , data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model0.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model0intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model0int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) , data=data.rmrER, REML=FALSE, A = list(species = A))
-
-Phylo_RMR_model1 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (1|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model1.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model1intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model1int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-
-Phylo_RMR_model2 <- Almer(lnRMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model2int <- Almer(lnRMR ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model2.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model2intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-
-Phylo_RMR_model4 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model4int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model4.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model4intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-
-Phylo_RMR_model5 <- Almer(lnRMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model5int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model5.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model5intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-
-Phylo_RMR_model6 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model6int <- Almer(lnRMR ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model6.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-Phylo_RMR_model6intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-
-### BIC --------------
-RMR_BIC<-BICdelta(BIC(Phylo_RMR_model0, Phylo_RMR_model0int, Phylo_RMR_model0.POLY, Phylo_RMR_model0intPOLY,
-                Phylo_RMR_model1, Phylo_RMR_model1int, Phylo_RMR_model1.POLY, Phylo_RMR_model1intPOLY,
-                Phylo_RMR_model2, Phylo_RMR_model2int, Phylo_RMR_model2.POLY, Phylo_RMR_model2intPOLY,
-                Phylo_RMR_model4, Phylo_RMR_model4int, Phylo_RMR_model4.POLY, Phylo_RMR_model4intPOLY,
-                Phylo_RMR_model5, Phylo_RMR_model5int, Phylo_RMR_model5.POLY, Phylo_RMR_model5intPOLY,
-                Phylo_RMR_model6, Phylo_RMR_model6int, Phylo_RMR_model6.POLY, Phylo_RMR_model6intPOLY))
-
-## MMR ecologically relevant -----------------
-Phylo_MMR_model0 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) , data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model0.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model0intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model0int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) , data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-
-Phylo_MMR_model1 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model1.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model1intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model1int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-
-Phylo_MMR_model2 <- Almer(lnAMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model2int <- Almer(lnAMR ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model2.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model2intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-
-Phylo_MMR_model4 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model4int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model4.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model4intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-
-Phylo_MMR_model5 <- Almer(lnAMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model5int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model5.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model5intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-
-Phylo_MMR_model6 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model6int <- Almer(lnAMR ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model6.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-Phylo_MMR_model6intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-
-### BIC --------------
-MMR_BIC<-BICdelta(BIC(Phylo_MMR_model0, Phylo_MMR_model0int, Phylo_MMR_model0.POLY, Phylo_MMR_model0intPOLY,
-                Phylo_MMR_model1, Phylo_MMR_model1int, Phylo_MMR_model1.POLY, Phylo_MMR_model1intPOLY,
-                Phylo_MMR_model2, Phylo_MMR_model2int, Phylo_MMR_model2.POLY, Phylo_MMR_model2intPOLY,
-                Phylo_MMR_model4, Phylo_MMR_model4int, Phylo_MMR_model4.POLY, Phylo_MMR_model4intPOLY,
-                Phylo_MMR_model5, Phylo_MMR_model5int, Phylo_MMR_model5.POLY, Phylo_MMR_model5intPOLY,
-                Phylo_MMR_model6, Phylo_MMR_model6int, Phylo_MMR_model6.POLY, Phylo_MMR_model6intPOLY))
-
-## AAS ecologically relevant ------------------
-Phylo_AS_model0 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) , data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model0.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model0intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model0int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) , data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-
-Phylo_AS_model1 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model1.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model1intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model1int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-
-Phylo_AS_model2 <- Almer(lnAS ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model2int <- Almer(lnAS ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model2.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model2intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-
-Phylo_AS_model4 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model4int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model4.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model4intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-
-Phylo_AS_model5 <- Almer(lnAS ~ lnBWg + tempTestK1000  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model5int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model5.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model5intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-
-Phylo_AS_model6 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model6int <- Almer(lnAS ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model6.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-Phylo_AS_model6intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-
-## BIC --------
-AS_BIC<-BICdelta(BIC(Phylo_AS_model0, Phylo_AS_model0int, Phylo_AS_model0.POLY, Phylo_AS_model0intPOLY,
-                Phylo_AS_model1, Phylo_AS_model1int, Phylo_AS_model1.POLY, Phylo_AS_model1intPOLY,
-                Phylo_AS_model2, Phylo_AS_model2int, Phylo_AS_model2.POLY, Phylo_AS_model2intPOLY,
-                Phylo_AS_model4, Phylo_AS_model4int, Phylo_AS_model4.POLY, Phylo_AS_model4intPOLY,
-                Phylo_AS_model5, Phylo_AS_model5int, Phylo_AS_model5.POLY, Phylo_AS_model5intPOLY,
-                Phylo_AS_model6, Phylo_AS_model6int, Phylo_AS_model6.POLY, Phylo_AS_model6intPOLY))
-
-
-## FAS ecologically relevant ----------------
-Phylo_FAS_model0 <- Almer(log(FAS) ~ lnBWg + tempTest + (1|species) , data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model0.POLY <- Almer(log(FAS) ~ lnBWg + poly(tempTest,2) + (1|species), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model0intPOLY <- Almer(log(FAS) ~ lnBWg * poly(tempTest,2) + (1|species), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model0int <- Almer(log(FAS) ~ lnBWg * tempTest + (1|species) , data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-
-Phylo_FAS_model1 <- Almer(log(FAS) ~ lnBWg + tempTest + (1|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model1.POLY <- Almer(log(FAS) ~ lnBWg + poly(tempTest,2) + (1|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model1intPOLY <- Almer(log(FAS) ~ lnBWg * poly(tempTest,2) + (1|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model1int <- Almer(log(FAS) ~ lnBWg * tempTest + (1|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-
-Phylo_FAS_model2 <- Almer(log(FAS) ~ lnBWg + tempTest  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model2int <- Almer(log(FAS) ~ lnBWg * tempTest  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model2.POLY <- Almer(log(FAS) ~ lnBWg + poly(tempTest,2) + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model2intPOLY <- Almer(log(FAS) ~ lnBWg * poly(tempTest,2)  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-
-Phylo_FAS_model4 <- Almer(log(FAS) ~ lnBWg + tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model4int <- Almer(log(FAS) ~ lnBWg * tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model4.POLY <- Almer(log(FAS) ~ lnBWg + poly(tempTest,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model4intPOLY <- Almer(log(FAS) ~ lnBWg * poly(tempTest,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-
-Phylo_FAS_model5 <- Almer(log(FAS) ~ lnBWg + tempTest  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model5int <- Almer(log(FAS) ~ lnBWg * tempTest + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model5.POLY <- Almer(log(FAS) ~ lnBWg + poly(tempTest,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model5intPOLY <- Almer(log(FAS) ~ lnBWg * poly(tempTest,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-
-Phylo_FAS_model6 <- Almer(lnFAS ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model6int <- Almer(lnFAS ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model6.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-Phylo_FAS_model6intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-
-## BIC -------------
-FAS_BIC<-BICdelta(BIC(Phylo_FAS_model0, Phylo_FAS_model0int, Phylo_FAS_model0.POLY, Phylo_FAS_model0intPOLY,
-                Phylo_FAS_model1, Phylo_FAS_model1int, Phylo_FAS_model1.POLY, Phylo_FAS_model1intPOLY,
-                Phylo_FAS_model2, Phylo_FAS_model2int, Phylo_FAS_model2.POLY, Phylo_FAS_model2intPOLY,
-                Phylo_FAS_model4, Phylo_FAS_model4int, Phylo_FAS_model4.POLY, Phylo_FAS_model4intPOLY,
-                Phylo_FAS_model5, Phylo_FAS_model5int, Phylo_FAS_model5.POLY, Phylo_FAS_model5intPOLY,
-                Phylo_FAS_model6, Phylo_FAS_model6int, Phylo_FAS_model6.POLY, Phylo_FAS_model6intPOLY))
-
-
-# RMR warm ------------------
-Phylo_RMR_W_model0 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (1|species) , data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model0.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model0intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model0int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) , data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-
-Phylo_RMR_W_model1 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (1|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model1.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model1intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model1int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-
-Phylo_RMR_W_model2 <- Almer(lnRMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model2int <- Almer(lnRMR ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model2.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model2intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-
-Phylo_RMR_W_model4 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model4int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model4.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model4intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-
-Phylo_RMR_W_model5 <- Almer(lnRMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model5int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model5.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model5intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-
-Phylo_RMR_W_model6 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model6int <- Almer(lnRMR ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model6.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-Phylo_RMR_W_model6intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-
-
-## BIC -------------
-RMR_W_BIC<-BICdelta(BIC(Phylo_RMR_W_model0, Phylo_RMR_W_model0int, Phylo_RMR_W_model0.POLY, Phylo_RMR_W_model0intPOLY,
-                Phylo_RMR_W_model1, Phylo_RMR_W_model1int, Phylo_RMR_W_model1.POLY, Phylo_RMR_W_model1intPOLY,
-                Phylo_RMR_W_model2, Phylo_RMR_W_model2int, Phylo_RMR_W_model2.POLY, Phylo_RMR_W_model2intPOLY,
-                Phylo_RMR_W_model4, Phylo_RMR_W_model4int, Phylo_RMR_W_model4.POLY, Phylo_RMR_W_model4intPOLY,
-                Phylo_RMR_W_model5, Phylo_RMR_W_model5int, Phylo_RMR_W_model5.POLY, Phylo_RMR_W_model5intPOLY,
-                Phylo_RMR_W_model6, Phylo_RMR_W_model6int, Phylo_RMR_W_model6.POLY, Phylo_RMR_W_model6intPOLY))
-
-# AMR / warm temps --------------
-Phylo_MMR_W_model0 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) , data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model0.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model0intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model0int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) , data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-
-Phylo_MMR_W_model1 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model1.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model1intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model1int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-
-Phylo_MMR_W_model2 <- Almer(lnAMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model2int <- Almer(lnAMR ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model2.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model2intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-
-Phylo_MMR_W_model4 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model4int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model4.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model4intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-
-Phylo_MMR_W_model5 <- Almer(lnAMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model5int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model5.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model5intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-
-Phylo_MMR_W_model6 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model6int <- Almer(lnAMR ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model6.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-Phylo_MMR_W_model6intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
-
-## BIC -------------
-MMR_W_BIC<-BICdelta(BIC(Phylo_MMR_W_model0, Phylo_MMR_W_model0int, Phylo_MMR_W_model0.POLY, Phylo_MMR_W_model0intPOLY,
-                Phylo_MMR_W_model1, Phylo_MMR_W_model1int, Phylo_MMR_W_model1.POLY, Phylo_MMR_W_model1intPOLY,
-                Phylo_MMR_W_model2, Phylo_MMR_W_model2int, Phylo_MMR_W_model2.POLY, Phylo_MMR_W_model2intPOLY,
-                Phylo_MMR_W_model4, Phylo_MMR_W_model4int, Phylo_MMR_W_model4.POLY, Phylo_MMR_W_model4intPOLY,
-                Phylo_MMR_W_model5, Phylo_MMR_W_model5int, Phylo_MMR_W_model5.POLY, Phylo_MMR_W_model5intPOLY,
-                Phylo_MMR_W_model6, Phylo_MMR_W_model6int, Phylo_MMR_W_model6.POLY, Phylo_MMR_W_model6intPOLY))
-
-
-
-# AS / warm temps --------------
-Phylo_AS_W_model0 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) , data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model0.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model0intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model0int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) , data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-
-Phylo_AS_W_model1 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model1.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model1intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model1int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-
-Phylo_AS_W_model2 <- Almer(lnAS ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model2int <- Almer(lnAS ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model2.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model2intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-
-Phylo_AS_W_model4 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model4int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model4.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model4intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-
-Phylo_AS_W_model5 <- Almer(lnAS ~ lnBWg + tempTestK1000  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model5int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model5.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model5intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-
-Phylo_AS_W_model6 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model6int <- Almer(lnAS ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model6.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-Phylo_AS_W_model6intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-
-## BIC -------------
-AS_W_BIC<-BICdelta(BIC(Phylo_AS_W_model0, Phylo_AS_W_model0int, Phylo_AS_W_model0.POLY, Phylo_AS_W_model0intPOLY,
-                Phylo_AS_W_model1, Phylo_AS_W_model1int, Phylo_AS_W_model1.POLY, Phylo_AS_W_model1intPOLY,
-                Phylo_AS_W_model2, Phylo_AS_W_model2int, Phylo_AS_W_model2.POLY, Phylo_AS_W_model2intPOLY,
-                Phylo_AS_W_model4, Phylo_AS_W_model4int, Phylo_AS_W_model4.POLY, Phylo_AS_W_model4intPOLY,
-                Phylo_AS_W_model5, Phylo_AS_W_model5int, Phylo_AS_W_model5.POLY, Phylo_AS_W_model5intPOLY,
-                Phylo_AS_W_model6, Phylo_AS_W_model6int, Phylo_AS_W_model6.POLY, Phylo_AS_W_model6intPOLY))
-
-
-# FAS / warm temps --------------
-Phylo_FAS_W_model0 <- Almer(lnFAS ~ lnBWg + tempTest + (1|species) , data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model0.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTest,2) + (1|species), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model0intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTest,2) + (1|species), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model0int <- Almer(lnFAS ~ lnBWg * tempTest + (1|species) , data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-
-Phylo_FAS_W_model1 <- Almer(lnFAS ~ lnBWg + tempTest + (1|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model1.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTest,2) + (1|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model1intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTest,2) + (1|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model1int <- Almer(lnFAS ~ lnBWg * tempTest + (1|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-
-Phylo_FAS_W_model2 <- Almer(lnFAS ~ lnBWg + tempTest  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model2int <- Almer(lnFAS ~ lnBWg * tempTest  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model2.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTest,2) + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model2intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTest,2)  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-
-Phylo_FAS_W_model4 <- Almer(lnFAS ~ lnBWg + tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model4int <- Almer(lnFAS ~ lnBWg * tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model4.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTest,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model4intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTest,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-
-Phylo_FAS_W_model5 <- Almer(lnFAS ~ lnBWg + tempTest  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model5int <- Almer(lnFAS ~ lnBWg * tempTest + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model5.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTest,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model5intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTest,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-
-Phylo_FAS_W_model6 <- Almer(lnFAS ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model6int <- Almer(lnFAS ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model6.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-Phylo_FAS_W_model6intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
-
-## BIC -------------
-FAS_W_BIC<-BICdelta(BIC(Phylo_FAS_W_model0, Phylo_FAS_W_model0int, Phylo_FAS_W_model0.POLY, Phylo_FAS_W_model0intPOLY,
-                Phylo_FAS_W_model1, Phylo_FAS_W_model1int, Phylo_FAS_W_model1.POLY, Phylo_FAS_W_model1intPOLY,
-                Phylo_FAS_W_model2, Phylo_FAS_W_model2int, Phylo_FAS_W_model2.POLY, Phylo_FAS_W_model2intPOLY,
-                Phylo_FAS_W_model4, Phylo_FAS_W_model4int, Phylo_FAS_W_model4.POLY, Phylo_FAS_W_model4intPOLY,
-                Phylo_FAS_W_model5, Phylo_FAS_W_model5int, Phylo_FAS_W_model5.POLY, Phylo_FAS_W_model5intPOLY,
-                Phylo_FAS_W_model6, Phylo_FAS_W_model6int, Phylo_FAS_W_model6.POLY, Phylo_FAS_W_model6intPOLY))
-
-## BIC results ------
-RMR_BIC # Phylo_RMR_model5
-MMR_BIC # Phylo_MMR_model4int
-AS_BIC  # Phylo_AS_model4
-FAS_BIC # Phylo_FAS_model4
-
-RMR_W_BIC # Phylo_RMR_W_model1
-MMR_W_BIC # Phylo_MMR_W_model4
-AS_W_BIC  # Phylo_AS_W_model4
-FAS_W_BIC # Phylo_FAS_W_model2.POLY
-
-# Phylo_AS_W_model1intPOLY  9 737.4351  0.00000
-# Phylo_AS_W_model1int      7 738.2306  0.79549
-# Phylo_AS_W_model4         7 738.3042  0.86917 # << use this
-
-# Best models  --------
-rmr_mod_ER<-Phylo_RMR_model5
-amr_mod_ER<-Phylo_MMR_model4int
-as_mod_ER<-Phylo_AS_model4
-fas_mod_ER<-Phylo_FAS_model4
-
-rmr_mod_W<-Phylo_RMR_W_model1
-amr_mod_W<-Phylo_MMR_W_model4
-as_mod_W<-Phylo_AS_W_model4
-fas_mod_W<-Phylo_FAS_W_model2.POLY
-
+if (run){
+  # phylo models ---------
+  ## RMR: ecologically relevant -----------------
+  Phylo_RMR_model0 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (1|species) , data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model0.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model0intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model0int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) , data=data.rmrER, REML=FALSE, A = list(species = A))
+  
+  Phylo_RMR_model1 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (1|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model1.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model1intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model1int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  
+  Phylo_RMR_model2 <- Almer(lnRMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model2int <- Almer(lnRMR ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model2.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model2intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  
+  Phylo_RMR_model4 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model4int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model4.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model4intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  
+  Phylo_RMR_model5 <- Almer(lnRMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model5int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model5.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model5intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  
+  Phylo_RMR_model6 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model6int <- Almer(lnRMR ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model6.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  Phylo_RMR_model6intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  
+  ### BIC --------------
+  RMR_BIC<-BICdelta(BIC(Phylo_RMR_model0, Phylo_RMR_model0int, Phylo_RMR_model0.POLY, Phylo_RMR_model0intPOLY,
+                  Phylo_RMR_model1, Phylo_RMR_model1int, Phylo_RMR_model1.POLY, Phylo_RMR_model1intPOLY,
+                  Phylo_RMR_model2, Phylo_RMR_model2int, Phylo_RMR_model2.POLY, Phylo_RMR_model2intPOLY,
+                  Phylo_RMR_model4, Phylo_RMR_model4int, Phylo_RMR_model4.POLY, Phylo_RMR_model4intPOLY,
+                  Phylo_RMR_model5, Phylo_RMR_model5int, Phylo_RMR_model5.POLY, Phylo_RMR_model5intPOLY,
+                  Phylo_RMR_model6, Phylo_RMR_model6int, Phylo_RMR_model6.POLY, Phylo_RMR_model6intPOLY))
+  
+  ## MMR ecologically relevant -----------------
+  Phylo_MMR_model0 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) , data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model0.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model0intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model0int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) , data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  
+  Phylo_MMR_model1 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model1.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model1intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model1int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  
+  Phylo_MMR_model2 <- Almer(lnAMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model2int <- Almer(lnAMR ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model2.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model2intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  
+  Phylo_MMR_model4 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model4int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model4.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model4intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  
+  Phylo_MMR_model5 <- Almer(lnAMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model5int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model5.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model5intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  
+  Phylo_MMR_model6 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model6int <- Almer(lnAMR ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model6.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  Phylo_MMR_model6intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  
+  ### BIC --------------
+  MMR_BIC<-BICdelta(BIC(Phylo_MMR_model0, Phylo_MMR_model0int, Phylo_MMR_model0.POLY, Phylo_MMR_model0intPOLY,
+                  Phylo_MMR_model1, Phylo_MMR_model1int, Phylo_MMR_model1.POLY, Phylo_MMR_model1intPOLY,
+                  Phylo_MMR_model2, Phylo_MMR_model2int, Phylo_MMR_model2.POLY, Phylo_MMR_model2intPOLY,
+                  Phylo_MMR_model4, Phylo_MMR_model4int, Phylo_MMR_model4.POLY, Phylo_MMR_model4intPOLY,
+                  Phylo_MMR_model5, Phylo_MMR_model5int, Phylo_MMR_model5.POLY, Phylo_MMR_model5intPOLY,
+                  Phylo_MMR_model6, Phylo_MMR_model6int, Phylo_MMR_model6.POLY, Phylo_MMR_model6intPOLY))
+  
+  ## AAS ecologically relevant ------------------
+  Phylo_AS_model0 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) , data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model0.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model0intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model0int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) , data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  
+  Phylo_AS_model1 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model1.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model1intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model1int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  
+  Phylo_AS_model2 <- Almer(lnAS ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model2int <- Almer(lnAS ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model2.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model2intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  
+  Phylo_AS_model4 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model4int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model4.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model4intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  
+  Phylo_AS_model5 <- Almer(lnAS ~ lnBWg + tempTestK1000  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model5int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model5.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model5intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  
+  Phylo_AS_model6 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model6int <- Almer(lnAS ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model6.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  Phylo_AS_model6intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  
+  ## BIC --------
+  AS_BIC<-BICdelta(BIC(Phylo_AS_model0, Phylo_AS_model0int, Phylo_AS_model0.POLY, Phylo_AS_model0intPOLY,
+                  Phylo_AS_model1, Phylo_AS_model1int, Phylo_AS_model1.POLY, Phylo_AS_model1intPOLY,
+                  Phylo_AS_model2, Phylo_AS_model2int, Phylo_AS_model2.POLY, Phylo_AS_model2intPOLY,
+                  Phylo_AS_model4, Phylo_AS_model4int, Phylo_AS_model4.POLY, Phylo_AS_model4intPOLY,
+                  Phylo_AS_model5, Phylo_AS_model5int, Phylo_AS_model5.POLY, Phylo_AS_model5intPOLY,
+                  Phylo_AS_model6, Phylo_AS_model6int, Phylo_AS_model6.POLY, Phylo_AS_model6intPOLY))
+  
+  
+  ## FAS ecologically relevant ----------------
+  Phylo_FAS_model0 <- Almer(log(FAS) ~ lnBWg + tempTest + (1|species) , data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model0.POLY <- Almer(log(FAS) ~ lnBWg + poly(tempTest,2) + (1|species), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model0intPOLY <- Almer(log(FAS) ~ lnBWg * poly(tempTest,2) + (1|species), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model0int <- Almer(log(FAS) ~ lnBWg * tempTest + (1|species) , data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  
+  Phylo_FAS_model1 <- Almer(log(FAS) ~ lnBWg + tempTest + (1|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model1.POLY <- Almer(log(FAS) ~ lnBWg + poly(tempTest,2) + (1|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model1intPOLY <- Almer(log(FAS) ~ lnBWg * poly(tempTest,2) + (1|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model1int <- Almer(log(FAS) ~ lnBWg * tempTest + (1|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  
+  Phylo_FAS_model2 <- Almer(log(FAS) ~ lnBWg + tempTest  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model2int <- Almer(log(FAS) ~ lnBWg * tempTest  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model2.POLY <- Almer(log(FAS) ~ lnBWg + poly(tempTest,2) + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model2intPOLY <- Almer(log(FAS) ~ lnBWg * poly(tempTest,2)  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  
+  Phylo_FAS_model4 <- Almer(log(FAS) ~ lnBWg + tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model4int <- Almer(log(FAS) ~ lnBWg * tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model4.POLY <- Almer(log(FAS) ~ lnBWg + poly(tempTest,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model4intPOLY <- Almer(log(FAS) ~ lnBWg * poly(tempTest,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  
+  Phylo_FAS_model5 <- Almer(log(FAS) ~ lnBWg + tempTest  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model5int <- Almer(log(FAS) ~ lnBWg * tempTest + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model5.POLY <- Almer(log(FAS) ~ lnBWg + poly(tempTest,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model5intPOLY <- Almer(log(FAS) ~ lnBWg * poly(tempTest,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  
+  Phylo_FAS_model6 <- Almer(lnFAS ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model6int <- Almer(lnFAS ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model6.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  Phylo_FAS_model6intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  
+  ## BIC -------------
+  FAS_BIC<-BICdelta(BIC(Phylo_FAS_model0, Phylo_FAS_model0int, Phylo_FAS_model0.POLY, Phylo_FAS_model0intPOLY,
+                  Phylo_FAS_model1, Phylo_FAS_model1int, Phylo_FAS_model1.POLY, Phylo_FAS_model1intPOLY,
+                  Phylo_FAS_model2, Phylo_FAS_model2int, Phylo_FAS_model2.POLY, Phylo_FAS_model2intPOLY,
+                  Phylo_FAS_model4, Phylo_FAS_model4int, Phylo_FAS_model4.POLY, Phylo_FAS_model4intPOLY,
+                  Phylo_FAS_model5, Phylo_FAS_model5int, Phylo_FAS_model5.POLY, Phylo_FAS_model5intPOLY,
+                  Phylo_FAS_model6, Phylo_FAS_model6int, Phylo_FAS_model6.POLY, Phylo_FAS_model6intPOLY))
+  
+  
+  # RMR warm ------------------
+  Phylo_RMR_W_model0 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (1|species) , data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model0.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model0intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model0int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) , data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  
+  Phylo_RMR_W_model1 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (1|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model1.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model1intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model1int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  
+  Phylo_RMR_W_model2 <- Almer(lnRMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model2int <- Almer(lnRMR ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model2.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model2intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  
+  Phylo_RMR_W_model4 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model4int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model4.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model4intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  
+  Phylo_RMR_W_model5 <- Almer(lnRMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model5int <- Almer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model5.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model5intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  
+  Phylo_RMR_W_model6 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model6int <- Almer(lnRMR ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model6.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  Phylo_RMR_W_model6intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  
+  
+  ## BIC -------------
+  RMR_W_BIC<-BICdelta(BIC(Phylo_RMR_W_model0, Phylo_RMR_W_model0int, Phylo_RMR_W_model0.POLY, Phylo_RMR_W_model0intPOLY,
+                  Phylo_RMR_W_model1, Phylo_RMR_W_model1int, Phylo_RMR_W_model1.POLY, Phylo_RMR_W_model1intPOLY,
+                  Phylo_RMR_W_model2, Phylo_RMR_W_model2int, Phylo_RMR_W_model2.POLY, Phylo_RMR_W_model2intPOLY,
+                  Phylo_RMR_W_model4, Phylo_RMR_W_model4int, Phylo_RMR_W_model4.POLY, Phylo_RMR_W_model4intPOLY,
+                  Phylo_RMR_W_model5, Phylo_RMR_W_model5int, Phylo_RMR_W_model5.POLY, Phylo_RMR_W_model5intPOLY,
+                  Phylo_RMR_W_model6, Phylo_RMR_W_model6int, Phylo_RMR_W_model6.POLY, Phylo_RMR_W_model6intPOLY))
+  
+  # AMR / warm temps --------------
+  Phylo_MMR_W_model0 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) , data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model0.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model0intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model0int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) , data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  
+  Phylo_MMR_W_model1 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model1.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model1intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model1int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  
+  Phylo_MMR_W_model2 <- Almer(lnAMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model2int <- Almer(lnAMR ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model2.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model2intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  
+  Phylo_MMR_W_model4 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model4int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model4.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model4intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  
+  Phylo_MMR_W_model5 <- Almer(lnAMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model5int <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model5.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model5intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  
+  Phylo_MMR_W_model6 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model6int <- Almer(lnAMR ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model6.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  Phylo_MMR_W_model6intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  
+  ## BIC -------------
+  MMR_W_BIC<-BICdelta(BIC(Phylo_MMR_W_model0, Phylo_MMR_W_model0int, Phylo_MMR_W_model0.POLY, Phylo_MMR_W_model0intPOLY,
+                  Phylo_MMR_W_model1, Phylo_MMR_W_model1int, Phylo_MMR_W_model1.POLY, Phylo_MMR_W_model1intPOLY,
+                  Phylo_MMR_W_model2, Phylo_MMR_W_model2int, Phylo_MMR_W_model2.POLY, Phylo_MMR_W_model2intPOLY,
+                  Phylo_MMR_W_model4, Phylo_MMR_W_model4int, Phylo_MMR_W_model4.POLY, Phylo_MMR_W_model4intPOLY,
+                  Phylo_MMR_W_model5, Phylo_MMR_W_model5int, Phylo_MMR_W_model5.POLY, Phylo_MMR_W_model5intPOLY,
+                  Phylo_MMR_W_model6, Phylo_MMR_W_model6int, Phylo_MMR_W_model6.POLY, Phylo_MMR_W_model6intPOLY))
+  
+  
+  
+  # AS / warm temps --------------
+  Phylo_AS_W_model0 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) , data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model0.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model0intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model0int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) , data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  
+  Phylo_AS_W_model1 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model1.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model1intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model1int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  
+  Phylo_AS_W_model2 <- Almer(lnAS ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model2int <- Almer(lnAS ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model2.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model2intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  
+  Phylo_AS_W_model4 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model4int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model4.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model4intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  
+  Phylo_AS_W_model5 <- Almer(lnAS ~ lnBWg + tempTestK1000  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model5int <- Almer(lnAS ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model5.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model5intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  
+  Phylo_AS_W_model6 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model6int <- Almer(lnAS ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model6.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  Phylo_AS_W_model6intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  
+  ## BIC -------------
+  AS_W_BIC<-BICdelta(BIC(Phylo_AS_W_model0, Phylo_AS_W_model0int, Phylo_AS_W_model0.POLY, Phylo_AS_W_model0intPOLY,
+                  Phylo_AS_W_model1, Phylo_AS_W_model1int, Phylo_AS_W_model1.POLY, Phylo_AS_W_model1intPOLY,
+                  Phylo_AS_W_model2, Phylo_AS_W_model2int, Phylo_AS_W_model2.POLY, Phylo_AS_W_model2intPOLY,
+                  Phylo_AS_W_model4, Phylo_AS_W_model4int, Phylo_AS_W_model4.POLY, Phylo_AS_W_model4intPOLY,
+                  Phylo_AS_W_model5, Phylo_AS_W_model5int, Phylo_AS_W_model5.POLY, Phylo_AS_W_model5intPOLY,
+                  Phylo_AS_W_model6, Phylo_AS_W_model6int, Phylo_AS_W_model6.POLY, Phylo_AS_W_model6intPOLY))
+  
+  
+  # FAS / warm temps --------------
+  Phylo_FAS_W_model0 <- Almer(lnFAS ~ lnBWg + tempTest + (1|species) , data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model0.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTest,2) + (1|species), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model0intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTest,2) + (1|species), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model0int <- Almer(lnFAS ~ lnBWg * tempTest + (1|species) , data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  
+  Phylo_FAS_W_model1 <- Almer(lnFAS ~ lnBWg + tempTest + (1|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model1.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTest,2) + (1|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model1intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTest,2) + (1|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model1int <- Almer(lnFAS ~ lnBWg * tempTest + (1|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  
+  Phylo_FAS_W_model2 <- Almer(lnFAS ~ lnBWg + tempTest  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model2int <- Almer(lnFAS ~ lnBWg * tempTest  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model2.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTest,2) + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model2intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTest,2)  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  
+  Phylo_FAS_W_model4 <- Almer(lnFAS ~ lnBWg + tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model4int <- Almer(lnFAS ~ lnBWg * tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model4.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTest,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model4intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTest,2) + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  
+  Phylo_FAS_W_model5 <- Almer(lnFAS ~ lnBWg + tempTest  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model5int <- Almer(lnFAS ~ lnBWg * tempTest + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model5.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTest,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model5intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTest,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  
+  Phylo_FAS_W_model6 <- Almer(lnFAS ~ lnBWg + tempTestK1000 + (lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model6int <- Almer(lnFAS ~ lnBWg * tempTestK1000+ (lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model6.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  Phylo_FAS_W_model6intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+  
+  ## BIC -------------
+  FAS_W_BIC<-BICdelta(BIC(Phylo_FAS_W_model0, Phylo_FAS_W_model0int, Phylo_FAS_W_model0.POLY, Phylo_FAS_W_model0intPOLY,
+                  Phylo_FAS_W_model1, Phylo_FAS_W_model1int, Phylo_FAS_W_model1.POLY, Phylo_FAS_W_model1intPOLY,
+                  Phylo_FAS_W_model2, Phylo_FAS_W_model2int, Phylo_FAS_W_model2.POLY, Phylo_FAS_W_model2intPOLY,
+                  Phylo_FAS_W_model4, Phylo_FAS_W_model4int, Phylo_FAS_W_model4.POLY, Phylo_FAS_W_model4intPOLY,
+                  Phylo_FAS_W_model5, Phylo_FAS_W_model5int, Phylo_FAS_W_model5.POLY, Phylo_FAS_W_model5intPOLY,
+                  Phylo_FAS_W_model6, Phylo_FAS_W_model6int, Phylo_FAS_W_model6.POLY, Phylo_FAS_W_model6intPOLY))
+  
+  ## BIC results ------
+  RMR_BIC # Phylo_RMR_model5
+  MMR_BIC # Phylo_MMR_model4int
+  AS_BIC  # Phylo_AS_model4
+  FAS_BIC # Phylo_FAS_model4
+  
+  RMR_W_BIC # Phylo_RMR_W_model1
+  MMR_W_BIC # Phylo_MMR_W_model4
+  AS_W_BIC  # Phylo_AS_W_model4
+  FAS_W_BIC # Phylo_FAS_W_model2.POLY
+  
+  # Phylo_AS_W_model1intPOLY  9 737.4351  0.00000
+  # Phylo_AS_W_model1int      7 738.2306  0.79549
+  # Phylo_AS_W_model4         7 738.3042  0.86917 # << use this
+  
+  # Best models  --------
+  rmr_mod_ER<-Phylo_RMR_model5
+  amr_mod_ER<-Phylo_MMR_model4int
+  as_mod_ER<-Phylo_AS_model4
+  fas_mod_ER<-Phylo_FAS_model4
+  
+  rmr_mod_W<-Phylo_RMR_W_model1
+  amr_mod_W<-Phylo_MMR_W_model4
+  as_mod_W<-Phylo_AS_W_model4
+  fas_mod_W<-Phylo_FAS_W_model2.POLY
+  
+}else{
+  # running best models only 
+  rmr_mod_ER <- Almer(lnRMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
+  amr_mod_ER <- Almer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
+  as_mod_ER <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
+  fas_mod_ER <- Almer(log(FAS) ~ lnBWg + tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
+  
+  rmr_mod_W <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (1|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
+  amr_mod_W <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))
+  as_mod_W <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
+  fas_mod_W <- Almer(lnFAS ~ lnBWg + poly(tempTest,2) + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
+}
 
 # un-comment to see - or run R markdown html summary script
 
@@ -508,9 +543,13 @@ fas_mod_W<-Phylo_FAS_W_model2.POLY
 
 data.as.test$resid<-resid(as_mod_W)
 data.as.test[which(data.as.test$resid < -1.5),] # could be considered outlier data
+data.fasER[which(data.fasER$FAS > 20),] # considered outliers, measurement extremes for zebrafish
+
+# *****************************************************************************
+# *****************************************************************************
 
 # Model scaling parameters and CIs ----------
-
+# this also expands the dataset to get mass independent values of metabolic rates
 model_outputs(phylo = TRUE, 
               best.model.rmr.er = rmr_mod_ER,
               best.model.amr.er= amr_mod_ER,
@@ -521,7 +560,21 @@ model_outputs(phylo = TRUE,
               best.model.as.w = as_mod_W,
               best.model.fas.w = fas_mod_W)
 
-# Figures --------
+# *****************************************************************************
+# *****************************************************************************
+
+
+
+# ******************************************************************************
+# Figures -------
+cols.as<-c("#265F73", "#007E66", "#00C5A3")
+cols.fas<-c("#395200", "#89A000", "yellow")
+cols.rmr<-c("#C70039", "#FF6D7C", "#FFA3AC")
+cols.amr<-c("#00749F","#00A8D6", "#9CE9FF")
+cols<-c("#00749F","#C70039","#00A8D6","#FF6D7C", "#9CE9FF","#FFA3AC", "#00C5A3", "#265F73")# AMR -rmr- AMR dark - rmr dark - light - as - fas
+
+set.seed(51423)
+# MMR and AMR used interchangeably throughout 
 
 # General scaling plots ------
 AMRmodel_plot1<-ggplot(data=data.amrER, aes(x=lnBWg, y=lnAMR)) +
@@ -529,7 +582,7 @@ AMRmodel_plot1<-ggplot(data=data.amrER, aes(x=lnBWg, y=lnAMR)) +
   geom_line(data=data.plotAMRint_ER,
             aes(y = model_predFE, x=lnBWg,  group=tempTestK1000_inC, color = tempTestK1000_inC),
             linewidth=0.3, lty=1,alpha=0.8, show.legend=FALSE) +
-  geom_point(alpha=0.9,  size=2, pch=21, color="grey50",fill="grey70" )+
+  geom_point(alpha=0.9, size=2, pch=21, color="grey50",fill="grey70" )+
   geom_point(data=data.amr.test, aes(x=lnBWg, y=lnAMR, fill=tempTest),
              alpha=0.9,  size=2, pch=21, show.legend = FALSE)+
   geom_line(data=data.plotAMR_warm[round(data.plotAMR_warm$tempTestK1000,2)==3.39,],
@@ -571,10 +624,10 @@ FASmodel_plot1<-ggplot(data=data.fasER, aes(x=lnBWg, y=log(FAS))) +
   geom_line(data=data.plotFAS_ER, aes(y = model_predFE, x=lnBWg,  group=tempTest), color="black", linewidth=1, lty=1, show.legend=FALSE) +
   geom_point(data=data.fas.test, aes(x=lnBWg, y=log(FAS), fill=tempTest), alpha=0.9,  size= 2, pch=21, show.legend=FALSE)+
   geom_line(data=data.plotFAS_warm, aes(y = model_predFE, x=lnBWg,  group=tempTest), color="#475500", linewidth=1, lty=1, show.legend=FALSE) +
-  annotate("text",  x = -5.5, y = 3.9, label = bquote(Optimal:~italic(b)[FAS] == .(FAS_slope)),size=5, hjust=0, family="Arial", color = "black")+
-  annotate("text",  x = -5.5, y = 3.5, label = bquote(Warm:~italic(b)[FAS] == .(FAS_slope_w)),size=5, hjust=0, family="Arial", color = "#475500")+
-  annotate("text", label = paste("n = ", nrow(data.fasER), sep=""),   x = -5.5, y = 3.1, size=3, hjust=0, family="Arial", color = "black")+
-  annotate("text", label = paste("n = ", nrow(data.fas.test), sep=""),  x = -5.5, y = 2.85, size=3, hjust=0, family="Arial", color = "#475500")+
+  annotate("text",  x = 4, y = 3.9, label = bquote(Optimal:~italic(b)[FAS] == .(FAS_slope)),size=5, hjust=0, family="Arial", color = "black")+
+  annotate("text",  x = 4, y = 3.5, label = bquote(Warm:~italic(b)[FAS] == .(FAS_slope_w)),size=5, hjust=0, family="Arial", color = "#475500")+
+  annotate("text", label = paste("n = ", nrow(data.fasER), sep=""),   x = 4, y = 3.1, size=3, hjust=0, family="Arial", color = "black")+
+  annotate("text", label = paste("n = ", nrow(data.fas.test), sep=""),  x = 4, y = 2.85, size=3, hjust=0, family="Arial", color = "#475500")+
   scale_fill_gradient(high = "yellow", low = "black")+
   ylim(0,4)
 ggformat(FASmodel_plot1, x_title=expression(italic(ln)*Body~mass~(g)), y_title=expression(italic(ln)*FAS), print = FALSE)
@@ -605,7 +658,7 @@ scaling<-cowplot:::plot_grid(AMRmodel_plot1, RMRmodel_plot1,
                               ncol = 2,
                               labels = "AUTO",
                               label_size = 17)
-ggsave(filename = paste("./Figures/Fig1_Scaling_aLL_", Sys.Date(), ".png", sep=""),
+ggsave(filename = paste("./Figures/Fig2_Scaling_phylo_.png", sep=""),
        plot=scaling, width = 8.5, height = 8.5, units = "in")
 
 # Both Activation energies together: -------
@@ -655,80 +708,64 @@ ASmodel_plot3.E_ALL<-ggplot(data.asER[data.asER$lnBWg==0,]) +
   scale_x_continuous(limits = c(3.25, 3.661), sec.axis = sec_axis(~ ((1000/.))-273.15, name = expression(Temperature~degree*C), breaks = c(32, 25, 17, 10, 3 )))+
   geom_line(data = data.plotAS_ER[which(round(data.plotAS_ER$lnBWg, 1) == round(log(1.35), 1)),], aes(y = log((exp(model_predFE)/exp(lnBWg))), x=tempTestK1000, group=lnBWg ) ,color="black", linewidth=1, lty=1, show.legend=FALSE)+
   geom_line(data = data.plotAS_warm[which(round(data.plotAS_warm$lnBWg, 1) == round(log(1.4), 1)),], aes(y = log((exp(model_predFE)/exp(lnBWg))), x=tempTestK1000, group=lnBWg), color = cols.as[2], linewidth=1, lty=1, show.legend=FALSE)
-ggformat(ASmodel_plot3.E_ALL, x_title= expression(Temperature^-1~(1000/K)), y_title=expression(italic(ln)*AS~(mg~O[2]~h^-1~g^-1)), print = T)
+ggformat(ASmodel_plot3.E_ALL, x_title= expression(Temperature^-1~(1000/K)), y_title=expression(italic(ln)*AS~(mg~O[2]~h^-1~g^-1)), print = F)
 
 Arh.plot<-cowplot:::plot_grid(AMRmodel_plot3.E_ALL, RMRmodel_plot3.E_ALL, ASmodel_plot3.E_ALL, 
           align = "hv",
           axis = "l",
           nrow = 1,
           ncol = 3,
+          labels = "AUTO",
+          label_y = 0.95,
           label_size = 17)
-ggsave(filename = paste("./Figures/Fig_ArrheniusFigMMR-RMR-AS_", Sys.Date(), ".png", sep=""),
+ggsave(filename = paste("./Figures/Fig3_ArrheniusFigMMR-RMR-AS_Phylo.png", sep=""),
        plot=Arh.plot, width = 13, height = 5, units = "in")
 
 
 # Both MMR and RMR together - AS punchline plots ---------
-# Overall all fish together:
-MRmodel_plot1<-ggplot() +
-  geom_ribbon(data=data.plotRMR_ER, mapping = aes(y = model_predFE, x=lnBWg, ymin=CI_2.5, ymax=CI_97.5, group = tempTestK1000), linetype=2, alpha=0.1, fill = "grey30")+
-  geom_ribbon(data.plotAMRint_ER, mapping = aes(y = model_predFE, x=lnBWg, ymin=CI_2.5, ymax=CI_97.5, group = tempTestK1000), linetype=2, alpha=0.1, fill = "grey30")+
-  geom_line(data=data.plotAMRint_ER[round(data.plotAMRint_ER$tempTestK1000,2)==3.49,], mapping = aes(y = model_predFE, x=lnBWg,  group=tempTestK1000), color="black", size=0.7, lty=1, show.legend=FALSE) +
-  geom_line(data=data.plotRMR_ER[round(data.plotRMR_ER$tempTestK1000,2)==3.49,], aes(y = model_predFE, x=lnBWg,  group=tempTestK1000, color= tempTestK1000), color="black", size=0.7, lty=1, show.legend=FALSE) +
-  scale_y_continuous(limits = c(-7, 12), breaks = seq(-7,12, 2))+
-  scale_x_continuous(limits = c(-7, 12), breaks = seq(-7,12, 2))
-ggformat(MRmodel_plot1, x_title=expression(italic(ln)*Body~mass~(g)), y_title=expression(italic(ln)*MR~(mg~O[2]~h^-1)), print = T)
-
-MRmodel_plotW<-ggplot() +
-  geom_ribbon(data.plotAMR_warm, mapping = aes(y = model_predFE, x=lnBWg, ymin=CI_2.5, ymax=CI_97.5, group = tempTestK1000), linetype=2, alpha=0.1, fill = cols.amr[2])+
-  geom_ribbon(data=data.plotRMR_warm, mapping = aes(y = model_predFE, x=lnBWg, ymin=CI_2.5, ymax=CI_97.5, group = tempTestK1000), linetype=2, alpha=0.1, fill = cols.rmr[2])+
-  geom_line(data=data.plotAMR_warm[round(data.plotAMR_warm$tempTestK1000,2)==3.49,], mapping = aes(y = model_predFE, x=lnBWg,  group=tempTestK1000), color=cols.amr[1], size=0.7, lty=1, show.legend=FALSE) +
-  geom_line(data=data.plotRMR_warm[round(data.plotRMR_warm$tempTestK1000,2)==3.49,], aes(y = model_predFE, x=lnBWg,  group=tempTestK1000, color= tempTestK1000), color=cols.rmr[1], size=0.7, lty=1, show.legend=FALSE) +
-  scale_y_continuous(limits = c(-7, 12), breaks = seq(-7,12, 2))+
-  scale_x_continuous(limits = c(-7, 12), breaks = seq(-7,12, 2))
-ggformat(MRmodel_plotW, x_title=expression(italic(ln)*Body~mass~(g)), y_title=expression(italic(ln)*MR~(mg~O[2]~h^-1)), pr = T)
-
-
-FinalMR<-cowplot:::plot_grid(MRmodel_plot1, MRmodel_plotW,
-          align = "hv",
-          axis = "l",
-          nrow = 1,
-          ncol = 2,
-          label_size = 17)
-ggsave(filename = paste("./Figures/Fig_Final_", Sys.Date(), ".png", sep=""),
-       plot=FinalMR, width = 7.5, height = 3.5, units = "in")
-
-
-# Overall all fish together:
+# All fish together:
 MRmodel_plot2<-ggplot(data=data.rmrER, aes(x=lnBWg, y=lnRMR)) +
   geom_line(data=data.plotRMR_ER[round(data.plotRMR_ER$tempTestK1000,2)==3.39,], aes(y = model_predFE, x=lnBWg,  group=tempTestK1000, color= tempTestK1000), color="black", size=0.7, lty=1, show.legend=FALSE) +
   geom_line(data=data.plotAMRint_ER[round(data.plotAMRint_ER$tempTestK1000,2)==3.39,], aes(y = model_predFE, x=lnBWg,  group=tempTestK1000, color= tempTestK1000), color="black", size=0.7, lty=1, show.legend=FALSE) +
   geom_line(data=data.plotRMR_warm[round(data.plotRMR_warm$tempTestK1000,2)==3.39,], aes(y = model_predFE, x=lnBWg,  group=tempTestK1000), color=cols.rmr[2], size=1, lty=1, show.legend=FALSE) +
   geom_line(data=data.plotAMR_warm[round(data.plotAMR_warm$tempTestK1000,2)==3.39,], aes(y = model_predFE, x=lnBWg,  group=tempTestK1000), color=cols.amr[2], size=1, lty=1, show.legend=FALSE) +
-   ylim(x = -5, 12)+
-   xlim(x = -5, 12)
-ggformat(MRmodel_plot2, x_title=expression(italic(ln)*Body~mass~(g)), y_title=expression(italic(ln)*MR~(mg~O[2]~h^-1)), print = F)
+  ylim(x = -6.5, 12)+
+  xlim(x = -6.5, 12)+
+  annotate("text",  x = -0, y = 11.5, label = bquote(italic(b)[MMR] ~"("* .(MMR_slope_w) *")"),size=5, hjust=0, family="Arial", color = cols.amr[1])+
+  annotate("text",  x = -6.5, y = 11.5, label = bquote(italic(b)[RMR] ~"("* .(RMR_slope_w) *")"),size=5, hjust=0, family="Arial", color = cols.rmr[1])+
+  annotate("text",  x = -0.9, y = 11.5, label = expression(paste("">"")),size=5, hjust=0, family="Arial", color = "black")+
+  annotate("text",  x = -0, y = 9.8 , label = bquote(italic(b)[MMR~20*degree*C] ~"("* .(round(AMR.slopes$lnBWg.trend[3],3)) *")"),size=5, hjust=0, family="Arial", color = "black")+
+  annotate("text",  x = -6.5, y = 9.8, label = bquote(italic(b)[RMR] ~"("* .(RMR_slope) *")"),size=5, hjust=0, family="Arial", color = "black")+
+  annotate("text",  x = -0.9, y = 9.8, label = expression(paste("" %~~% "")),size=5, hjust=0, family="Arial", color = "black")+
+  scale_fill_gradient( low = cols.amr[3], high = cols.amr[1])+
+  scale_color_gradient( low = "grey80", high = "grey0")+
+  annotate("segment", x = 5.2, xend = 5.2, y = 6, yend = 4.5,
+           colour = cols.amr[1], size = 1, arrow = arrow(length = unit(0.3,"cm"), type="closed",))+
+  annotate("segment", x = -4, xend = -4, yend = -4, y = -5.2,
+           colour = cols.rmr[1], size = 1, arrow = arrow(length = unit(0.3,"cm"), type="closed",))
+ggformat(MRmodel_plot2, x_title=expression(italic(ln)*Body~mass~(g)), y_title=expression(italic(ln)*MR~(mg~O[2]~h^-1)), print = T)
+MRmodel_plot2<<-MRmodel_plot2
 
-ggsave(filename = paste("./Figures/Fig5-final_MMR-RMR_", Sys.Date(), ".png", sep=""),
-       plot=MRmodel_plot2, width = 4, height = 4, units = "in")
-
+# ggsave(filename = paste("./Figures/Fig5-final_MMR-RMR_Phylo.png", sep=""),
+#        plot=MRmodel_plot2, width = 4, height = 4, units = "in")
 
 
 # Boxplots: FAS, AS, MR, mass-independent models ----------
-fas_boxplot<-ggplot(data=data.fas, aes(y=FAS, x = test_category, label=species, fill=test_category3))+
+fas_boxplot<-ggplot(data=data.fas, aes(y=FAS, x = test_category,  fill=test_category3))+
   geom_boxplot(show.legend = F)+
   scale_fill_manual(values=cols.fas)+
   scale_x_discrete(labels=c("acclim" = "Acclimated \n warm", "acute" = "Acute \n warm", "ecol_relev" = "Optimal"))
 ggformat(fas_boxplot, y_title = expression(FAS~(MMR/RMR)), x_title = "", print = F)
 fas_boxplot<-fas_boxplot+theme(legend.position = "none")
 
-rmr_boxplot<-ggplot(data=data.rmr, aes(y=mass_specrmr, x = test_category, label=species, fill=test_category))+
+rmr_boxplot<-ggplot(data=data.rmr, aes(y=mass_specrmr, x = test_category, fill=test_category))+
   geom_boxplot(show.legend = F)+
   scale_fill_manual(values=cols.rmr)+
   scale_x_discrete(labels=c("acclim" = "Acclimated \n warm", "acute" = "Acute \n warm", "ecol_relev" = "Optimal"))
 ggformat(rmr_boxplot, y_title = expression(RMR~(mgO[2]~g^-1~h^-1)), x_title = "", print = F)
 rmr_boxplot<-rmr_boxplot+theme(legend.position = "none")
 
-amr_boxplot<-ggplot(data=data.amr, aes(y=mass_specamr, x = test_category, label=species, fill=test_category))+
+amr_boxplot<-ggplot(data=data.amr, aes(y=mass_specamr, x = test_category, fill=test_category))+
   geom_boxplot(show.legend = F)+
   scale_fill_manual(values=cols.amr)+
   scale_x_discrete(labels=c("acclim" = "Acclimated \n warm", "acute" = "Acute \n warm", "ecol_relev" = "Optimal"))
@@ -739,38 +776,28 @@ cowplot:::plot_grid(amr_boxplot,rmr_boxplot,fas_boxplot,
           align = "hv",
           axis = "l",
           nrow = 1,
+          labels = "AUTO",
           ncol = 3) %>%
-ggsave(filename = "./Figures/FigSUP_boxplots_mar2022.png", width = 12.5, height =4)
+ggsave(filename = "./Figures/Supl_fig1_boxplots_Phylo.png", width = 12.5, height =4)
 
-
-# COMBO warm fish and ecol relev ********************
-rmr_boxplot<-ggplot(data=data.rmr, aes(y=mass_specrmr, x = test_category3, label=species, fill=test_category3))+
-  geom_boxplot(show.legend = F)+
-  scale_fill_manual(values=c("grey50", cols.rmr[3]))+
-  scale_x_discrete(labels=c("warm" = "Warm", "ecol_relev" = "Optimal"))
-ggformat(rmr_boxplot, y_title = expression(RMR~(mgO[2]~g^-1~h^-1)), x_title = "", print = F)
-rmr_boxplot<-rmr_boxplot+theme(legend.position = "none")
-ggsave(filename = paste("./Figures/Fig_box_rmr1_", Sys.Date(), ".png", sep=""),
-       plot=rmr_boxplot, width = 4, height = 4, units = "in")
-
-amr_boxplot<-ggplot(data=data.amr, aes(y=mass_specamr, x = test_category3, label=species, fill=test_category3))+
-  geom_boxplot(show.legend = F)+
-  scale_fill_manual(values=c("grey50", cols.amr[3]))+
-  scale_x_discrete(labels=c("warm" = "Warm", "ecol_relev" = "Optimal"))
-ggformat(amr_boxplot, y_title = expression(MMR~(mgO[2]~g^-1~h^-1)), x_title = "", print = F)
-amr_boxplot<-amr_boxplot+theme(legend.position = "none")
-ggsave(filename = paste("./Figures/Fig_box_amr1_", Sys.Date(), ".png", sep=""),
-       plot=amr_boxplot, width = 4, height = 4, units = "in")
-
-fas_boxplot<-ggplot(data=data.fas, aes(y=FAS, x = test_category3, label=species, fill=test_category3))+
-  geom_boxplot(show.legend = FALSE)+
-  scale_fill_manual(values=c("grey50", cols.fas[3]))+
-  scale_color_manual(values=cols.fas)+
-  scale_x_discrete(labels=c("warm" = "Warm", "ecol_relev" = "Optimal"))
-ggformat(fas_boxplot, y_title = "FAS (MMR / RMR)", x_title = "", print = F)
-fas_boxplot<-fas_boxplot+theme(legend.position = "none")
-ggsave(filename = paste("./Figures/Fig_box_fas1_", Sys.Date(), ".png", sep=""),
-       plot=fas_boxplot, width = 4, height = 4, units = "in")
-
-
-  
+# Not used in manuscript -------------
+# Overall all fish together, with booted CI:
+# MRmodel_plot1<-ggplot() +
+#   geom_ribbon(data=data.plotRMR_ER, mapping = aes(y = model_predFE, x=lnBWg, ymin=CI_2.5, ymax=CI_97.5, group = tempTestK1000), linetype=2, alpha=0.1, fill = "grey30")+
+#   geom_ribbon(data.plotAMRint_ER, mapping = aes(y = model_predFE, x=lnBWg, ymin=CI_2.5, ymax=CI_97.5, group = tempTestK1000), linetype=2, alpha=0.1, fill = "grey30")+
+#   geom_line(data=data.plotAMRint_ER[round(data.plotAMRint_ER$tempTestK1000,2)==3.49,], mapping = aes(y = model_predFE, x=lnBWg,  group=tempTestK1000), color="black", linewidth=0.7, lty=1, show.legend=FALSE) +
+#   geom_line(data=data.plotRMR_ER[round(data.plotRMR_ER$tempTestK1000,2)==3.49,], aes(y = model_predFE, x=lnBWg,  group=tempTestK1000, color= tempTestK1000), color="black", linewidth=0.7, lty=1, show.legend=FALSE) +
+#   scale_y_continuous(limits = c(-7, 12), breaks = seq(-7,12, 2))+
+#   scale_x_continuous(limits = c(-7, 12), breaks = seq(-7,12, 2))
+# ggformat(MRmodel_plot1, x_title=expression(italic(ln)*Body~mass~(g)), y_title=expression(italic(ln)*MR~(mg~O[2]~h^-1)), print = F)
+# 
+# MRmodel_plotW<-ggplot() +
+#   geom_ribbon(data.plotAMR_warm, mapping = aes(y = model_predFE, x=lnBWg, ymin=CI_2.5, ymax=CI_97.5, group = tempTestK1000), linetype=2, alpha=0.1, fill = cols.amr[2])+
+#   geom_ribbon(data=data.plotRMR_warm, mapping = aes(y = model_predFE, x=lnBWg, ymin=CI_2.5, ymax=CI_97.5, group = tempTestK1000), linetype=2, alpha=0.1, fill = cols.rmr[2])+
+#   geom_line(data=data.plotAMR_warm[round(data.plotAMR_warm$tempTestK1000,2)==3.49,], mapping = aes(y = model_predFE, x=lnBWg,  group=tempTestK1000), color=cols.amr[1], size=0.7, lty=1, show.legend=FALSE) +
+#   geom_line(data=data.plotRMR_warm[round(data.plotRMR_warm$tempTestK1000,2)==3.49,], aes(y = model_predFE, x=lnBWg,  group=tempTestK1000, color= tempTestK1000), color=cols.rmr[1], size=0.7, lty=1, show.legend=FALSE) +
+#   scale_y_continuous(limits = c(-7, 12), breaks = seq(-7,12, 2))+
+#   scale_x_continuous(limits = c(-7, 12), breaks = seq(-7,12, 2))
+# ggformat(MRmodel_plotW, x_title=expression(italic(ln)*Body~mass~(g)), y_title=expression(italic(ln)*MR~(mg~O[2]~h^-1)), print = F)
+# 
+#   

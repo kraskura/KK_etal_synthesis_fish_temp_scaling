@@ -487,6 +487,24 @@ model_outputs(phylo = FALSE,
               best.model.as.w= as_mod_nonPhyloW,
               best.model.fas.w= fas_mod_nonPhyloW)
 
+
+# Figures -------
+cols.as<<-c("#265F73", "#007E66", "#00C5A3")
+cols.fas<<-c("#395200", "#89A000", "yellow")
+cols.rmr<<-c("#C70039", "#FF6D7C", "#FFA3AC")
+cols.amr<<-c("#00749F","#00A8D6", "#9CE9FF")
+cols<<-c("#00749F","#C70039","#00A8D6","#FF6D7C", "#9CE9FF","#FFA3AC", "#00C5A3", "#265F73")# AMR -rmr- AMR dark - rmr dark - light - as - fas
+
+set.seed(51423)
+# MMR and AMR used interchangeably throughout 
+
+library(ggplot2)
+library(ggpubr)
+library(cowplot)
+library(forcats)
+library(here)
+
+
   # General scaling plots ------
   AMRmodel_plot1<-ggplot(data=data.amrER, aes(x=lnBWg, y=lnAMR)) +
     geom_point(alpha=0.9,  size=2, pch=19, color="grey70")+
