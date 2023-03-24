@@ -50,12 +50,26 @@ ecol.model.update<-function(ecol.model.null,
                             data.ANOVA = NULL,
                             data.EMMEANS = NULL, 
                             data.CONTRASTS = NULL, 
+                            data.PARAMS = NULL,
                             ref.tempTest20C, 
-                            ref.lnBWg){
+                            ref.lnBWg, 
+                            phylo = TRUE){
+  
+  # if(phylo){
+  #   foldername.phylo<-"Phylo"
+  # }else{
+  #   foldername.phylo<-"nonPhylo"
+  # }
 
   for (i in 1:length(ecol.predictor)){
-    
-    ecol.model<-Almer(update.formula(formula(ecol.model.null), paste(' ~ . + ', ecol.predictor[i], collapse = "")), data=ecol.data.subset, REML = F)
+      
+    if(phylo){
+      foldername.phylo<-"Phylo"
+      ecol.model<-Almer(update.formula(formula(ecol.model.null), paste(' ~ . + ', ecol.predictor[i], collapse = "")), data=ecol.data.subset, REML = F)
+    }else{
+      foldername.phylo<-"nonPhylo"
+      ecol.model<-lmer(update.formula(formula(ecol.model.null), paste(' ~ . + ', ecol.predictor[i], collapse = "")), data=ecol.data.subset, REML = F)
+    }
     # print(ecol.model)# ecol.model<-Almer(lnRMR ~ lnBWg + tempTestK1000 + DemersPelag + (1 | species) + (1 | species:trial), data=data.rmr.test, REML = F)
     
     BIC.table<-BICdelta(BIC(ecol.model.null, ecol.model))
@@ -64,10 +78,26 @@ ecol.model.update<-function(ecol.model.null,
     BIC.table$test.categ<-temp.test.category
     BIC.table$ecol<-ecol.predictor[i]
     
+    params.table<-as.data.frame(fixef(ecol.model.null))
+    ecol.params.table<-as.data.frame(fixef(ecol.model))
+    params.table<-as.data.frame(cbind(params.table[1:3,1], ecol.params.table[1:3,1]))
+    colnames(params.table)<-c("fixef.model.null", "fixef.model.ecol")
+    params.table$estimate<-rownames(params.table)
+
+    params.table$var<-mr.type
+    params.table$test.categ<-temp.test.category
+    params.table$ecol<-ecol.predictor[i]
+    
     if(is.null(data.BIC)){
       data.BIC<-as.data.frame(BIC.table)
     }else{
       data.BIC<-rbind(data.BIC, BIC.table)
+    }
+    
+    if(is.null(data.PARAMS)){
+      data.PARAMS<-as.data.frame(params.table)
+    }else{
+      data.PARAMS<-rbind(data.PARAMS, params.table)
     }
    
     anova.comp<-as.data.frame(car::Anova(ecol.model))
@@ -143,8 +173,10 @@ ecol.model.update<-function(ecol.model.null,
     }
   }
   
-  return(list(data.BIC , data.ANOVA, data.EMMEANS, data.CONTRASTS))
+  return(list(data.BIC , data.ANOVA, data.EMMEANS, data.CONTRASTS, data.PARAMS))
 }
+
+
 
 # depending on local R setting this may give some errors about displaying all the data. 
 output.RMR.ER <- ecol.model.update(
@@ -153,8 +185,8 @@ output.RMR.ER <- ecol.model.update(
                   temp.test.category = "opt",
                   mr.type = "RMR",
                   ecol.predictor = c("DemersPelag", "BodyShapeI", "Climate", "salintyComb"),
-                  ref.tempTest20C = c(1000/(((10+273.15)))), 
-                  ref.lnBWg = c(log(10)))
+                  ref.tempTest20C = c(1000/(((20+273.15)))), 
+                  ref.lnBWg = c(log(1)))
 
 output.RMR.W <- ecol.model.update(
                   ecol.model.null = rmr_mod_W, 
@@ -162,8 +194,8 @@ output.RMR.W <- ecol.model.update(
                   temp.test.category = "warm",
                   mr.type = "RMR",
                   ecol.predictor = c("DemersPelag", "BodyShapeI", "Climate", "salintyComb"),
-                  ref.tempTest20C = c(1000/(((10+273.15)))), 
-                  ref.lnBWg = c(log(10)))
+                  ref.tempTest20C = c(1000/(((20+273.15)))), 
+                  ref.lnBWg = c(log(1)))
 
 output.MMR.ER <- ecol.model.update(
                   ecol.model.null = amr_mod_ER, 
@@ -171,8 +203,8 @@ output.MMR.ER <- ecol.model.update(
                   temp.test.category = "opt",
                   mr.type = "MMR",
                   ecol.predictor = c("DemersPelag", "BodyShapeI", "Climate", "salintyComb"),
-                  ref.tempTest20C = c(1000/(((10+273.15)))), 
-                  ref.lnBWg = c(log(10)))
+                  ref.tempTest20C = c(1000/(((20+273.15)))), 
+                  ref.lnBWg = c(log(1)))
 
 output.MMR.W <- ecol.model.update(
                   ecol.model.null = amr_mod_W, 
@@ -180,8 +212,8 @@ output.MMR.W <- ecol.model.update(
                   temp.test.category = "warm",
                   mr.type = "MMR",
                   ecol.predictor = c("DemersPelag", "BodyShapeI", "Climate", "salintyComb"),
-                  ref.tempTest20C = c(1000/(((10+273.15)))), 
-                  ref.lnBWg = c(log(10)))
+                  ref.tempTest20C = c(1000/(((20+273.15)))), 
+                  ref.lnBWg = c(log(1)))
 
 output.FAS.ER <- ecol.model.update(
                   ecol.model.null = fas_mod_ER, 
@@ -189,8 +221,8 @@ output.FAS.ER <- ecol.model.update(
                   temp.test.category = "opt",
                   mr.type = "FAS",
                   ecol.predictor = c("DemersPelag", "BodyShapeI", "Climate", "salintyComb"), 
-                  ref.lnBWg = c(log(10)),
-                  ref.tempTest20C = c(10))
+                  ref.lnBWg = c(log(1)),
+                  ref.tempTest20C = c(20))
 
 output.FAS.W <- ecol.model.update(
                   ecol.model.null = fas_mod_W, 
@@ -198,8 +230,8 @@ output.FAS.W <- ecol.model.update(
                   temp.test.category = "warm",
                   mr.type = "FAS",
                   ecol.predictor = c("DemersPelag", "BodyShapeI", "Climate", "salintyComb"),
-                  ref.lnBWg = c(log(10)),
-                  ref.tempTest20C = c(10))
+                  ref.lnBWg = c(log(1)),
+                  ref.tempTest20C = c(20))
 
 output.AS.ER <- ecol.model.update(
                   ecol.model.null = as_mod_ER, 
@@ -207,8 +239,8 @@ output.AS.ER <- ecol.model.update(
                   temp.test.category = "opt",
                   mr.type = "AS",
                   ecol.predictor = c("DemersPelag", "BodyShapeI", "Climate", "salintyComb"),
-                  ref.tempTest20C = c(1000/(((10+273.15)))), 
-                  ref.lnBWg = c(log(10)))
+                  ref.tempTest20C = c(1000/(((20+273.15)))), 
+                  ref.lnBWg = c(log(1)))
 
 output.AS.W <- ecol.model.update(
                   ecol.model.null = as_mod_W, 
@@ -216,8 +248,8 @@ output.AS.W <- ecol.model.update(
                   temp.test.category = "warm",
                   mr.type = "AS",
                   ecol.predictor = c("DemersPelag", "BodyShapeI", "Climate", "salintyComb"),
-                  ref.tempTest20C = c(1000/(((10+273.15)))), 
-                  ref.lnBWg = c(log(10)))
+                  ref.tempTest20C = c(1000/(((20+273.15)))), 
+                  ref.lnBWg = c(log(1)))
 
 ecol.bic<<-rbind(output.AS.ER[[1]], output.AS.W[[1]],
       output.FAS.ER[[1]], output.FAS.W[[1]],
@@ -245,6 +277,18 @@ ecol.posthoc.comp<-rbind(output.AS.ER[[4]], output.AS.W[[4]],
       output.FAS.ER[[4]], output.FAS.W[[4]],
       output.RMR.ER[[4]], output.RMR.W[[4]],
       output.MMR.ER[[4]], output.MMR.W[[4]])
+
+ecol.model.params<-rbind(output.AS.ER[[5]], output.AS.W[[5]],
+      output.FAS.ER[[5]], output.FAS.W[[5]],
+      output.RMR.ER[[5]], output.RMR.W[[5]],
+      output.MMR.ER[[5]], output.MMR.W[[5]])
+
+write.csv(file = "./Data_exports/Ecologies/ecologies_data_emmeans.csv", ecol.emmeans, row.names=FALSE)
+write.csv(file = "./Data_exports/Ecologies/ecologies_data_anova.csv", ecol.anova, row.names=FALSE)
+write.csv(file = "./Data_exports/Ecologies/ecologies_data_posthoc.csv", ecol.posthoc.comp, row.names=FALSE)
+write.csv(file = "./Data_exports/Ecologies/ecologies_data_bic.csv", ecol.bic, row.names=FALSE)
+write.csv(file = "./Data_exports/Ecologies/ecologies_data_modelParams.csv", ecol.model.params, row.names=FALSE)
+
 
 # ******************************************************************************************************************************************************
 # ******************************************************************************************************************************************************
@@ -931,8 +975,7 @@ cowplot::plot_grid(rmr.WARM.ER.good,
   
 
 
-## Ecologies: Boxplots, AS and FAS ecology size independent -------------
-
+## Ecologies: violin lots, AS and FAS ecology size independent -------------
 # Demersal Pelagic
 ecolAS1<-ggplot(data=data.as, aes(y=mass_specas, fill=DemersPelag, x=test_category3,
                                   group = interaction(test_category3, DemersPelag)))+
@@ -945,13 +988,18 @@ ecolAS1<-ggplot(data=data.as, aes(y=mass_specas, fill=DemersPelag, x=test_catego
   geom_pointrange(data.as, mapping=aes(x=test_category3, y = mass_specas,
                                        fill=DemersPelag, 
                                        group = interaction(test_category3, DemersPelag)),
-                  stat = "summary", fun.ymin = min,fun.ymax = max,fun.y = mean, 
+                  stat = "summary",
                   position=position_dodge(width = 0.9), color = "black", pch=23)+
   scale_fill_viridis_d(option = "A")+
   scale_x_discrete(labels=c("Optimal", "Warm"))+
   ylim(0,8)+
+  # geom_segment(aes(x = 0.8, y = 7.8, xend = 1.1, yend = 7.8), size = 0.1)+
+  # geom_segment(aes(x = 1.9, y = 7.8, xend = 2.2, yend = 7.8), size = 0.1)+
+  annotate(geom = "text", y = 7.9, x = 0.95, label = "(RMR, MMR) BIC *", size = 3)+
+  annotate(geom = "text", y = 7.4, x = 0.95, label = "(AS) BIC ns", size = 3)+
+  annotate(geom = "text", y = 7.9, x = 2.05, label = "(all) BIC ns", size = 3)+
   geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
-ggformat(ecolAS1, y_title = bquote("AS" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=T, size_text = 11)
+ggformat(ecolAS1, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=T, size_text = 11)
 ecolAS1 <- ecolAS1 + theme(
   plot.title = element_text(face = "bold", size=15, hjust = 0.5),
   legend.position = "none",
@@ -980,8 +1028,13 @@ ecolAS2<-ggplot(data=data.as, aes(y=mass_specas, fill=BodyShapeI, x=test_categor
   scale_fill_viridis_d(option = "E")+
   scale_x_discrete(labels=c("Optimal", "Warm"))+
   ylim(0,8)+
+  # geom_segment(aes(x = 0.8, y = 7.8, xend = 1.1, yend = 7.8), size = 0.1)+
+  # geom_segment(aes(x = 1.9, y = 7.8, xend = 2.2, yend = 7.8), size = 0.1)+
+  annotate(geom = "text", y = 7.9, x = 0.95, label = "(RMR) BIC *", size = 3)+
+  annotate(geom = "text", y = 7.4, x = 0.95, label = "(AS, MMR) BIC ns", size = 3)+
+  annotate(geom = "text", y = 7.9, x = 2.05, label = "(all) BIC ns", size = 3)+
   geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
-ggformat(ecolAS2, y_title = bquote("AS" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=T, size_text = 11)
+ggformat(ecolAS2, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=T, size_text = 11)
 ecolAS2 <- ecolAS2 + theme(
   plot.title = element_text(face = "bold", size=15, hjust = 0.5),
   legend.position = "none",
@@ -1009,8 +1062,13 @@ ecolAS3<-ggplot(data=data.as, aes(y=mass_specas, fill=salintyComb, x=test_catego
   scale_fill_viridis_d(option = "D", direction = -1)+
   scale_x_discrete(labels=c("Optimal", "Warm"))+
   ylim(0,8)+
+  # geom_segment(aes(x = 0.8, y = 7.8, xend = 1.1, yend = 7.8), size = 0.1)+
+  # geom_segment(aes(x = 1.9, y = 7.8, xend = 2.2, yend = 7.8), size = 0.1)+
+  annotate(geom = "text", y = 7.9, x = 0.95, label = "(RMR) BIC *", size = 3)+
+  annotate(geom = "text", y = 7.4, x = 0.95, label = "(AS, MMR) BIC ns", size = 3)+
+  annotate(geom = "text", y = 7.9, x = 2.05, label = "(all) BIC ns", size = 3)+
   geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
-ggformat(ecolAS3, y_title = bquote("AS" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=T, size_text = 11)
+ggformat(ecolAS3, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=T, size_text = 11)
 ecolAS3 <- ecolAS3 + theme(
   plot.title = element_text(face = "bold", size=15, hjust = 0.5),
   legend.position = "none",
@@ -1037,8 +1095,13 @@ ecolAS4<-ggplot(data=data.as, aes(y=mass_specas, fill=Climate, x=test_category3,
   scale_fill_viridis_d(option = "C", direction = 1)+
   scale_x_discrete(labels=c("Optimal", "Warm"))+
   ylim(0,8)+
+  # geom_segment(aes(x = 0.8, y = 7.8, xend = 1.1, yend = 7.8), size = 0.1)+
+  # geom_segment(aes(x = 1.9, y = 7.8, xend = 2.2, yend = 7.8), size = 0.1)+
+  annotate(geom = "text", y = 7.9, x = 0.95, label = "(RMR) BIC *", size = 3)+
+  annotate(geom = "text", y = 7.4, x = 0.95, label = "(AS, MMR) BIC ns", size = 3)+
+  annotate(geom = "text", y = 7.9, x = 2.05, label = "(all) BIC ns", size = 3)+
   geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
-ggformat(ecolAS4, y_title = bquote("AS" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=T, size_text = 11)
+ggformat(ecolAS4, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=T, size_text = 11)
 ecolAS4 <- ecolAS4 + theme(
   plot.title = element_text(face = "bold", size=15, hjust = 0.5),
   legend.position = "none",
@@ -1056,6 +1119,10 @@ ecolFAS1<-ggplot(data=data.fas, aes(y=FAS, fill=DemersPelag, x=test_category3,
   scale_fill_viridis_d(option = "A", labels=c('Benthopelagic', 'Demersal',"Pelagic", "Reef" ), "Lifestyle")+
   scale_x_discrete(labels=c("Optimal", "Warm"))+
   ylim(0,20)+
+  # geom_segment(aes(x = 0.8, y = 19, xend = 1.1, yend = 19), size = 0.1)+
+  # geom_segment(aes(x = 1.9, y = 19, xend = 2.2, yend = 19), size = 0.1)+
+  annotate(geom = "text", y = 19.5, x = 0.95, label = "BIC ns", size = 3)+
+  annotate(geom = "text", y = 19.5, x = 2.05, label = "BIC ns", size = 3)+
   geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
 ggformat(ecolFAS1, y_title = bquote("FAS" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=T, size_text = 11)
 ecolFAS1 <- ecolFAS1 + theme(
@@ -1066,7 +1133,7 @@ ecolFAS1 <- ecolFAS1 + theme(
   legend.margin=margin(0,0,0,0),
   legend.box.margin=margin(0,0,6,0),
   plot.margin = margin(5.5, 5.5, 5.35, 5.5),
-  legend.spacing.y = unit(0, 'cm'),
+  legend.spacing.y = unit(0.5, 'cm'),
   legend.text = element_text(margin = margin(l = 0, unit = c("cm"))),
   legend.key.height= unit(0.5, 'cm'),
   legend.key.width= unit(0.5, 'cm'))
@@ -1078,6 +1145,10 @@ ecolFAS2<-ggplot(data=data.fas, aes(FAS, fill=BodyShapeI, x=test_category3,
   scale_fill_viridis_d(option = "E", labels=c('Elongated', 'Fusiform',"Short, Deep" ), "Body Shape")+
   scale_x_discrete(labels=c("Optimal", "Warm"))+
   ylim(0,20)+
+  # geom_segment(aes(x = 0.8, y = 19, xend = 1.1, yend = 19), size = 0.1)+
+  # geom_segment(aes(x = 1.9, y = 19, xend = 2.2, yend = 19), size = 0.1)+
+  annotate(geom = "text", y = 19.5, x = 0.95, label = "BIC ns", size = 3)+
+  annotate(geom = "text", y = 19.5, x = 2.05, label = "BIC ns", size = 3)+
   geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
 ggformat(ecolFAS2, y_title = bquote("FAS" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=T, size_text = 11)
 ecolFAS2 <- ecolFAS2 + theme( 
@@ -1088,8 +1159,8 @@ ecolFAS2 <- ecolFAS2 + theme(
   legend.margin=margin(0,0,0,0),
   legend.box.margin=margin(0,0,6,0),
   plot.margin = margin(5.5, 5.5, 5.35, 5.5),
-  legend.spacing.x = unit(1.0, 'cm'),
-  legend.text = element_text(margin = margin(l = -0.6, unit = c("cm"))),
+  legend.spacing.y = unit(0.5, 'cm'),
+  legend.text = element_text(margin = margin(l = 0, unit = c("cm"))),
   legend.key.height= unit(0.5, 'cm'),
   legend.key.width= unit(0.5, 'cm'))
 
@@ -1101,6 +1172,10 @@ ecolFAS3<-ggplot(data=data.fas, aes(FAS, fill=salintyComb, x=test_category3,
                        labels=c('Freshw.', 'Freshw.-sal',"Marine", "Marine.-fresh", "All" ), "Salinity")+
   scale_x_discrete(labels=c("Optimal", "Warm"))+
   ylim(0,20)+
+  # geom_segment(aes(x = 0.8, y = 19, xend = 1.1, yend = 19), size = 0.1)+
+  # geom_segment(aes(x = 1.9, y = 19, xend = 2.2, yend = 19), size = 0.1)+
+  annotate(geom = "text", y = 19.5, x = 0.95, label = "BIC ns", size = 3)+
+  annotate(geom = "text", y = 19.5, x = 2.05, label = "BIC ns", size = 3)+
   geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
 ggformat(ecolFAS3, y_title = bquote("FAS" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=T, size_text = 11)
 ecolFAS3 <- ecolFAS3 + theme(
@@ -1111,8 +1186,8 @@ ecolFAS3 <- ecolFAS3 + theme(
   legend.margin=margin(0,0,0,0),
   legend.box.margin=margin(0,0,6,0),
   plot.margin = margin(5.5, 5.5, 5.35, 5.5),
-  legend.spacing.x = unit(1.0, 'cm'),
-  legend.text = element_text(margin = margin(l = -0.6, unit = c("cm"))),
+  legend.spacing.y = unit(0.5, 'cm'),
+  legend.text = element_text(margin = margin(l = 0, unit = c("cm"))),
   legend.key.height= unit(0.5, 'cm'),
   legend.key.width= unit(0.5, 'cm'))
 
@@ -1122,6 +1197,10 @@ ecolFAS4<-ggplot(data=data.fas, aes(FAS, fill=Climate, x=test_category3,
   scale_fill_viridis_d(option = "C", direction = 1, "Climate")+
   scale_x_discrete(labels=c("Optimal", "Warm"))+
   ylim(0,20)+
+  # geom_segment(aes(x = 0.8, y = 19, xend = 1.1, yend = 19), size = 0.1)+
+  # geom_segment(aes(x = 1.9, y = 19, xend = 2.2, yend = 19), size = 0.1)+
+  annotate(geom = "text", y = 19.5, x = 0.95, label = "BIC *", size = 3)+
+  annotate(geom = "text", y = 19.5, x = 2.05, label = "BIC ns", size = 3)+
   geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
 ggformat(ecolFAS4, y_title = bquote("FAS" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=T, size_text = 11)
 ecolFAS4 <- ecolFAS4 + theme(
@@ -1132,8 +1211,8 @@ ecolFAS4 <- ecolFAS4 + theme(
   legend.margin=margin(0,0,0,0),
   legend.box.margin=margin(0,0,6,0),
   plot.margin = margin(5.5, 5.5, 5.35, 5.5),
-  legend.spacing.x = unit(1.0, 'cm'),
-  legend.text = element_text(margin = margin(l = -0.6, unit = c("cm"))),
+  legend.spacing.y = unit(0.5, 'cm'),
+  legend.text = element_text(margin = margin(l = 0, unit = c("cm"))),
   legend.key.height= unit(0.5, 'cm'),
   legend.key.width= unit(0.5, 'cm'))
 

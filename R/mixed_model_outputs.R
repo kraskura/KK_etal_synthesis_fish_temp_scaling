@@ -1,6 +1,6 @@
 # Model scaling parameters and CIs ----------
 
-model_outputs<-function(phylo=FALSE,
+model_outputs<-function(phylo=TRUE,
                         best.model.rmr.er,
                         best.model.amr.er,
                         best.model.as.er,

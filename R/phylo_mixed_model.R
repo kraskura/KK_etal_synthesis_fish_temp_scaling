@@ -8,7 +8,6 @@ library(ape)
 library(rotl)
 library(ggtree)
 library(Matrix)
-library(phylobase)
 
 library(pryr)
 library(TDbook)
@@ -549,6 +548,7 @@ data.fasER[which(data.fasER$FAS > 20),] # considered outliers, measurement extre
 # *****************************************************************************
 
 # Model scaling parameters and CIs ----------
+# custom function to obtain model parameters and recalculated mass specific MR using model estimate scaling slopes
 # this also expands the dataset to get mass independent values of metabolic rates
 model_outputs(phylo = TRUE, 
               best.model.rmr.er = rmr_mod_ER,
