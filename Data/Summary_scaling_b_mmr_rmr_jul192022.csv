@@ -1,0 +1,87 @@
+﻿Order_MMR,Running_ID,StudyID,Study,Species_common,Species,b,Test_C,MR,Relationship,Diff_mmr-rmr,notes/mechan,Notes2
+1,16,9,Norin and Malte 2011,Brown trout,Salmo trutta,0.547,15,MMR,MMR < RMR,0.432,REPEAT,5 weeks
+2,37,13,Messmer et al 2017,Leopard coral grouper,Plectropomus leopardus,0.74,28.5,MMR,MMR ≈ RMR,0.007,,3-5 days
+3,27,14,White et al 2017,Mudfish ,Neochanna apoda,0.77,14,MMR,MMR > RMR,0.15,,
+4,13,8,Lv et al 2018,Black carp,Mylopharyngoden piceus,0.775,25,MMR,MMR < RMR,0.058,,
+5,2,2,Huang et al 2013 ,Crucian carp,Carrasius auratus,0.785,25,MMR,MMR ≈ RMR,0.009,,
+6,25,12,Christensen et al 2020,European perch,Perca fluviatilis,0.793,28,MMR,MMR < RMR,0.07,,
+7,38,13,Messmer et al 2017,Leopard coral grouper,Plectropomus leopardus,0.799,33,MMR,MMR ≈ RMR,0.01,ACCLIMATION,3-5 days
+8,29,15,Tirsgaard et al 2015,Atlantic cod,Gadus morhua,0.82,2,MMR,MMR < RMR,0.051,,2-3 weeks
+9,36,18,Norin et al. 2016,Barramundi,Lates calcarifer,0.8217,35,MMR,MMR < RMR,0.1044,ACUTE,2ºC/h
+10,24,12,Christensen et al 2020,European perch,Perca fluviatilis,0.822,25,MMR,MMR < RMR,0.041,,
+11,22,12,Christensen et al 2020,European perch,Perca fluviatilis,0.823,15,MMR,MMR < RMR,0.04,,
+12,26,17,Cutts et al 2002,Atlantic salmon,Salmo salar,0.83,9,MMR,MMR < RMR,0.02,,
+13,1,1,Zhang et al 2014 ,Grass carp,Ctenopharyngodon idellus,0.831,25,MMR,MMR < RMR,0.032,,
+14,33,15,Tirsgaard et al 2015,Atlantic cod,Gadus morhua,0.847,20,MMR,MMR > RMR,0.05,ACCLIMATION,2-3 weeks
+15,14,9,Norin and Malte 2011,Brown trout,Salmo trutta,0.852,15,MMR,MMR < RMR,0.655,REPEAT,5 weeks
+16,15,9,Norin and Malte 2011,Brown trout,Salmo trutta,0.864,15,MMR,MMR < RMR,0.33,REPEAT,5 weeks
+17,12,7,Norin and Malte 2012,Brown trout,Salmo trutta,0.867,15,MMR,MMR < RMR,0.225,,
+18,23,12,Christensen et al 2020,European perch,Perca fluviatilis,0.883,20,MMR,MMR > RMR,0.02,,
+19,31,15,Tirsgaard et al 2015,Atlantic cod,Gadus morhua,0.884,10,MMR,MMR < RMR,0.02,,2-3 weeks
+20,17,9,Norin and Malte 2011,Brown trout,Salmo trutta,0.886,15,MMR,MMR < RMR,0.224,REPEAT,5 weeks
+21,30,15,Tirsgaard et al 2015,Atlantic cod,Gadus morhua,0.889,5,MMR,MMR < RMR,0.042,,2-3 weeks
+22,4,3,Norin and Gamperl 2017 ,Cunner,Tautogolabrus adspersus,0.894,15,MMR,MMR < RMR,0.093,REPEAT,2.5 months
+23,32,15,Tirsgaard et al 2015,Atlantic cod,Gadus morhua,0.922,15,MMR,MMR > RMR,0.079,,2-3 weeks
+24,7,3,Norin and Gamperl 2017 ,Cunner,Tautogolabrus adspersus,0.928,15,MMR,MMR > RMR,0.135,REPEAT,2.5 months
+25,10,5,Lucas et al 2014,Zebrafish,Danio rerio,0.931,28,MMR,MMR < RMR,0.038,,
+26,35,18,Norin et al. 2016,Barramundi,Lates calcarifer,0.9324,29,MMR,MMR > RMR,0.0399,REPEAT,12 days in between
+27,3,3,Norin and Gamperl 2017 ,Cunner,Tautogolabrus adspersus,0.961,15,MMR,MMR > RMR,0.042,REPEAT,2.5 months
+28,6,3,Norin and Gamperl 2017 ,Cunner,Tautogolabrus adspersus,0.963,15,MMR,MMR > RMR,0.122,REPEAT,2.5 months
+29,20,11,Brett and Glass 1973,Sockeye salmon,Oncorhynchus nerka,0.963,15,MMR,MMR > RMR,0.099,,
+30,11,6,Tarby 1981,Walleye,Stizostedion vitreum vitreum,0.965,20,MMR,MMR > RMR,0.083,,
+31,5,3,Norin and Gamperl 2017 ,Cunner,Tautogolabrus adspersus,0.972,15,MMR,MMR > RMR,0.058,REPEAT,2.5 months
+32,18,10,Armstrong et al 1992,Northern pike,Oncorhynchus nerka,0.99,15,MMR,MMR > RMR,0.19,,
+33,39,16,Reemeyer and Rees 2020,Common killifish ,Fundulus grandis,0.99,25,MMR,MMR < RMR,0.04,,4 weeks
+34,9,4,Rao 1968 ,Rainbow trout,Salmo gairdneri,0.9916,15,MMR,MMR > RMR,0.2082,,
+35,21,11,Brett and Glass 1973,Sockeye salmon,Oncorhynchus nerka,0.996,20,MMR,MMR > RMR,0.111,,
+36,19,11,Brett and Glass 1973,Sockeye salmon,Oncorhynchus nerka,0.999,5.3,MMR,MMR > RMR,0.085,,
+37,28,14,White et al 2017,Banded kōkopu,Galaxias fasciatus,1,14,MMR,MMR > RMR,0.28,,
+38,34,18,Norin et al. 2016,Barramundi,Lates calcarifer,1.0323,29,MMR,MMR > RMR,0.0698,REPEAT,12 days in between
+39,8,4,Rao 1968 ,Rainbow trout,Salmo gairdneri,1.0437,5,MMR,MMR > RMR,0.2599,,
+40,40,16,Reemeyer and Rees 2020,Common killifish ,Fundulus grandis,1.05,25,MMR,MMR > RMR,0.18,,4 weeks
+41,41,16,Reemeyer and Rees 2020,Common killifish ,Fundulus grandis,1.09,32,MMR,MMR > RMR,0.2,ACCLIMATION,4 weeks
+42,42,16,Reemeyer and Rees 2020,Common killifish ,Fundulus grandis,1.09,25,MMR,MMR > RMR,0.32,,4 weeks
+43,43,16,Reemeyer and Rees 2020,Common killifish ,Fundulus grandis,1.34,25,MMR,MMR > RMR,0.38,,4 weeks
+NA,1,1,Zhang et al 2014 ,Grass carp,Ctenopharyngodon idellus,0.863,25,RMR,MMR < RMR,0.032,,
+NA,2,2,Huang et al 2013 ,Crucian carp,Carrasius auratus,0.776,25,RMR,MMR ≈ RMR,0.009,,
+NA,3,3,Norin and Gamperl 2017 ,Cunner,Tautogolabrus adspersus,0.919,15,RMR,MMR > RMR,0.042,REPEAT,2.5 months
+NA,4,3,Norin and Gamperl 2017 ,Cunner,Tautogolabrus adspersus,0.987,15,RMR,MMR < RMR,0.093,REPEAT,2.5 months
+NA,5,3,Norin and Gamperl 2017 ,Cunner,Tautogolabrus adspersus,0.914,15,RMR,MMR > RMR,0.058,REPEAT,2.5 months
+NA,6,3,Norin and Gamperl 2017 ,Cunner,Tautogolabrus adspersus,0.841,15,RMR,MMR > RMR,0.122,REPEAT,2.5 months
+NA,7,3,Norin and Gamperl 2017 ,Cunner,Tautogolabrus adspersus,0.793,15,RMR,MMR > RMR,0.135,REPEAT,2.5 months
+NA,8,4,Rao 1968 ,Rainbow trout,Salmo gairdneri,0.7838,5,RMR,MMR > RMR,0.2599,,
+NA,9,4,Rao 1968 ,Rainbow trout,Salmo gairdneri,0.7834,15,RMR,MMR > RMR,0.2082,,
+NA,10,5,Lucas et al 2014,Zebrafish,Danio rerio,0.969,28,RMR,MMR < RMR,0.038,,
+NA,11,6,Tarby 1981,Walleye,Stizostedion vitreum vitreum,0.882,20,RMR,MMR > RMR,0.083,,
+NA,12,7,Norin and Malte 2012,Brown trout,Salmo trutta,1.092,15,RMR,MMR < RMR,0.225,,
+NA,13,8,Lv et al 2018,Black carp,Mylopharyngoden piceus,0.833,25,RMR,MMR < RMR,0.058,,
+NA,14,9,Norin and Malte 2011,Brown trout,Salmo trutta,1.507,15,RMR,MMR < RMR,0.655,REPEAT,5 weeks
+NA,15,9,Norin and Malte 2011,Brown trout,Salmo trutta,1.194,15,RMR,MMR < RMR,0.33,REPEAT,5 weeks
+NA,16,9,Norin and Malte 2011,Brown trout,Salmo trutta,0.979,15,RMR,MMR < RMR,0.432,REPEAT,5 weeks
+NA,17,9,Norin and Malte 2011,Brown trout,Salmo trutta,1.11,15,RMR,MMR < RMR,0.224,REPEAT,5 weeks
+NA,18,10,Armstrong et al 1992,Northern pike,Oncorhynchus nerka,0.8,15,RMR,MMR > RMR,0.19,,
+NA,19,11,Brett and Glass 1973,Sockeye salmon,Oncorhynchus nerka,0.914,5.3,RMR,MMR > RMR,0.085,,
+NA,20,11,Brett and Glass 1973,Sockeye salmon,Oncorhynchus nerka,0.864,15,RMR,MMR > RMR,0.099,,
+NA,21,11,Brett and Glass 1973,Sockeye salmon,Oncorhynchus nerka,0.885,20,RMR,MMR > RMR,0.111,,
+NA,22,12,Christensen et al 2020,European perch,Perca fluviatilis,0.863,15,RMR,MMR < RMR,0.04,,
+NA,23,12,Christensen et al 2020,European perch,Perca fluviatilis,0.863,20,RMR,MMR > RMR,0.02,,
+NA,24,12,Christensen et al 2020,European perch,Perca fluviatilis,0.863,25,RMR,MMR < RMR,0.041,,
+NA,25,12,Christensen et al 2020,European perch,Perca fluviatilis,0.863,28,RMR,MMR < RMR,0.07,,
+NA,26,17,Cutts et al 2002,Atlantic salmon,Salmo salar,0.85,9,RMR,MMR < RMR,0.02,,
+NA,27,14,White et al 2017,Mudfish ,Neochanna apoda,0.62,14,RMR,MMR > RMR,0.15,,
+NA,28,14,White et al 2017,Banded kōkopu,Galaxias fasciatus,0.72,14,RMR,MMR > RMR,0.28,,
+NA,29,15,Tirsgaard et al 2015,Atlantic cod,Gadus morhua,0.871,2,RMR,MMR < RMR,0.051,,2-3 weeks
+NA,30,15,Tirsgaard et al 2015,Atlantic cod,Gadus morhua,0.931,5,RMR,MMR < RMR,0.042,,2-3 weeks
+NA,31,15,Tirsgaard et al 2015,Atlantic cod,Gadus morhua,0.904,10,RMR,MMR < RMR,0.02,,2-3 weeks
+NA,32,15,Tirsgaard et al 2015,Atlantic cod,Gadus morhua,0.843,15,RMR,MMR > RMR,0.079,,2-3 weeks
+NA,33,15,Tirsgaard et al 2015,Atlantic cod,Gadus morhua,0.797,20,RMR,MMR > RMR,0.05,ACCLIMATION,2-3 weeks
+NA,34,18,Norin et al. 2016,Barramundi,Lates calcarifer,0.9625,29,RMR,MMR > RMR,0.0698,,12 days in between
+NA,35,18,Norin et al. 2016,Barramundi,Lates calcarifer,0.8925,29,RMR,MMR > RMR,0.0399,,12 days in between
+NA,36,18,Norin et al. 2016,Barramundi,Lates calcarifer,0.9261,35,RMR,MMR < RMR,0.1044,ACUTE,2ºC/h
+NA,37,13,Messmer et al 2017,Leopard coral grouper,Plectropomus leopardus,0.747,28.5,RMR,MMR ≈ RMR,0.007,,3-5 days
+NA,38,13,Messmer et al 2017,Leopard coral grouper,Plectropomus leopardus,0.789,33,RMR,MMR ≈ RMR,0.01,ACCLIMATION,3-5 days
+NA,39,16,Reemeyer and Rees 2020,Common killifish ,Fundulus grandis,1.03,25,RMR,MMR < RMR,0.04,,4 weeks
+NA,40,16,Reemeyer and Rees 2020,Common killifish ,Fundulus grandis,0.87,25,RMR,MMR > RMR,0.18,,4 weeks
+NA,41,16,Reemeyer and Rees 2020,Common killifish ,Fundulus grandis,0.89,32,RMR,MMR > RMR,0.2,ACCLIMATION,4 weeks
+NA,42,16,Reemeyer and Rees 2020,Common killifish ,Fundulus grandis,0.77,25,RMR,MMR > RMR,0.32,,4 weeks
+NA,43,16,Reemeyer and Rees 2020,Common killifish ,Fundulus grandis,0.96,25,RMR,MMR > RMR,0.38,,4 weeks

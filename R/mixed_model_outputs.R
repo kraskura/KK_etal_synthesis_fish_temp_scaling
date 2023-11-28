@@ -153,22 +153,22 @@ model_outputs<-function(phylo=TRUE,
   k<-(8.62*10^(-5)) # Boltzmann's constant
 
   # ECOL RELEV
-  RMR_slope<<-round(fixef(best.model.rmr.er)[2],3)
-  RMR_int<<-round(fixef(best.model.rmr.er)[1],3)
-  FAS_slope<<-round(fixef(best.model.fas.er)[2],3)
-  FAS_int<<-round(fixef(best.model.fas.er)[1],3)
-  AS_slope<<-round(fixef(best.model.as.er)[2],3)
-  AS_int<<-round(fixef(best.model.as.er)[1],3)
+  RMR_slope<<-round(coef(summary(best.model.rmr.er))[2],3)
+  RMR_int<<-round(coef(summary(best.model.rmr.er))[1],3)
+  FAS_slope<<-round(coef(summary(best.model.fas.er))[2],3)
+  FAS_int<<-round(coef(summary(best.model.fas.er))[1],3)
+  AS_slope<<-round(coef(summary(best.model.as.er))[2],3)
+  AS_int<<-round(coef(summary(best.model.as.er))[1],3)
 
   # WARM
-  MMR_slope_w<<-round(fixef(best.model.amr.w)[2],3)
-  MMR_int_w<<-round(fixef(best.model.amr.w)[1],3)
-  RMR_slope_w<<-round(fixef(best.model.rmr.w)[2],3)
-  RMR_int_w<<-round(fixef(best.model.rmr.w)[1],3)
-  FAS_slope_w<<-round(fixef(best.model.fas.w)[2],3)
-  FAS_int_w<<-round(fixef(best.model.fas.w)[1],3)
-  AS_slope_w<<-round(fixef(best.model.as.w)[2],3)
-  AS_int_w<<-round(fixef(best.model.as.w)[1],3)
+  MMR_slope_w<<-round(coef(summary(best.model.amr.w))[2],3)
+  MMR_int_w<<-round(coef(summary(best.model.amr.w))[1],3)
+  RMR_slope_w<<-round(coef(summary(best.model.rmr.w))[2],3)
+  RMR_int_w<<-round(coef(summary(best.model.rmr.w))[1],3)
+  FAS_slope_w<<-round(coef(summary(best.model.fas.w))[2],3)
+  FAS_int_w<<-round(coef(summary(best.model.fas.w))[1],3)
+  AS_slope_w<<-round(coef(summary(best.model.as.w))[2],3)
+  AS_int_w<<-round(coef(summary(best.model.as.w))[1],3)
 
   C20inTempTestK1000<<-1000/(((20+273.15)))
   C10inTempTestK1000<<-1000/((10+273.15))
@@ -202,11 +202,11 @@ model_outputs<-function(phylo=TRUE,
   MMR_E_ER$`(Intercept)` <<- NA
   MMR_E_ER$tempTestK1000_inC <<- NA
 
-  RMR_E_ER<<-round(fixef(best.model.rmr.er)[3],3)
-  AS_E_ER<<-round(fixef(best.model.as.er)[3],3)
-  MMR_E_W<<-round(fixef(best.model.amr.w)[3],3)
-  RMR_E_W<<-round(fixef(best.model.rmr.w)[3],3)
-  AS_E_W<<-round(fixef(best.model.as.w)[3],3)
+  RMR_E_ER<<-round(coef(summary(best.model.rmr.er))[3],3)
+  AS_E_ER<<-round(coef(summary(best.model.as.er))[3],3)
+  MMR_E_W<<-round(coef(summary(best.model.amr.w))[3],3)
+  RMR_E_W<<-round(coef(summary(best.model.rmr.w))[3],3)
+  AS_E_W<<-round(coef(summary(best.model.as.w))[3],3)
 
   # activation energies:
   # -1*(E*k)*1000

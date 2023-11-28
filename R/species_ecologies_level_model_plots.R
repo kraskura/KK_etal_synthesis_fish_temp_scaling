@@ -1,4 +1,12 @@
 
+library(reshape2)
+library(here)
+library(tidyverse)
+library(dplyr)
+library(emmeans)
+options(dplyr.summarise.inform = FALSE)
+# ******************************************************************************************************************************************************
+
 
 k<-(8.62*10^(-5)) # Boltzmann's constant
 E<-0.63 # activation energy MTE
@@ -8,14 +16,6 @@ cols.rmr<-c("#C70039", "#FF6D7C", "#FFA3AC")
 cols.amr<-c("#00749F","#00A8D6", "#9CE9FF")
 cols<-c("#00749F","#C70039","#00A8D6","#FF6D7C", "#9CE9FF","#FFA3AC", "#00C5A3", "#265F73")# AMR -rmr- AMR dark - rmr dark - light - as - fas
 # ******************************************************************************************************************************************************
-
-
-library(reshape2)
-library(here)
-library(tidyverse)
-library(dplyr)
-library(emmeans)
-options(dplyr.summarise.inform = FALSE)
 
 # for emmeans library
 # Ecologically Relevant conditions: 
@@ -40,7 +40,6 @@ data.amr$tempTestK1000<-1000/data.amr$tempTestK
 # Global models with ecology --------
 # standardized metric for contrasts
 # tempTest20C<-1000/(((20+273.15)))
-
 ecol.model.update<-function(ecol.model.null, 
                             ecol.data.subset, 
                             temp.test.category, 
@@ -534,7 +533,7 @@ ecology_data.RMR$ecol_temp_cat<-factor(ecology_data.RMR$ecol_temp_cat, level = c
 ecology_data.FAS<-ecology_data[ecology_data$MR=="FAS", ]
 ecology_data.FAS$ecol_temp_cat<-factor(ecology_data.FAS$ecol_temp_cat, level = c(as.character(ecology_data.FAS$ecol_temp_cat)))
 
-# only those that have warm 
+# only those that have warm temperatures
 ecology_data.AMRd<-ecology_data.AMR[ ave(1:nrow(ecology_data.AMR), ecology_data.AMR$ecology_subgroup, FUN=length) > 1 , ]
 ecology_data.FASd<-ecology_data.FAS[ ave(1:nrow(ecology_data.FAS), ecology_data.FAS$ecology_subgroup, FUN=length) > 1 , ]
 ecology_data.RMRd<-ecology_data.RMR[ ave(1:nrow(ecology_data.RMR), ecology_data.RMR$ecology_subgroup, FUN=length) > 1 , ]
@@ -748,6 +747,7 @@ ggformat(ecol_amr_sum1,
          x_title=expression(italic(ln)*Body~mass~(g)),
          y_title=expression(italic(ln)*MMR~(mg~O[2]~h^-1)),
          print = F)
+
 ecol_amr_sum1<-ecol_amr_sum1 +
   ggtitle("ECOLOGIES") +
   theme(
@@ -777,6 +777,7 @@ species_amr_sum1<-ggplot(species.amr, aes(color = test_category3)) +
   xlim(x = -7, 12)+
   scale_color_manual(values = c("black", cols.amr[2]))
 ggformat(species_amr_sum1, x_title=expression(italic(ln)*Body~mass~(g)), y_title=expression(italic(ln)*MMR~(mg~O[2]~h^-1)), print = F)
+
 species_amr_sum1<-species_amr_sum1 +
   ggtitle("SPECIES") +
   theme(
@@ -794,6 +795,7 @@ species_rmr_sum1<-ggplot(species.rmr, aes(color = test_category3)) +
   xlim(x = -7, 12)+
   scale_color_manual(values = c("black", cols.rmr[2]))
 ggformat(species_rmr_sum1, x_title=expression(italic(ln)*Body~mass~(g)), y_title=expression(italic(ln)*RMR~(mg~O[2]~h^-1)), print = F )
+
 species_rmr_sum1<-species_rmr_sum1 +
   theme(plot.margin = margin(unit(c(-2.5,0.5,0,0), "cm")), 
     axis.title.y = element_blank(),
@@ -845,39 +847,51 @@ rmr.WARM.ER.good<-ggplot(data=ecology_data.RMRd.g,
                "Suptropical",
                "",
                "Fusiform"))+
-  geom_text(aes(label = slope,  x = 0.25),
-            family = "Arial", fontface ="bold", size=3.5, color = cols.rmr[1], hjust = 1)+
+  geom_text(aes(label = slope,  x = 0.25, color=interaction(test_category3, MR)),
+            family = "Arial",  size=3.5, hjust = 1)+
   geom_text(data = ecology_data.AMRd.g, aes(label = slope,  x = 0.3),
-            family = "Arial", fontface ="bold", size=3.5, color = cols.amr[1], hjust = 0)+
+            family = "Arial",  size=3.5, hjust = 0)+
   
-  geom_text(data = ecology_data.RMRd.g,
-            mapping = aes(label =  n_data_n_species, x = 1.5),
-            family = "Arial", size=3.5, color = cols.rmr[1], hjust = 1)+
-  geom_text(data = ecology_data.AMRd.g,
-            mapping = aes(label =  n_data_n_species, x = 1.55),
-            family = "Arial", size=3.5, color = cols.amr[1], hjust = 0)+
-  
-  geom_linerange(data = ecology_data.RMRd.g,
-                 aes(xmin = as.numeric(slope.ciL),
-                     xmax = as.numeric(slope.ciH)), alpha = 0.4)+
-  geom_vline(xintercept = 1, lty = "dotted", color="grey")+
-  geom_linerange(aes(xmin = slope.ciL, xmax = slope.ciH),
-                 alpha = 0.4)+
-  geom_linerange(data = ecology_data.AMRd.g,
-                 mapping = aes(xmin = as.numeric(slope.ciL), xmax = as.numeric(slope.ciH)),
-                 alpha = 0.4)+
-  geom_point(pch=21, size=4, stroke=0.6, alpha=1)+
-  geom_point(data = ecology_data.AMRd.g,
-             pch=21, size=4, stroke=0.6, alpha=1)+
-  geom_line(arrow = arrow(length=unit(0.20,"cm"), ends="last", type = "closed"),
+  geom_line(arrow = arrow(length=unit(0,"cm"), ends="last", type = "closed"),
             size = 0.7, color = cols.rmr[1])+
   geom_line(data = ecology_data.AMRd.g,
-            arrow = arrow(length=unit(0.20,"cm"), ends="last", type = "closed"),
+            arrow = arrow(length=unit(0,"cm"), ends="last", type = "closed"),
             size = 0.7, color = cols.amr[1])+
-  scale_color_manual(values=c("black", "black",cols.amr[1], cols.rmr[1]))+
-  scale_fill_manual(values=c(cols.amr[1],cols.rmr[1],cols.amr[2], cols.rmr[2]))+
+  
+  geom_text(data = ecology_data.RMRd.g,
+            mapping = aes(label =  n_data_n_species, x = 1.5, color=interaction(test_category3, MR)),
+            family = "Arial", size=3.5, hjust = 1)+
+  geom_text(data = ecology_data.AMRd.g,
+            mapping = aes(label =  n_data_n_species, x = 1.55, color=interaction(test_category3, MR)),
+            family = "Arial", size=3.5, hjust = 0)+
+
+  annotate("text", x = 0.1, y = 18.5, color = "black", label = 'atop(bold("RMR   MMR"))',
+            family = "Arial", size=3.5, hjust = 0, parse = T)+
+  annotate("text", x = 1.25, y = 18.5, color = "black", label = 'atop(bold("n data (n species)"))',
+            family = "Arial", size=3.5, hjust = 0, parse = T)+
+  annotate("text", x = 0.5, y = 18, color = "black", label = 'optimal',
+            family = "Arial", size=3.5, hjust = 0, parse = T)+
+  annotate("text", x = 0.5, y = 17, color = "black", label = 'warm',
+            family = "Arial", size=3.5, hjust = 0, parse = T)+
+  geom_linerange(data = ecology_data.RMRd.g,
+                 aes(xmin = as.numeric(slope.ciL),
+                     xmax = as.numeric(slope.ciH)), alpha = 1)+
+  geom_linerange(data = ecology_data.AMRd.g,
+                 mapping = aes(xmin = as.numeric(slope.ciL),
+                               xmax = as.numeric(slope.ciH)),
+                 alpha = 1)+
+  
+  geom_vline(xintercept = 1, lty = "dotted", color="grey50")+
+  geom_vline(xintercept = 0.75, lty = "dotted", color="grey50")+
+
+  geom_point(pch=21, size=3, stroke=0.6, alpha=1, color = "black")+
+  geom_point(data = ecology_data.AMRd.g,
+             pch=21, size=3, stroke=0.6, alpha=1, color = "black")+
+
+  scale_color_manual(values=c("black", "grey50",cols.amr[1], cols.rmr[1]))+
+  scale_fill_manual(values=c("black", "grey50",cols.amr[2], cols.rmr[2]))+
   xlab(expression(Slope~value~(italic(b))))+
-  scale_x_continuous(limits = c(0.1,1.8))+
+  scale_x_continuous(limits = c(0.05,1.8))+
   # scale_y_discrete(limits=rev)+
   theme_classic()+
   theme(axis.text.y = element_text(face = "italic", color = "black", size = 15),
@@ -888,7 +902,9 @@ rmr.WARM.ER.good<-ggplot(data=ecology_data.RMRd.g,
         axis.line.x=element_line(colour = 'black',size=0.5),
         axis.ticks.y=element_line(size=0.5),
         axis.ticks.x=element_line(size=0),
-        text=element_text(size=20,  family="Arial"))
+        text=element_text(size=20,  family="Arial"), 
+        plot.margin = margin(2, 0, 1, 1, "cm"))+
+  coord_cartesian(clip = "off")
 rmr.WARM.ER.good
 
 
@@ -918,13 +934,18 @@ fas.WARM.ER.good<-ggplot(data=ecology_data.FASd.g,
                "",
                "Fusiform"))+
   geom_text(aes(label = n_data_n_species,  x = 0.2), family = "Arial", size=3.5, hjust=0)+
-  geom_text(aes(label = slope, x = -0.2, family = "Arial"), size=3.5, hjust=1, fontface="bold")+
+  geom_text(aes(label = slope, x = -0.2, family = "Arial"), size=3.5, hjust=1)+
+  geom_line(arrow = arrow(length=unit(0,"cm"), ends="first", type = "closed"), size = 0.7)+
   geom_linerange(data = ecology_data.FASd.g,
-                 aes(xmin = as.numeric(slope.ciL) , xmax = as.numeric(slope.ciH)), alpha = 0.4)+
+                 aes(xmin = as.numeric(slope.ciL) , xmax = as.numeric(slope.ciH)),
+                 alpha = 1)+
+  annotate("text", x = -0.27, y = 18.5, color = "black", label = 'atop(bold("FAS"))',
+            family = "Arial", size=3.5, hjust = 0, parse = T)+
+  annotate("text", x = 0.14, y = 18.5, color = "black", label = 'atop(bold("n data (n species)"))',
+            family = "Arial", size=3.5, hjust = 0, parse = T)+
   geom_vline(xintercept = 0, lty = "dotted", color="grey")+
-  geom_linerange(aes(xmin = slope.ciL, xmax = slope.ciH), alpha = 0.4)+
-  geom_point(pch=21, size=4, stroke=0.6, alpha=1)+
-  geom_line(arrow = arrow(length=unit(0.20,"cm"), ends="first", type = "closed"), size = 0.7)+
+  geom_linerange(aes(xmin = slope.ciL, xmax = slope.ciH), alpha = 1)+
+  geom_point(pch=21, size=3, stroke=0.6, alpha=1, color = "black")+
   scale_color_manual(values=c("black", cols.fas[1]))+
   scale_fill_manual(values=c("black", cols.fas[2]))+
   xlab(expression(Slope~value~(italic(b))))+
@@ -941,7 +962,9 @@ fas.WARM.ER.good<-ggplot(data=ecology_data.FASd.g,
         axis.ticks.y=element_line(size=0.5),
         axis.text.y = element_blank(),
         axis.ticks.x=element_line(size=0),
-        text=element_text(size=20,  family="Arial"))
+        text=element_text(size=20,  family="Arial"),
+        plot.margin = margin(2, 1, 1, 0, "cm"))+
+  coord_cartesian(clip = "off")
 fas.WARM.ER.good
 
 cowplot::plot_grid(rmr.WARM.ER.good,
@@ -949,8 +972,8 @@ cowplot::plot_grid(rmr.WARM.ER.good,
                   nrow = 1, 
                   labels = "AUTO", 
                   rel_widths = c(1, 0.5),
-                  label_x = c(0.03, 0.25),
-                  label_y = c(0.98, 0.98)) %>% 
+                  label_x = c(0.28, -0.05),
+                  label_y = c(0.92, 0.92)) %>% 
   ggsave(filename = paste("./Figures/Fig4_ecology1_ScalingSuited_FAS.png", sep=""),
          width = 9.5, height = 6)
 

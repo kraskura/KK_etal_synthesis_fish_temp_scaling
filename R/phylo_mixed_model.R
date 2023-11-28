@@ -1,4 +1,13 @@
 
+# if neccessary : 
+# if (!require("BiocManager", quietly = TRUE))
+#     install.packages("BiocManager")
+# 
+# BiocManager::install("ggtree")
+
+# install.packages("lme4", type = "source")
+# install.packages("evolvability", type = "source")
+
 library(lme4)
 library(emmeans)
 library(car)
@@ -13,7 +22,7 @@ library(pryr)
 library(TDbook)
 library(ggimage)
 
-library(ggformatKK) # from github
+library(ggformat2) # from github
 library(weathermetrics)
 library(ggplot2)
 library(ggpubr)
@@ -24,17 +33,18 @@ library(here)
 
 # **************************************************
 # run full model comparison analysis ( run = TRUE), or figures, best models, only (run = FALSE)?
-
+# this is set for full execution of code (sourcing code); see message below
 run = FALSE
 # run = TRUE
-
-# **************************************************
 
 if(run){
   message("running all models and BIC comparison: this will take a while")
 }else{
   message("not re-running all models and BIC comparison: using models run before")
 }
+
+# **************************************************
+
 
 ## Source the data ------------
 source("./R/get_data_temp.R") 
@@ -89,7 +99,7 @@ get_phylo_matrix<-function(species.list, matrix.name, tree.name, dataset.ID){
 
 }
 
-# 1. Data for models ------
+# Data for models ------
 data.list<-get_data_temp(data.amr = "./Data/Fish_AMR_temp_dataset_mar2022.csv",
                                  data.rmr = "./Data//Fish_RMR_temp_dataset_mar2022.csv",
                                  ecology.data = "./Data/Kraskura_species_ecologies_mar2022.csv",
@@ -122,7 +132,7 @@ data.rmr.test<-rbind(data.rmrAC, data.rmrAM)
 data.fas.test<-data.amr.test[c(!is.na(data.amr.test$FAS) & is.finite(data.amr.test$FAS)) , ]
 data.as.test<-data.amr.test[c(!is.na(data.amr.test$lnAS) & is.finite(data.amr.test$lnAS)) , ]
 
-# get model data set specific phylogentics model matrixes -------
+# Get model data set specific phylogentics model matrixes -------
 data.rmrER<-droplevels(data.rmrER)
 data.rmr.test<-droplevels(data.rmr.test)
 data.amrER<-droplevels(data.amrER)
@@ -145,9 +155,9 @@ get_phylo_matrix(species.list = unique(levels(data.as.test$species)), matrix.nam
 get_phylo_matrix(species.list = unique(levels(data.fasER$species)), matrix.name = "A.fas.er", tree.name = "tr.fas.er", dataset.ID = "FAS optimal")
 get_phylo_matrix(species.list = unique(levels(data.fas.test$species)), matrix.name = "A.fas.w", tree.name = "tree.fas.w", dataset.ID = "FAS warm")
 
+# Phylo models -----------------
 if (run){
-  # phylo models ---------
-  ## RMR: ecologically relevant -----------------
+  # RMR optimal -----------------
   Phylo_RMR_model0 <- Almer(lnRMR ~ lnBWg + tempTestK1000 + (1|species) , data=data.rmrER, REML=FALSE, A = list(species = A))
   Phylo_RMR_model0.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.rmrER, REML=FALSE, A = list(species = A))
   Phylo_RMR_model0intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.rmrER, REML=FALSE, A = list(species = A))
@@ -178,7 +188,7 @@ if (run){
   Phylo_RMR_model6.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
   Phylo_RMR_model6intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
   
-  ### BIC --------------
+  ### BIC rmr optimal --------------
   RMR_BIC<-BICdelta(BIC(Phylo_RMR_model0, Phylo_RMR_model0int, Phylo_RMR_model0.POLY, Phylo_RMR_model0intPOLY,
                   Phylo_RMR_model1, Phylo_RMR_model1int, Phylo_RMR_model1.POLY, Phylo_RMR_model1intPOLY,
                   Phylo_RMR_model2, Phylo_RMR_model2int, Phylo_RMR_model2.POLY, Phylo_RMR_model2intPOLY,
@@ -186,7 +196,7 @@ if (run){
                   Phylo_RMR_model5, Phylo_RMR_model5int, Phylo_RMR_model5.POLY, Phylo_RMR_model5intPOLY,
                   Phylo_RMR_model6, Phylo_RMR_model6int, Phylo_RMR_model6.POLY, Phylo_RMR_model6intPOLY))
   
-  ## MMR ecologically relevant -----------------
+  ## MMR optimal -----------------
   Phylo_MMR_model0 <- Almer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) , data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
   Phylo_MMR_model0.POLY <- Almer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
   Phylo_MMR_model0intPOLY <- Almer(lnAMR ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
@@ -225,7 +235,7 @@ if (run){
                   Phylo_MMR_model5, Phylo_MMR_model5int, Phylo_MMR_model5.POLY, Phylo_MMR_model5intPOLY,
                   Phylo_MMR_model6, Phylo_MMR_model6int, Phylo_MMR_model6.POLY, Phylo_MMR_model6intPOLY))
   
-  ## AAS ecologically relevant ------------------
+  ## AAS optimal ------------------
   Phylo_AS_model0 <- Almer(lnAS ~ lnBWg + tempTestK1000 + (1|species) , data=data.asER, REML=FALSE, A = list(species = A.aas.er))
   Phylo_AS_model0.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
   Phylo_AS_model0intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
@@ -256,7 +266,7 @@ if (run){
   Phylo_AS_model6.POLY <- Almer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
   Phylo_AS_model6intPOLY <- Almer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
   
-  ## BIC --------
+  ### BIC --------
   AS_BIC<-BICdelta(BIC(Phylo_AS_model0, Phylo_AS_model0int, Phylo_AS_model0.POLY, Phylo_AS_model0intPOLY,
                   Phylo_AS_model1, Phylo_AS_model1int, Phylo_AS_model1.POLY, Phylo_AS_model1intPOLY,
                   Phylo_AS_model2, Phylo_AS_model2int, Phylo_AS_model2.POLY, Phylo_AS_model2intPOLY,
@@ -265,7 +275,7 @@ if (run){
                   Phylo_AS_model6, Phylo_AS_model6int, Phylo_AS_model6.POLY, Phylo_AS_model6intPOLY))
   
   
-  ## FAS ecologically relevant ----------------
+  ## FAS optimal ----------------
   Phylo_FAS_model0 <- Almer(log(FAS) ~ lnBWg + tempTest + (1|species) , data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
   Phylo_FAS_model0.POLY <- Almer(log(FAS) ~ lnBWg + poly(tempTest,2) + (1|species), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
   Phylo_FAS_model0intPOLY <- Almer(log(FAS) ~ lnBWg * poly(tempTest,2) + (1|species), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
@@ -296,7 +306,7 @@ if (run){
   Phylo_FAS_model6.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
   Phylo_FAS_model6intPOLY <- Almer(lnFAS ~ lnBWg * poly(tempTestK1000,2) + (lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
   
-  ## BIC -------------
+  ### BIC -------------
   FAS_BIC<-BICdelta(BIC(Phylo_FAS_model0, Phylo_FAS_model0int, Phylo_FAS_model0.POLY, Phylo_FAS_model0intPOLY,
                   Phylo_FAS_model1, Phylo_FAS_model1int, Phylo_FAS_model1.POLY, Phylo_FAS_model1intPOLY,
                   Phylo_FAS_model2, Phylo_FAS_model2int, Phylo_FAS_model2.POLY, Phylo_FAS_model2intPOLY,
@@ -476,6 +486,14 @@ if (run){
   AS_W_BIC  # Phylo_AS_W_model4
   FAS_W_BIC # Phylo_FAS_W_model2.POLY
   
+  # close ones: 
+  
+  # Phylo_RMR_W_model1         6 -19.875982  0.00000
+  # Phylo_RMR_W_model2         7 -19.861484  0.01450
+               
+  # Phylo_MMR_W_model4         7 -62.99042   0.00000
+  # Phylo_MMR_W_model5         7 -62.08901   0.90142
+
   # Phylo_AS_W_model1intPOLY  9 737.4351  0.00000
   # Phylo_AS_W_model1int      7 738.2306  0.79549
   # Phylo_AS_W_model4         7 738.3042  0.86917 # << use this
@@ -504,8 +522,7 @@ if (run){
   fas_mod_W <- Almer(lnFAS ~ lnBWg + poly(tempTest,2) + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w))
 }
 
-# un-comment to see - or run R markdown html summary script
-
+# un-comment to see best model summaries or view output from R markdown
 # # Ecol relev
 # summary(rmr_mod_ER)
 # summary(amr_mod_ER)
@@ -550,6 +567,7 @@ data.fasER[which(data.fasER$FAS > 20),] # considered outliers, measurement extre
 # Model scaling parameters and CIs ----------
 # custom function to obtain model parameters and recalculated mass specific MR using model estimate scaling slopes
 # this also expands the dataset to get mass independent values of metabolic rates
+# function source script available at 'mixed_model_outputs.R'
 model_outputs(phylo = TRUE, 
               best.model.rmr.er = rmr_mod_ER,
               best.model.amr.er= amr_mod_ER,
@@ -571,7 +589,8 @@ cols.as<-c("#265F73", "#007E66", "#00C5A3")
 cols.fas<-c("#395200", "#89A000", "yellow")
 cols.rmr<-c("#C70039", "#FF6D7C", "#FFA3AC")
 cols.amr<-c("#00749F","#00A8D6", "#9CE9FF")
-cols<-c("#00749F","#C70039","#00A8D6","#FF6D7C", "#9CE9FF","#FFA3AC", "#00C5A3", "#265F73")# AMR -rmr- AMR dark - rmr dark - light - as - fas
+cols<-c("#00749F","#C70039","#00A8D6","#FF6D7C", "#9CE9FF","#FFA3AC", "#00C5A3", "#265F73")
+# AMR -rmr- AMR dark - rmr dark - light - as - fas
 
 set.seed(51423)
 # MMR and AMR used interchangeably throughout 
@@ -741,8 +760,12 @@ MRmodel_plot2<-ggplot(data=data.rmrER, aes(x=lnBWg, y=lnRMR)) +
   scale_color_gradient( low = "grey80", high = "grey0")+
   annotate("segment", x = 5.2, xend = 5.2, y = 6, yend = 4.5,
            colour = cols.amr[1], size = 1, arrow = arrow(length = unit(0.3,"cm"), type="closed",))+
+  annotate("text",  x = -1, y = 5.8, label = expression(paste("higher intercept, \n lower slope")),
+           size=5, hjust=0, family="Arial", color = cols.amr[1])+
   annotate("segment", x = -4, xend = -4, yend = -4, y = -5.2,
-           colour = cols.rmr[1], size = 1, arrow = arrow(length = unit(0.3,"cm"), type="closed",))
+           colour = cols.rmr[1], size = 1, arrow = arrow(length = unit(0.3,"cm"), type="closed",))+
+  annotate("text",  x = -5, y = -6.1, label = expression(paste("higher intercept, higher slope")),
+           size=5, hjust=0, family="Arial", color = cols.rmr[1])
 ggformat(MRmodel_plot2, x_title=expression(italic(ln)*Body~mass~(g)), y_title=expression(italic(ln)*MR~(mg~O[2]~h^-1)), print = T)
 MRmodel_plot2<<-MRmodel_plot2
 
@@ -799,5 +822,3 @@ ggsave(filename = "./Figures/Supl_fig1_boxplots_Phylo.png", width = 12.5, height
 #   scale_y_continuous(limits = c(-7, 12), breaks = seq(-7,12, 2))+
 #   scale_x_continuous(limits = c(-7, 12), breaks = seq(-7,12, 2))
 # ggformat(MRmodel_plotW, x_title=expression(italic(ln)*Body~mass~(g)), y_title=expression(italic(ln)*MR~(mg~O[2]~h^-1)), print = F)
-# 
-#   

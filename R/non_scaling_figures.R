@@ -3,14 +3,15 @@
 # source("./R/phylo_mixed_model.R") # needed libraries called within 
 # source("./R/nonPhylo_mixed_models.R") # for comparison supplemental 
 
-source("./R/get_data_species_ecologies.R")
+source("./R/get_data_temp.R")
 
 # colors --------
 cols.as<<-c("#265F73", "#007E66", "#00C5A3")
 cols.fas<<-c("#395200", "#89A000", "yellow")
 cols.rmr<<-c("#C70039", "#FF6D7C", "#FFA3AC")
 cols.amr<<-c("#00749F","#00A8D6", "#9CE9FF")
-cols<<-c("#00749F","#C70039","#00A8D6","#FF6D7C", "#9CE9FF","#FFA3AC", "#00C5A3", "#265F73")# AMR -rmr- AMR dark - rmr dark - light - as - fas
+cols<<-c("#00749F","#C70039","#00A8D6","#FF6D7C", "#9CE9FF","#FFA3AC", "#00C5A3", "#265F73")
+# AMR -rmr- AMR dark - rmr dark - light - as - fas
  
 
 # local setup ------
@@ -196,7 +197,7 @@ cowplot:::plot_grid(AScorrel1.large, AScorrel1.small,
                     nrow = 2,
                     ncol = 1) %>%
   # fig_part4.1
-  ggsave(filename = "./Figures/AMR_AS_correl_march232022.png", width = 5, height = 7)
+  ggsave(filename = "./Figures/AMR_AS_correl.png", width = 5, height = 7)
 
 AScorrel1.small.rmr<-ggplot(data.amr[data.amr$BW_g<100,],
                             aes(x=RMR, y=AS, group=test_category3,
@@ -228,5 +229,5 @@ cowplot:::plot_grid(AScorrel1.large, AScorrel1.small,
                     nrow = 2,
                     ncol = 1) %>%
   # fig_part4.1
-  ggsave(filename = "./Figures/AMR_AS_correl_march232022.png", width = 5, height = 7)
+  ggsave(filename = "./Figures/AMR_AS_correl.png", width = 5, height = 7)
 
