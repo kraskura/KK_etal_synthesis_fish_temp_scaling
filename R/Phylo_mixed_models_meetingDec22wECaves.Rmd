@@ -25,7 +25,7 @@ library(ggtree)
 library(TDbook)
 library(ggimage)
 library(phylobase)
-library(ggformatKK) # from github
+library(ggformat2) # from github
 library(here)
 library(weathermetrics)
 library(here)
@@ -114,42 +114,63 @@ Ready to use datasets include:
 
 Just a glimpse of what kind of data are available. (Not all columns are shown here)
 
-```{r, echo = FALSE, message=FALSE, warning=FALSE, inlucde =FALSE}
+```{r get data from sources function get_data_temp, echo = FALSE, message=FALSE, warning=FALSE, inlucde =FALSE}
+source(here("R", "get_data_temp.R"))
 
-source("get_data_temp.R")
-data.list<-get_data_temp(data.amr = "../Data/Fish_AMR_temp_dataset_mar2022.csv",
-                                 data.rmr = "../Data//Fish_RMR_temp_dataset_mar2022.csv",
-                                 ecology.data = "../Data/Kraskura_species_ecologies_mar2022.csv",
-                                 onlyTop.above = TRUE, save.FishBase.species.data = F,
-                                 calc_mass_specific = FALSE)
+data.list<-get_data_temp(data.amr = here("Data", "Fish_AMR_temp_dataset_mar2022.csv"),
+                         data.rmr = here("Data","Fish_RMR_temp_dataset_mar2022.csv"),
+                         ecology.data = here("Data", "Kraskura_species_ecologies_mar2022.csv"),
+                         onlyTop.above = TRUE,
+                         save.FishBase.species.data = F,
+                         calc_mass_specific = FALSE)
 
-
-data.amrAC<-data.frame(data.list[1]) 
+data.amrAC<-data.frame(data.list[1])
 data.rmrAC<-data.frame(data.list[2])
 data.amrAM<-data.frame(data.list[3])
 data.rmrAM<-data.frame(data.list[4])
 data.amrER<-data.frame(data.list[5])
 data.rmrER<-data.frame(data.list[6])
 
-data.asAC<-data.frame(data.list[7]) 
+data.asAC<-data.frame(data.list[7])
 data.fasAC<-data.frame(data.list[8])
 data.asAM<-data.frame(data.list[9])
 data.fasAM<-data.frame(data.list[10])
 data.asER<-data.frame(data.list[11])
 data.fasER<-data.frame(data.list[12])
 
-data.amr<-data.frame(data.list[13]) 
-data.rmr<-data.frame(data.list[14]) 
+data.amr<-data.frame(data.list[13])
+data.rmr<-data.frame(data.list[14])
 dataMR<-data.frame(data.list[15])
 data.as<-data.frame(data.list[16])
 data.fas<-data.frame(data.list[17])
 
-# the warm ones 
+# the warm ones
 data.amr.test<-rbind(data.amrAC, data.amrAM)
 data.rmr.test<-rbind(data.rmrAC, data.rmrAM)
-data.fas.test<-data.amr.test[c(!is.na(data.amr.test$FAS) & is.finite(data.amr.test$FAS)) , ]
-data.as.test<-data.amr.test[c(!is.na(data.amr.test$lnAS) & is.finite(data.amr.test$lnAS)) , ]
+data.fas.test<-rbind(data.fasAC, data.fasAM)
+data.as.test<-rbind(data.asAC, data.asAM)
+data.fas.test<-data.fas.test[c(!is.na(data.fas.test$FAS) & is.finite(data.fas.test$FAS)) , ]
+data.as.test<-data.as.test[c(!is.na(data.as.test$lnAS) & is.finite(data.as.test$lnAS)) , ]
 
+# test categories
+data.fas$test_category3 <- "warm"
+data.fas[data.fas$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.as$test_category3 <- "warm"
+data.as[data.as$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.amr$test_category3 <- "warm"
+data.amr[data.amr$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.rmr$test_category3 <- "warm"
+data.rmr[data.rmr$test_category == "ecol_relev", "test_category3"] <- "optimal"
+
+# Get model data set specific phylogentics model matrixes -------
+data.rmrER<-droplevels(data.rmrER)
+data.rmr.test<-droplevels(data.rmr.test)
+data.amrER<-droplevels(data.amrER)
+data.amr.test<-droplevels(data.amr.test)
+data.asER<-droplevels(data.asER)
+data.as.test<-droplevels(data.as.test)
+data.fasER<-droplevels(data.fasER)
+data.fas.test<-droplevels(data.fas.test)
 ```
 
 ```{r, echo = FALSE}
@@ -199,48 +220,9 @@ The outputs below are custom-messages that I prepped for my sanity checks. They 
 
 <br>
 
-```{r, message=TRUE, results='hide', warning=FALSE, echo=FALSE}
+```{r get phylo matrices from sourced function get_data_phylo_matrix , message=TRUE, results='hide', warning=FALSE, echo=FALSE}
 
-phylo.matrix<-function(species.list, matrix.name, tree.name, dataset.ID){
-
-  taxon_search <- tnrs_match_names(names=species.list, context_name="Vertebrates") 
-  ott_in_tree <- ott_id(taxon_search)[is_in_tree(ott_id(taxon_search))]
-  tr <- tol_induced_subtree(ott_ids = ott_in_tree)
-  
-  tr$tip.label <- strip_ott_ids(tr$tip.label, remove_underscores = TRUE)
-  labels <- as.data.frame(tr$tip.label)
-
-  labels$`tr$tip.label`[which(labels$`tr$tip.label` == "Oncorhynchus mykiss (species in domain Eukaryota)")]<-"Oncorhynchus mykiss"
-  labels$`tr$tip.label`[which(labels$`tr$tip.label` == "Gadus morhua (species in domain Eukaryota)")]<-"Gadus morhua"
-  labels$`tr$tip.label`[which(labels$`tr$tip.label` == "Leiocassis longirostris")]<-"Tachysurus dumerili" 
-  labels$`tr$tip.label`[which(labels$`tr$tip.label` == "Tachysurus vachellii")]<-"Pseudobagrus vachellii" 
-  labels$`tr$tip.label`[which(labels$`tr$tip.label` == "Rhinogobius similis")]<- "Rhinogobius giurinus" 
-  tr$tip.label <- labels$`tr$tip.label`
-  
-  if(all(species.list %in% tr$tip.label)){
-    # message(paste(dataset.ID, ": All species names are identified and mathced with phylo data", sep =""))
-    message(paste(dataset.ID,": All species names are identified and mathced with phylo data \n",  "N species:", length(species.list), sep = ""))
-  }
-  
-  tr2<-compute.brlen(tr)
-
-  A <- ape::vcv.phylo(tr2)
-  tree <- compute.brlen(tr2)
-  cor <- vcv(tree, cor = T)
-  
-  # if((dim(A)[1] * dim(A)[2] == sum(!is.na(A))) && all(colnames(A) == rownames(A))){
-  # 
-  #   message("The phylo matrix has no missing values, and column/row names has matching species IDs") 
-  #   message(paste("Size of the matrix ", dim(A)[1], " X ", dim(A)[2], sep =""))
-  #  # The column names of A must be the species identifier. and the same
-  # }  
-  
-  A <- Matrix::Matrix(ape::vcv(tree), sparse = TRUE)
-
-  assign(matrix.name, value = A, envir = .GlobalEnv)
-  assign(tree.name, value = tree, envir = .GlobalEnv)
-
-}
+source(here("R", "get_data_phylo_matrix.R"))
 
 data.rmrER<-droplevels(data.rmrER)
 data.rmr.test<-droplevels(data.rmr.test)
@@ -251,21 +233,21 @@ data.as.test<-droplevels(data.as.test)
 data.fasER<-droplevels(data.fasER)
 data.fas.test<-droplevels(data.fas.test)
 
-phylo.matrix(species.list = unique(levels(data.rmrER$species)), matrix.name = "A", tree.name = "tree.kk", dataset.ID = "RMR optimal")
-phylo.matrix(species.list = unique(levels(data.rmr.test$species)), matrix.name = "A.rmr.w", tree.name = "tr.rmr.w", dataset.ID = "RMR warm")
+get_phylo_matrix(species.list = unique(levels(data.rmrER$species)), matrix.name = "A", tree.name = "tree.kk", dataset.ID = "RMR optimal")
+get_phylo_matrix(species.list = unique(levels(data.rmr.test$species)), matrix.name = "A.rmr.w", tree.name = "tr.rmr.w", dataset.ID = "RMR warm")
 
-phylo.matrix(species.list = unique(levels(data.amrER$species)), matrix.name = "A.mmr.er", tree.name = "tr.mmr.er", dataset.ID = "MMR optimal")
-phylo.matrix(species.list = unique(levels(data.amr.test$species)), matrix.name = "A.mmr.w", tree.name = "tr.mmr.w", dataset.ID = "MMR warm")
+get_phylo_matrix(species.list = unique(levels(data.amrER$species)), matrix.name = "A.mmr.er", tree.name = "tr.mmr.er", dataset.ID = "MMR optimal")
+get_phylo_matrix(species.list = unique(levels(data.amr.test$species)), matrix.name = "A.mmr.w", tree.name = "tr.mmr.w", dataset.ID = "MMR warm")
 
-phylo.matrix(species.list = unique(levels(data.asER$species)), matrix.name = "A.aas.er", tree.name = "tr.aas.er", dataset.ID = "AAS optimal")
-phylo.matrix(species.list = unique(levels(data.as.test$species)), matrix.name = "A.aas.w", tree.name = "tr.aas.w", dataset.ID = "AAS warm")
+get_phylo_matrix(species.list = unique(levels(data.asER$species)), matrix.name = "A.aas.er", tree.name = "tr.aas.er", dataset.ID = "AAS optimal")
+get_phylo_matrix(species.list = unique(levels(data.as.test$species)), matrix.name = "A.aas.w", tree.name = "tr.aas.w", dataset.ID = "AAS warm")
 
-phylo.matrix(species.list = unique(levels(data.fasER$species)), matrix.name = "A.fas.er", tree.name = "tr.fas.er", dataset.ID = "FAS optimal")
-phylo.matrix(species.list = unique(levels(data.fas.test$species)), matrix.name = "A.fas.w", tree.name = "tree.fas.w", dataset.ID = "FAS warm")
+get_phylo_matrix(species.list = unique(levels(data.fasER$species)), matrix.name = "A.fas.er", tree.name = "tr.fas.er", dataset.ID = "FAS optimal")
+get_phylo_matrix(species.list = unique(levels(data.fas.test$species)), matrix.name = "A.fas.w", tree.name = "tree.fas.w", dataset.ID = "FAS warm")
 
 ```
 
-### Making the Phylogenetic Tree!
+### Making the Phylogenetic Tree
 
 - This tree below shows species that are in RMR optimal temperature dataset. 
 
@@ -382,8 +364,6 @@ Phylo_RMR_model5.POLY <- Almer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|specie
 Phylo_RMR_model5intPOLY <- Almer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
 
 ```
-
-
 
 
 ```{r, message=FALSE, include = FALSE }

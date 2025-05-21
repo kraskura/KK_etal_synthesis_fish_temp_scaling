@@ -2,13 +2,12 @@
 library(lme4)
 library(emmeans)
 library(pryr)
-library(ggformatKK) # from github
+library(ggformat2) # from github
 library(here)
 
 ## Source the data ------------
-source("./R/get_data_temp.R")
-source("./R/mixed_model_outputs.R")
-
+source(here("R", "get_data_temp.R"))
+source(here("R", "mixed_model_outputs.R"))
 
 # function to order model selection based on the lowest BIC score
 BICdelta<-function(BICtable){
@@ -47,8 +46,10 @@ data.fas<-data.frame(data.list[17])
 # the warm ones
 data.amr.test<-rbind(data.amrAC, data.amrAM)
 data.rmr.test<-rbind(data.rmrAC, data.rmrAM)
-data.fas.test<-data.amr.test[c(!is.na(data.amr.test$FAS) & is.finite(data.amr.test$FAS)) , ]
-data.as.test<-data.amr.test[c(!is.na(data.amr.test$lnAS) & is.finite(data.amr.test$lnAS)) , ]
+data.fas.test<-rbind(data.fasAC, data.fasAM)
+data.as.test<-rbind(data.asAC, data.asAM)
+data.fas.test<-data.fas.test[c(!is.na(data.fas.test$FAS) & is.finite(data.fas.test$FAS)) , ]
+data.as.test<-data.as.test[c(!is.na(data.as.test$lnAS) & is.finite(data.as.test$lnAS)) , ]
 
 # get model data set specific phylogentics model matrixes -------
 data.rmrER<-droplevels(data.rmrER)
@@ -72,7 +73,6 @@ RMR_model1intPOLY <- lmer(lnRMR ~ lnBWg * poly(tempTestK1000,2) + (1|species) + 
 RMR_model1int <- lmer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) + (1|species:trial), data=data.rmrER, REML=FALSE)
 
 RMR_model2 <- lmer(lnRMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmrER, REML=FALSE)
-# ^^^ singular fit 
 RMR_model2int <- lmer(lnRMR ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmrER, REML=FALSE)
 RMR_model2.POLY <- lmer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmrER, REML=FALSE)
 # ^^^ singular fit 
@@ -152,6 +152,7 @@ AS_model1intPOLY <- lmer(lnAS ~ lnBWg * poly(tempTestK1000,2) + (1|species) + (1
 AS_model1int <- lmer(lnAS ~ lnBWg * tempTestK1000 + (1|species) + (1|species:trial), data=data.asER, REML=FALSE)
 
 AS_model2 <- lmer(lnAS ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.asER, REML=FALSE)
+# ^^^ convergence issues: Model failed to converge with max|grad| = 0.00350204 (tol = 0.002, component 1)
 AS_model2int <- lmer(lnAS ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.asER, REML=FALSE)
 AS_model2.POLY <- lmer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.asER, REML=FALSE)
 # ^^^ convergence issues: Model failed to converge: degenerate  Hessian with 1 negative eigenvalues
@@ -190,14 +191,14 @@ FAS_model0int <- lmer(log(FAS) ~ lnBWg * tempTest + (1|species) , data=data.fasE
 FAS_model1 <- lmer(log(FAS) ~ lnBWg + tempTest + (1|species) + (1|species:trial), data=data.fasER, REML=FALSE)
 FAS_model1.POLY <- lmer(log(FAS) ~ lnBWg + poly(tempTest,2) + (1|species) + (1|species:trial), data=data.fasER, REML=FALSE)
 FAS_model1intPOLY <- lmer(log(FAS) ~ lnBWg * poly(tempTest,2) + (1|species) + (1|species:trial), data=data.fasER, REML=FALSE)
-# ^^^ convergence issues: Model failed to converge with max|grad| =
+# ^^^ convergence issues: Model failed to converge with max|grad| = 0.00551275 (tol = 0.002, component 1
 FAS_model1int <- lmer(log(FAS) ~ lnBWg * tempTest + (1|species) + (1|species:trial), data=data.fasER, REML=FALSE)
 
 FAS_model2 <- lmer(log(FAS) ~ lnBWg + tempTest  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fasER, REML=FALSE)
+# ^^^ convergence issues: Model failed to converge with max|grad| =
 FAS_model2int <- lmer(log(FAS) ~ lnBWg * tempTest  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fasER, REML=FALSE)
 # ^^^ convergence issues: Model failed to converge with max|grad| =
 FAS_model2.POLY <- lmer(log(FAS) ~ lnBWg + poly(tempTest,2) + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fasER, REML=FALSE)
-# ^^^ convergence issues: Model failed to converge with max|grad| =
 FAS_model2intPOLY <- lmer(log(FAS) ~ lnBWg * poly(tempTest,2)  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fasER, REML=FALSE)
 
 FAS_model4 <- lmer(log(FAS) ~ lnBWg + tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE)
@@ -238,6 +239,7 @@ RMR_W_model1int <- lmer(lnRMR ~ lnBWg * tempTestK1000 + (1|species) + (1|species
 
 RMR_W_model2 <- lmer(lnRMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmr.test, REML=FALSE)
 RMR_W_model2int <- lmer(lnRMR ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmr.test, REML=FALSE)
+# ^^^ singular fit 
 RMR_W_model2.POLY <- lmer(lnRMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmr.test, REML=FALSE)
 # ^^^ singular fit 
 RMR_W_model2intPOLY <- lmer(lnRMR ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.rmr.test, REML=FALSE)
@@ -289,9 +291,10 @@ MMR_W_model1int <- lmer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) + (1|species
 
 MMR_W_model2 <- lmer(lnAMR ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amr.test, REML=FALSE)
 MMR_W_model2int <- lmer(lnAMR ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amr.test, REML=FALSE)
+# ^^^ convergence issues: Model failed to converge: degenerate  Hessian with 1 negative eigenvalues
 MMR_W_model2.POLY <- lmer(lnAMR ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amr.test, REML=FALSE)
 MMR_W_model2intPOLY <- lmer(lnAMR ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.amr.test, REML=FALSE)
-# ^^^ convergence issues: Model failed to converge with max|grad|
+# ^^^ convergence issues: Model failed to converge: degenerate  Hessian with 1 negative eigenvalues
 
 MMR_W_model4 <- lmer(lnAMR ~ lnBWg + tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE)
 MMR_W_model4int <- lmer(lnAMR ~ lnBWg * tempTestK1000 + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE)
@@ -331,6 +334,7 @@ AS_W_model1int <- lmer(lnAS ~ lnBWg * tempTestK1000 + (1|species) + (1|species:t
 
 AS_W_model2 <- lmer(lnAS ~ lnBWg + tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.as.test, REML=FALSE)
 AS_W_model2int <- lmer(lnAS ~ lnBWg * tempTestK1000  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.as.test, REML=FALSE)
+# ^^^ convergence issues: boundary (singular) fit: see help('isSingular')
 AS_W_model2.POLY <- lmer(lnAS ~ lnBWg + poly(tempTestK1000,2) + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.as.test, REML=FALSE)
 AS_W_model2intPOLY <- lmer(lnAS ~ lnBWg * poly(tempTestK1000,2)  + (1|species) +(0 + tempTestK1000|species) + (1|species:trial), data=data.as.test, REML=FALSE)
 
@@ -437,9 +441,7 @@ amr_mod_nonPhyloW<-MMR_W_model4
 as_mod_nonPhyloW<-AS_W_model1 # different???? than Phylo?
 fas_mod_nonPhyloW<-FAS_W_model2.POLY
 
-
 # un-comment to see - or run R markdown html summary script
-
 # # Ecol relev
 # summary(rmr_mod_nonPhyloER)
 # summary(amr_mod_nonPhyloER)
@@ -488,21 +490,23 @@ model_outputs(phylo = FALSE,
               best.model.fas.w= fas_mod_nonPhyloW)
 
 
-# Figures -------
+
+# Can Run this part seperately: Figures -------
 cols.as<<-c("#265F73", "#007E66", "#00C5A3")
 cols.fas<<-c("#395200", "#89A000", "yellow")
 cols.rmr<<-c("#C70039", "#FF6D7C", "#FFA3AC")
 cols.amr<<-c("#00749F","#00A8D6", "#9CE9FF")
-cols<<-c("#00749F","#C70039","#00A8D6","#FF6D7C", "#9CE9FF","#FFA3AC", "#00C5A3", "#265F73")# AMR -rmr- AMR dark - rmr dark - light - as - fas
+cols<-c("#00749F","#C70039","#00A8D6","#FF6D7C", "#9CE9FF","#FFA3AC", "#00C5A3", "#265F73")# AMR -rmr- AMR dark - rmr dark - light - as - fas
 
 set.seed(51423)
 # MMR and AMR used interchangeably throughout 
 
-library(ggplot2)
-library(ggpubr)
-library(cowplot)
-library(forcats)
-library(here)
+# uncomment and run if the libraries were not installed at the top 
+# library(ggplot2)
+# library(ggpubr)
+# library(cowplot)
+# library(forcats)
+# library(here)
 
 
   # General scaling plots ------

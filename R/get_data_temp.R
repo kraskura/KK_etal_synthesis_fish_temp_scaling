@@ -71,7 +71,7 @@ get_data_temp <- function(data.amr, data.rmr,
   data.amr$lnFAS<-log(data.amr$FAS)
   data.amr$tempTestK<-celsius.to.kelvin(data.amr$tempTest, round = 2)
   
-  # add dummy variable for temp category (k-1 variables so 2) 
+  # dummy variable for temp category (k-1 variables so 2) 
   # d1(acute): ecol_relev = 0, acute=1, acclim =0 
   # d2(acclim): ecol_relev = 0, acute=0, acclim =1
   
@@ -237,24 +237,33 @@ get_data_temp <- function(data.amr, data.rmr,
   data.as<-data.as[!c(is.na(data.as$AS) | is.infinite(data.as$lnAS)), ]
   data.fas<-data.fas[!c(is.na(data.fas$FAS)), ]
   
+  # caculate mass specific metabolic rates
   if(calc_mass_specific){
-    # mass specific MR 
-    data.amr$mass_specamr<-(data.amr$AMR/(data.amr$BW_g^exp_amr)) # units : mgO2 g-79 h-1
-    data.rmr$mass_specrmr<-data.rmr$RMR/(data.rmr$BW_g^exp_rmr) # units : mgO2 g-0.86 h-1
-    # adjust warm:
-    data.amr$mass_specamr[!c(data.amr$test_category == "ecol_relev")]<-(data.amr$AMR[!c(data.amr$test_category == "ecol_relev")]/(data.amr$BW_g[!c(data.amr$test_category == "ecol_relev")]^exp_amr_warm)) # units : mgO2 g-79 h-1
-    data.rmr$mass_specrmr[!c(data.rmr$test_category == "ecol_relev")]<-data.rmr$RMR[!c(data.rmr$test_category == "ecol_relev")]/(data.rmr$BW_g[!c(data.rmr$test_category == "ecol_relev")]^exp_rmr_warm) # units : mgO2 g-0.86 h-1
   
-    data.amr$ln_mass_specamr<-log(data.amr$mass_specamr) # + data.amr$diff_intercept# units : mgO2 g-79 h-1
-    data.rmr$ln_mass_specrmr<-log(data.rmr$mass_specrmr) # + data.rmr$diff_intercept# units : mgO2 g-0.89 h-1
-    data.as$mass_specamr<-(data.as$AMR/(data.as$BW_g^exp_amr)) # units : mgO2 g-79 h-1
-    data.as$mass_specrmr<-data.as$RMR/(data.as$BW_g^exp_rmr) # units : mgO2 g-0.86 h-1
-    data.as$mass_specas<-data.as$AS/(data.as$BW_g^exp_as) # units : mgO2 g-0.86 h-1
-    # adjust for warm
-    data.as$mass_specamr[!c(data.as$test_category == "ecol_relev")] <- (data.as$AMR[!c(data.as$test_category == "ecol_relev")]/(data.as$BW_g[!c(data.as$test_category == "ecol_relev")]^exp_amr_warm)) # units : mgO2 g-79 h-1
-    data.as$mass_specrmr[!c(data.as$test_category == "ecol_relev")] <- (data.as$RMR[!c(data.as$test_category == "ecol_relev")]/(data.as$BW_g[!c(data.as$test_category == "ecol_relev")]^exp_rmr_warm)) # units : mgO2 g-79 h-1
-    data.as$mass_specas[!c(data.as$test_category == "ecol_relev")] <- (data.as$AS[!c(data.as$test_category == "ecol_relev")]/(data.as$BW_g[!c(data.as$test_category == "ecol_relev")]^exp_as_warm)) # units : mgO2 g-79 h-1
+    # adjust mass specific MMR and RMR; ecol relevant 
+    data.amr$mass_specamr<-(data.amr$AMR/(data.amr$BW_g^exp_amr)) # mass specific; linear  
+    data.rmr$mass_specrmr<-data.rmr$RMR/(data.rmr$BW_g^exp_rmr) # mass specific ; linear
+    # log transformed
+    data.amr$ln_mass_specamr<-log(data.amr$mass_specamr) # 
+    data.rmr$ln_mass_specrmr<-log(data.rmr$mass_specrmr) #
     
+    # adjust warm: AMR/MMR and RMR
+    data.amr$mass_specamr[!c(data.amr$test_category == "ecol_relev")]<-(data.amr$AMR[!c(data.amr$test_category == "ecol_relev")]/(data.amr$BW_g[!c(data.amr$test_category == "ecol_relev")]^exp_amr_warm)) # 
+    data.rmr$mass_specrmr[!c(data.rmr$test_category == "ecol_relev")]<-data.rmr$RMR[!c(data.rmr$test_category == "ecol_relev")]/(data.rmr$BW_g[!c(data.rmr$test_category == "ecol_relev")]^exp_rmr_warm) # 
+  
+    
+    # aerobic scope dataset; ecolo relevant 
+    data.as$mass_specamr<-(data.as$AMR/(data.as$BW_g^exp_amr)) # 
+    data.as$mass_specrmr<-data.as$RMR/(data.as$BW_g^exp_rmr) # 
+    data.as$mass_specas<-data.as$AS/(data.as$BW_g^exp_as) # 
+    
+    # aerobic scope dataset; warm
+    data.as$mass_specamr[!c(data.as$test_category == "ecol_relev")] <- (data.as$AMR[!c(data.as$test_category == "ecol_relev")]/(data.as$BW_g[!c(data.as$test_category == "ecol_relev")]^exp_amr_warm)) # 
+    data.as$mass_specrmr[!c(data.as$test_category == "ecol_relev")] <- (data.as$RMR[!c(data.as$test_category == "ecol_relev")]/(data.as$BW_g[!c(data.as$test_category == "ecol_relev")]^exp_rmr_warm)) #
+    data.as$mass_specas[!c(data.as$test_category == "ecol_relev")] <- (data.as$AS[!c(data.as$test_category == "ecol_relev")]/(data.as$BW_g[!c(data.as$test_category == "ecol_relev")]^exp_as_warm)) # 
+    
+    
+    # add the exponents to the dataset 
     data.amr$exp_amr<-exp_amr
     data.rmr$exp_rmr<-exp_rmr
     data.as$exp_amr<-exp_amr
@@ -264,7 +273,7 @@ get_data_temp <- function(data.amr, data.rmr,
     data.rmr$exp_rmr[!c(data.rmr$test_category == "ecol_relev")]<-exp_rmr_warm
     data.as$exp_amr[!c(data.as$test_category == "ecol_relev")]<-exp_amr_warm
     data.as$exp_rmr[!c(data.as$test_category == "ecol_relev")]<-exp_rmr_warm
-    data.as$exp_as[!c(data.as$test_category == "ecol_relev")]<-exp_as_warm
+    data.as$exp_as[!c(data.as$test_category == "ecol_relev")]<-exp_as_warm # poly term
     
     message(paste("Mass specific measures: 1) AMR (b = ", exp_amr, "); 2) RMR (b = ",exp_rmr,")", sep = ""))
     message(paste("Mass specific measures for WARM: 1) AMR (b = ", exp_amr_warm, "); 2) RMR (b = ",exp_rmr_warm,")", sep = ""))

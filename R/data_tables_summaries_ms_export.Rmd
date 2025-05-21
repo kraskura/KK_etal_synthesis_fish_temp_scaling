@@ -8,7 +8,8 @@ output:
     toc_float: true
     number_sections: false
     code_folding: hide
----
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -16,12 +17,13 @@ library(knitr)
 library(kableExtra)
 library(tidyverse)
 knitr::opts_chunk$set(echo = TRUE)
+library(here)
 ```
 
 ### Metabolic scaling with temperature and species ecologies 
 
 ```{r Prep runs, include = F}
-source("phylo_mixed model.R")
+source(here("R", "phylo_mixed_model.R"))
 ```
 
 ### Mixed models (`evolvability::Almer`)
@@ -145,7 +147,7 @@ summary(as_mod_W)
 ```
 
 ### Ecologically relevant 
-```{r model performance plots warm, echo = F}
+```{r optimal model performance plots , echo = F}
 par(mfrow=c(4,4))
 
 plot(rmr_mod_ER)

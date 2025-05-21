@@ -13,18 +13,18 @@ for(i in 1:nrow(data)){
   }
 }
 
-data
+# data
 
 plot <- ggplot(data = data, mapping = aes(x = b, y=factor(Order_MMR), size = MR,
                                     Color = Test_C, fill = Test_C,
                                     shape = MR, group = Running_ID))+
-  geom_vline(xintercept = c(1, 0.75), lty = "dashed", color="black", size= 0.1)+
+  geom_vline(xintercept = c(1, 0.75), lty = "dashed", color="black", linewidth= 0.3)+
   geom_path(color = "grey", arrow = arrow(length = unit(0.1, "cm"), angle = 1), 
             show.legend = F)+
   geom_point(alpha=1)+
   xlim(0, 1.55)+
-  geom_text(aes(label = Study, x = 0.05), family = "Arial", size=2, hjust = 0)+
-  geom_text(aes(label = star, x = 0.0), family = "Arial", size=5, color = "red",
+  geom_text(aes(label = Study, x = 0.05), family = "Helvetica", size=3, hjust = 0)+
+  geom_text(aes(label = star, x = 0.0), family = "Helvetica", size=7, color = "red",
             hjust = 0)+
   scale_color_viridis_c(option = "A")+
   scale_fill_viridis_c(option = "A", name = "T, ºC")+
@@ -48,22 +48,23 @@ plot <- ggplot(data = data, mapping = aes(x = b, y=factor(Order_MMR), size = MR,
                   "Common killifish "   ,  "Common killifish " ,    "Common killifish "    ,
                   "Common killifish "))+  
   theme_classic()+
-  theme(axis.text.y = element_text(face = "italic", color = "black", size = 6),
+  theme(axis.text.y = element_text(face = "italic", color = "black", size = 9.5),
         axis.text.x = element_text( color = "black", size =10),
         axis.title.y = element_blank(),
-        legend.position = c(0.78, 0.7),
+        legend.position = c(0.78, 0.1),
         axis.line.y=element_line(colour = 'black',size=0.5),
         axis.line.x=element_line(colour = 'black',size=0.5),
         axis.ticks.y=element_line(size=0.5),
         axis.ticks.x=element_line(size=0),
-        text=element_text(size=12,  family="Arial"),
+        text=element_text(size=12,  family="Helvetica"),
         legend.spacing.x = unit(0.1, 'cm'),
-        legend.margin = margin(-0.9,0,0,0, unit="cm"))+
-  guides(size = "legend", colour = "legend")
-  
-  
-ggsave(filename = paste("./Figures/Fig1_ecology1_FAS_ER_", Sys.Date(), ".png", sep=""),
-       width = 6, height = 7.5, units = "in")
+        legend.margin = margin(-0.9,0,0,0, unit="cm"), legend.box = "horizontal")+
+  guides(size = "legend", colour = "legend") 
 
+  # plot 
+  
+ggsave(filename = paste("./Figures/Figure1_main.png", sep=""),
+       width = 6, height = 7.5, units = "in")
+ 
 
 
