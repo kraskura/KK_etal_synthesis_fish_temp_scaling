@@ -1,7 +1,52 @@
 # colors 
+# if neccessary : 
+# if (!require("BiocManager", quietly = TRUE))
+#     install.packages("BiocManager")
 # 
+# BiocManager::install("ggtree")
+
+# install.packages("lme4", type = "source")
+# install.packages("evolvability", type = "source")
+library(ggh4x)
+library(tidyverse)
+library(dplyr)
+
 library(colorBlindness)
 library(patchwork)
+library(weathermetrics)
+
+library(lme4)
+library(emmeans)
+library(car)
+
+library(evolvability) # Almer function
+library(ape)
+library(rotl)
+library(ggtree)
+library(Matrix)
+
+# library(kableExtra)
+
+library(pryr)
+library(viridisLite)
+library(TDbook)
+library(ggimage)
+
+library(ggformat2) # from github
+library(weathermetrics)
+library(ggplot2)
+library(ggpubr)
+library(cowplot)
+library(forcats)
+library(patchwork)
+library(reshape2)
+library(emmeans)
+library(systemfonts)
+library(flextable)
+
+
+library(here)
+
 # displayAvailablePalette(color="white")
 # colorBlindness::SteppedSequential5Steps
 

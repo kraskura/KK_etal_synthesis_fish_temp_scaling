@@ -1,217 +1,782 @@
 ---
-title: "Synthesis: model parameters, data table, and data summaries"
-author: "K. Kraskura"
+title: 'Supplemental material: model parameters, data table, and data summaries'
+subtitle: 'Publication: '
+author: "Kraskura K, Jerde CL, Eliason EJ"
 date: "`r Sys.Date()`"
 output: 
-  html_document:
-    toc: true
-    toc_float: true
+  officedown::rdocx_document:
     number_sections: false
-    code_folding: hide
-editor_options: 
+editor_options:
   chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 library(knitr)
-library(kableExtra)
-library(tidyverse)
-knitr::opts_chunk$set(echo = TRUE)
 library(here)
+library(officedown)
+library(officer)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE,
+                      error = FALSE, message = FALSE)
+# here()
 ```
 
-### Metabolic scaling with temperature and species ecologies 
 
-```{r Prep runs, include = F}
-source(here("R", "phylo_mixed_model.R"))
+```{r Prep runs, include = F, warning=FALSE}
+# source(here("R", "phylo_mixed_model.R")) # phylo models, make sure the in this code 'run' is set to 'FALSE'. if TRUE all analyssis will be rerun which takes a few hours 
+# source(here("R", "species_ecologies_level_model_plots.R")) # speices specific analysis and runs 
+# source(here("R", "phylo_model_update_wEcol.R")) # common color schemes
+sys.source(here("R", "get_data_temp.R"), envir = knitr::knit_global()) # common color schemes
+sys.source(here("R", "colors_themes.R"), envir = knitr::knit_global())
+
+print(cols.amr)
+
+# function to order model selection based on the lowest BIC score
+BICdelta<-function(BICtable){
+  BIC.t <- BICtable [order(BICtable$BIC), ]
+  BIC.t$delta <- round(abs(BIC.t$BIC[1] -  BIC.t$BIC), 5)
+  return(BIC.t)
+}
+
+# Data for models ------
+data.list<-get_data_temp(data.amr = here("Data", "Fish_AMR_temp_dataset_mar2022.csv"),
+                         data.rmr = here("Data","Fish_RMR_temp_dataset_mar2022.csv"),
+                         ecology.data = here("Data", "Kraskura_species_ecologies_mar2022.csv"),
+                         onlyTop.above = TRUE, save.FishBase.species.data = F,
+                         calc_mass_specific = FALSE)
+
+# data.list.NO.SALMON<-get_data_temp(data.amr = here("Data", "Fish_AMR_temp_dataset_mar2022.csv"),
+#                                  data.rmr = here("Data","Fish_RMR_temp_dataset_mar2022.csv"),
+#                                  ecology.data = here("Data", "Kraskura_species_ecologies_mar2022.csv"),
+#                                  onlyTop.above = TRUE, save.FishBase.species.data = F,
+#                                  calc_mass_specific = FALSE)
+
+data.amrAC<-data.frame(data.list[1])
+data.rmrAC<-data.frame(data.list[2])
+data.amrAM<-data.frame(data.list[3])
+data.rmrAM<-data.frame(data.list[4])
+data.amrER<-data.frame(data.list[5])
+data.rmrER<-data.frame(data.list[6])
+
+data.asAC<-data.frame(data.list[7])
+data.fasAC<-data.frame(data.list[8])
+data.asAM<-data.frame(data.list[9])
+data.fasAM<-data.frame(data.list[10])
+data.asER<-data.frame(data.list[11])
+data.fasER<-data.frame(data.list[12])
+
+data.amr<-data.frame(data.list[13])
+data.rmr<-data.frame(data.list[14])
+dataMR<-data.frame(data.list[15])
+data.as<-data.frame(data.list[16])
+data.fas<-data.frame(data.list[17])
+
+# the warm ones
+data.amr.test<-rbind(data.amrAC, data.amrAM)
+data.rmr.test<-rbind(data.rmrAC, data.rmrAM)
+data.fas.test<-rbind(data.fasAC, data.fasAM)
+data.as.test<-rbind(data.asAC, data.asAM)
+data.fas.test<-data.fas.test[c(!is.na(data.fas.test$FAS) & is.finite(data.fas.test$FAS)) , ]
+data.as.test<-data.as.test[c(!is.na(data.as.test$lnAS) & is.finite(data.as.test$lnAS)) , ]
+
+# test categories
+data.fas$test_category3 <- "warm"
+data.fas[data.fas$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.as$test_category3 <- "warm"
+data.as[data.as$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.amr$test_category3 <- "warm"
+data.amr[data.amr$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.rmr$test_category3 <- "warm"
+data.rmr[data.rmr$test_category == "ecol_relev", "test_category3"] <- "optimal"
+ 
+# Phylo models -----------------
+# get phylo trees:
+data.rmrER<-droplevels(data.rmrER)
+data.rmr.test<-droplevels(data.rmr.test)
+data.amrER<-droplevels(data.amrER)
+data.amr.test<-droplevels(data.amr.test)
+data.asER<-droplevels(data.asER)
+data.as.test<-droplevels(data.as.test)
+data.fasER<-droplevels(data.fasER)
+data.fas.test<-droplevels(data.fas.test)
+
+
+
+```
+# General summary statistics
+
+```{r, message  = TRUE}
+message(paste("The number of datapoints total:", nrow(dataMR)))
+message(paste("The number of trials total:", length(levels(dataMR$trial))))
+message(paste("The number of studies total:", length(levels(dataMR$study_ID))))
+message(paste("The number of species total:", length(levels(dataMR$species))))
+message(paste("The number of individual fish:",length(unique(dataMR$fish_ID))))
+message(paste("The number of individual fish below 1000 g:", nrow(dataMR[c(!duplicated(dataMR$fish_ID)) & dataMR$BW_g<1000,])))
+
+
+message(paste("The number of datapoints in AS data subset:", nrow(data.as)))
+message(paste("The number of trials in AS data subset:", length(levels(data.as$trial))))
+message(paste("The number of studies in AS data subset:", length(levels(data.as$study_ID))))
+message(paste("The number of species in AS data subset:", length(levels(data.as$species))))
+
+message(paste("The percent of tropical fish that had FAS below 3:", 
+              round(nrow(data.fas[(data.fas$Climate == "Tropical" & data.fas$FAS<3 & data.fas$test_category3 == "optimal"),]) /
+                nrow(data.fas[(data.fas$Climate == "Tropical" & data.fas$test_category3 == "optimal"),]), 4) * 100), "%")
+
+message(paste("The percent of subtropical fish that had FAS below 3:",
+              round(nrow(data.fas[(data.fas$Climate == "Subtropical" & data.fas$FAS<3 & data.fas$test_category3 == "optimal"),]) /
+                nrow(data.fas[(data.fas$Climate == "Subtropical" & data.fas$test_category3 == "optimal"),]), 4) * 100), "%")
+
+message(paste("The percent of temperate fish that had FAS below 3:",
+              round(nrow(data.fas[(data.fas$Climate == "Temperate" & data.fas$FAS<3 & data.fas$test_category3 == "optimal"),]) /
+                nrow(data.fas[(data.fas$Climate == "Temperate" & data.fas$test_category3 == "optimal"),]), 4) * 100), "%")
+
+message(paste("The percent of polar fish that had FAS below 3:",
+              round(nrow(data.fas[(data.fas$Climate == "Polar" & data.fas$FAS<3 & data.fas$test_category3 == "optimal"),]) /
+                nrow(data.fas[(data.fas$Climate == "Polar" & data.fas$test_category3 == "optimal"),]), 4) * 100), "%")
+
+# summary(dataMR$BW_g)
 ```
 
-### Mixed models (`evolvability::Almer`)
-
-Rationale behind each model:
+# Phylogenetic mixed models (`evolvability::Almer`)
 
 - model sets: Different random effects 
-  + set 0: `(1|species)` = species intercept only
-  + set 1: `(1|species) + (1|species:trial)` = species, and nested trial under species intercepts
-  + set 2: `(1|species) +(0 + tempTestK1000|species) + (1|species:trial)` = species intercept, nested trial under species intercept, species-specific response to temperature (i.e. different size individuals of the same species, woutl have differe sensititivy to temperature). 
-  + set 3: _(models lead to singular fits, these were no longer considered)_
-  + set 4: `(1|species) +(0 + lnBWg|species) + (1|species:trial)` = species intercept, nested trial under species intercept, species-specific mass scaling slopes 
-  + set 5: `(1|species) +(0 + lnBWg|species:trial) + (1|species:trial)` = species intercept, nested trial under species intercept, nested species:trial mass scaling slopes
+
+  * set 0: `(1|species)` = species intercept only
+  * set 1: `(1|species) + (1|species:trial)` = species, and nested trial under species intercepts
+  * set 2: `(1|species) +(0 + tempTest|species) + (1|species:trial)` = species intercept, nested trial under species intercept, species-specific response to temperature (i.e. different size individuals of the same species, would have different sensitivity to temperature). 
+  * set 3: _(models lead to singular fits, these were no longer considered)_
+  * set 4: `(1|species) +(0 + lnBWg|species) + (1|species:trial)` = species intercept, nested trial under species intercept, species-specific mass scaling slopes 
+  * set 5: `(1|species) +(0 + lnBWg|species:trial) + (1|species:trial)` = species intercept, nested trial under species intercept, nested species:trial mass scaling slopes
+  
 - model types: 
+
   + mass and temperature affect metabolism independently 
   + (`int`) mass and temperature affect metabolism in interaction 
-  + (`.POLY`) nonlinear polynomial Arrhenius temperature response 
-  + (`intPOLY`) nonlinear polynomial Arrhenius temperature response that changes with body mass (interaction nonlinear temp X mass)
+  + (`.POLY`) nonlinear polynomial temperature response 
+  + (`intPOLY`) nonlinear polynomial temperature response that changes with body mass (interaction nonlinear temp X mass)
 
-- Not printed below, but constructed were also models for MMR, AAS, and FAS. BIC comparison for these is shown below.  Specifically compared were: 
-  1. best non-phylogeny model (thesis)
-  2. equivalent phylogeny model
+# Abbreviations:
+
+MMR = maximum metabolic rates
+RMR = resting metabolic rates
+AS = absolute aerobic scope
+FAS = factorial aerobic scope
+BIC = Bayesian Information Criterion (model comparison metric)
 
 
-### 1. BIC RMR - optimal temperatures
-```{r, echo = FALSE, fig.align = 'left'}
-RMR_BIC %>%
-  kbl(digits = 2) %>%
-  kable_classic_2(full_width = F)
+# Tables 
+```{r table defaults}
+# set_flextable_defaults()
+set_flextable_defaults(
+  big.mark = "",
+  table_align = "center",
+  text.align = "left",
+  font.family = "Helvetica",
+  font.size = 10,
+  digits = 2,
+  decimal.mark = ".",
+  na_str = "-",
+  padding = 1,
+  border.color = "#CCCCCC",
+  line_spacing = 1
+)
+
+
+```
+
+## BIC model selection tables 
+
+#### Table S1.** Selection of best fit scaling relationship of RMR in optimal temperatures using BIC comparison. 
+```{r, echo = FALSE}
+
+table1<- read.csv(here("Data_exports", "RMR_BIC.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable()
+
+# table1 <- theme_booktabs(table1)
+table1 <- add_footer_lines(table1, "All models within ∆BIC 7 could be considered significant.")
+table1 <- color(table1, part = "footer", color = "#666666")
+
+table1
     
 # Phylo model can be used in model selection 
 ```
-<br>
 
-### 2. BIC RMR - warm temperatures
+#### Table S2.** Selection of best fit scaling relationship of RMR in warm temperatures using BIC comparison.
 ```{r, echo = FALSE}
-RMR_W_BIC %>%
-  kbl(digits = 2) %>%
-  kable_classic_2(full_width = F)
 
-# knitr:::kable(RMR_W_BIC%>%   kbl(digits = 2) %>%   kable_classic_2(full_width = F)      # Phylo model can be used in model selection 
+table2<-read.csv(here("Data_exports", "RMR_W_BIC.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable()
+
+# table2 <- theme_booktabs(table2)
+table2 <- add_footer_lines(table2, "All models within ∆BIC 7 could be considered significant.")
+table2 <- color(table2, part = "footer", color = "#666666")
+
+table2
+
 ```
 
-<br>
-
-### 3. BIC MMR - optimal temperatures
+#### Table S3.** Selection of best fit scaling relationship of MMR in optimal temperatures using BIC comparison.
 ```{r, echo = FALSE}
-MMR_BIC %>%
-  kbl(digits = 2) %>%
-  kable_classic_2(full_width = F)
+table3<-read.csv(here("Data_exports", "MMR_BIC.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable()
+
+# table3 <- theme_booktabs(table3)
+table3 <- add_footer_lines(table3, "All models within ∆BIC 7 could be considered significant.")
+table3 <- color(table3, part = "footer", color = "#666666")
+
+table3
+
 ```
 
-<br>
-
-### 4. BIC MMR - warm temperatures
+#### Table S4.** Selection of best fit scaling relationship of MMR in warm temperatures using BIC comparison.
 ```{r, echo = FALSE}
-MMR_W_BIC %>%
-  kbl(digits = 2) %>%
-  kable_classic_2(full_width = F)
-    # Phylo model can be used in model selection 
+table4<-read.csv(here("Data_exports", "MMR_W_BIC.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable()
+
+# table4 <- theme_booktabs(table4)
+table4 <- add_footer_lines(table4, "All models within ∆BIC 7 could be considered significant.")
+table4 <- color(table4, part = "footer", color = "#666666")
+table4 <- set_caption(table4, caption = "Table 4: Selection of best fit scaling relationship of MMR in warm temperatures using BIC comparison", align_with_table = FALSE)
+
+table4
+
 ```
 
-<br>
-
-### 5. BIC Absolute AS - optimal temperatures
+#### Table S5.** Selection of best fit scaling relationship of AS in optimal temperatures using BIC comparison.
 ```{r, echo = FALSE}
-AS_BIC %>%
-  kbl(digits = 2) %>%
-  kable_classic_2(full_width = F)
-    # Phylo model can be used in model selection 
+table5<-read.csv(here("Data_exports", "AS_BIC.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable()
+
+# table5 <- theme_booktabs(table5)
+table5 <- add_footer_lines(table5, "All models within ∆BIC 7 could be considered significant.")
+table5 <- color(table5, part = "footer", color = "#666666")
+table5
+
 ```
 
-<br>
-
-### 6. BIC Absolute AS - warm temperatures
+#### Table S6.** Selection of best fit scaling relationship of AS in warm temperatures using BIC comparison.
 ```{r, echo = FALSE}
-AS_W_BIC %>%
-  kbl(digits = 2) %>%
-  kable_classic_2(full_width = F)
-    # Phylo model can be used in model selection 
+table6<-read.csv(here("Data_exports", "AS_W_BIC.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable()
+
+# table6 <- theme_booktabs(table6)
+table6 <- add_footer_lines(table6, "All models within ∆BIC 7 could be considered significant.")
+table6 <- color(table6, part = "footer", color = "#666666")
+
+table6
+
 ```
 
-<br>
-
-### 7. BIC Factorial AS - optimal temperatures
+#### Table S7.** Selection of best fit scaling relationship of FAS in optimal temperatures using BIC comparison.
 ```{r, echo = FALSE}
-FAS_BIC %>%
-  kbl(digits = 2) %>%
-  kable_classic_2(full_width = F)
-    # Phylo model can be used in model selection 
+table7<-read.csv(here("Data_exports", "FAS_BIC.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable()
+
+# table7 <- theme_booktabs(table7)
+table7 <- add_footer_lines(table7, "All models within ∆BIC 7 could be considered significant.")
+table7 <- color(table7, part = "footer", color = "#666666")
+
+table7
 ```
 
-<br>
-
-### 8. BIC Factorial AS - warm temperatures
+#### Table S8.** Selection of best fit scaling relationship of FAS in warm temperatures using BIC comparison.
 ```{r, echo = FALSE}
-FAS_W_BIC %>%
-  kbl(digits = 2) %>%
-  kable_classic_2(full_width = F)
-    # Phylo model can be used in model selection 
+table8<-read.csv(here("Data_exports", "FAS_W_BIC.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable()
+
+# table8 <- theme_booktabs(table8)
+table8 <- add_footer_lines(table8, "All models within ∆BIC 7 could be considered significant.")
+table8 <- color(table8, part = "footer", color = "#666666")
+
+table8
 ```
 
-## Best models summries and resid plots :
+## Summary of the data 
 
-### Ecologically relevant 
-```{r model summaries, echo =F }
-# Ecol relev
-summary(rmr_mod_ER)
-summary(amr_mod_ER)
-summary(fas_mod_ER)
-summary(as_mod_ER)
-```
-
-### Warm fish
-```{r model summaries warm, echo = F}
-# warm
-summary(rmr_mod_W)
-summary(amr_mod_W)
-summary(fas_mod_W)
-summary(as_mod_W)
-```
-
-### Ecologically relevant 
-```{r optimal model performance plots , echo = F}
-par(mfrow=c(4,4))
-
-plot(rmr_mod_ER)
-hist(resid(rmr_mod_ER))
-
-plot(amr_mod_ER)
-hist(resid(amr_mod_ER))
-
-plot(fas_mod_ER)
-hist(resid(fas_mod_ER))
-
-plot(as_mod_ER)
-hist(resid(as_mod_ER))
-```
-
-### Warm fish
-```{r model performance plots warm, echo = F}
-par(mfrow=c(4,4))
-
-plot(amr_mod_W)
-hist(resid(amr_mod_W))
-
-plot(rmr_mod_W)
-hist(resid(rmr_mod_W))
-
-plot(fas_mod_W)
-hist(resid(fas_mod_W))
-
-plot(as_mod_W)
-hist(resid(as_mod_W)) # little skew not too bad, only 5 measurements, all reasonable biologically
-
-```
-
-
-## Summary data 
+#### Table S9.** Summary of sample sizes, body mass, and temperature ranges in all collated data. 
 ```{r min max data, echo = F}
-sum_data %>%
-  kbl(digits = 2) %>%
-  kable_classic_2(full_width = F)
+
+summaryFAS <-  data.fas %>%
+  dplyr:::group_by(test_category3) %>%
+  summarise(size_mean = mean(BW_g), size_min = min(BW_g), size_max = max(BW_g), 
+            temp_mean = mean(tempTest), temp_min = min(tempTest), temp_max = max(tempTest),
+            n_species = length(unique(species)), 
+            n = length(BW_g),
+            n_trial = length(unique(trial)), 
+            n_studies = length(unique(study_ID))) %>% 
+  as.data.frame()
+summaryFAS$temp_sum<-paste(round(summaryFAS$temp_mean, 2), " (", round(summaryFAS$temp_min, 2), ",", round(summaryFAS$temp_max,2), ")", sep="")
+summaryFAS$size_sum<-paste(round(summaryFAS$size_mean, 2), " (", round(summaryFAS$size_min, 2), ",", round(summaryFAS$size_max,2), ")", sep="")
+summaryFAS$MR<-"FAS"
+
+summaryAS <-  data.as %>%
+  dplyr:::group_by(test_category3) %>%
+  summarise(size_mean = mean(BW_g), size_min = min(BW_g), size_max = max(BW_g), 
+            temp_mean = mean(tempTest), temp_min = min(tempTest), temp_max = max(tempTest),
+            n_species = length(unique(species)), 
+            n = length(BW_g),
+            n_trial = length(unique(trial)), 
+            n_studies = length(unique(study_ID)))%>% 
+  as.data.frame()
+summaryAS$temp_sum<-paste(round(summaryAS$temp_mean, 2), " (", round(summaryAS$temp_min, 2), ",", round(summaryAS$temp_max,2), ")", sep="")
+summaryAS$size_sum<-paste(round(summaryAS$size_mean, 2), " (", round(summaryAS$size_min, 2), ",", round(summaryAS$size_max,2), ")", sep="")
+summaryAS$MR<-"AS"
+
+summaryAMR <- data.amr %>%
+  dplyr:::group_by(test_category3) %>%
+  summarise(size_mean = mean(BW_g), size_min = min(BW_g), size_max = max(BW_g), 
+            temp_mean = mean(tempTest), temp_min = min(tempTest), temp_max = max(tempTest),
+            n_species = length(unique(species)), 
+            n = length(BW_g),
+            n_trial = length(unique(trial)), 
+            n_studies = length(unique(study_ID)))%>% 
+  as.data.frame()
+summaryAMR$temp_sum<-paste(round(summaryAMR$temp_mean, 2), " (", round(summaryAMR$temp_min, 2), ",", round(summaryAMR$temp_max,2), ")", sep="")
+summaryAMR$size_sum<-paste(round(summaryAMR$size_mean, 2), " (", round(summaryAMR$size_min, 2), ",", round(summaryAMR$size_max,2), ")", sep="")
+summaryAMR$MR<-"AMR"
+
+summaryRMR <- data.rmr %>%
+  dplyr:::group_by(test_category3) %>%
+  summarise(size_mean = mean(BW_g), size_min = min(BW_g), size_max = max(BW_g), 
+            temp_mean = mean(tempTest), temp_min = min(tempTest), temp_max = max(tempTest),
+            n_species = length(unique(species)), 
+            n = length(BW_g),
+            n_trial = length(unique(trial)), 
+            n_studies = length(unique(study_ID)))%>% 
+  as.data.frame()
+summaryRMR$temp_sum<-paste(round(summaryRMR$temp_mean, 2), " (", round(summaryRMR$temp_min, 2), ",", round(summaryRMR$temp_max,2), ")", sep="")
+summaryRMR$size_sum<-paste(round(summaryRMR$size_mean, 2), " (", round(summaryRMR$size_min, 2), ",", round(summaryRMR$size_max,2), ")", sep="")
+summaryRMR$MR<-"RMR"
+
+
+# display: 
+table9<-rbind(summaryFAS, summaryAS, summaryAMR,summaryRMR)  %>% 
+  select(MR, test_category3,n_species, n_studies, n_trial, n, size_sum, temp_sum) %>% 
+  rename(`MR metric` = "MR", 
+         `Temperature Category` = "test_category3",
+         "N species" = n_species, 
+         "N studies" = n_studies,
+         "N trial" = n_trial,
+         "N datapoints" = n, 
+         "Mass (g); mean (min, max))" = size_sum, 
+         "Temperature (ºC; mean (min, max))" = temp_sum) %>% 
+  dplyr::mutate(`MR metric`= str_replace(`MR metric`, "AMR", "MMR")) %>% 
+flextable()
+
+# table9 <- add_footer_lines(table9, "All models within ∆BIC 7 could be considered significant.")
+table9 <- color(table9, part = "footer", color = "#666666")
+
+table9
+
 
 ```
+
+#### Table S10.** Factorial aerobic scopes in fish with different ecologies and morphologies. 
+```{r}
+# table10<-data.fas %>% 
+#   group_by(test_category3) %>% 
+#   summarise(min_fas = min(FAS), max_fas = max(FAS), mean_fas = mean(FAS), n = length(FAS)) %>% 
+#   dplyr::mutate(across(min_fas:mean_fas, ~ round(.x, 2))) %>% 
+#   rename("Temperature category" = test_category3,
+#          "FAS (min)" = min_fas,
+#          "FAS (max)" = max_fas,
+#          "FAS (mean)" = mean_fas) %>% 
+#   flextable()
+
+data.fas %>% 
+  pivot_longer(cols = c(Climate, DemersPelag, BodyShapeI, salintyComb),
+               names_to = "Ecology group", values_to = "Ecol. subgroups" ) %>%
+  dplyr:::group_by(`Ecology group`, `Ecol. subgroups`, test_category3) %>%
+  summarise(min_fas = min(FAS), max_fas = max(FAS), mean_fas = mean(FAS), n = length(FAS)) %>% 
+  dplyr::mutate(across(min_fas:mean_fas, ~ round(.x, 2))) %>% 
+  rename("Temperature category" = test_category3,
+         "FAS (min)" = min_fas,
+         "FAS (max)" = max_fas,
+         "FAS (mean)" = mean_fas) %>% 
+  flextable()
+
+```
+
+#### Table S11.** Summary data of RMR dataset with sample sizes, body mass and temperature ranges in fish grouped by different ecologies and morphologies. 
+```{r min max data by ecology and morphology RMR}
+data.rmr %>%
+  pivot_longer(cols = c(Climate, DemersPelag, BodyShapeI, salintyComb),
+               names_to = "Ecology group", values_to = "Ecol. subgroups" ) %>% 
+  dplyr:::group_by(`Ecology group`, `Ecol. subgroups`, test_category3) %>%
+  summarise(`Mass (g, mean)` = mean(BW_g),
+            `Mass (g, min)` = min(BW_g),
+            `Mass (g, max)` = max(BW_g),
+            `Temp. (ºC, mean)` = mean(tempTest), 
+            `Temp. (ºC, min)` = min(tempTest),
+            `Temp. (ºC, max)` = max(tempTest),
+            `N species` = length(unique(species)),
+            `N datapoints` = length(BW_g),
+            `N trials` = length(unique(trial)),
+            `N studies` = length(unique(study_ID)))%>%
+  dplyr::mutate(across(2:10, ~ round(.x, 2))) %>% 
+  mutate("Mass (g); mean (min, max))" = paste(`Mass (g, mean)`, " (", `Mass (g, min)`, ", ", `Mass (g, max)`, ")", sep = ""),
+         "Temperature (ºC; mean (min, max))"= paste(`Temp. (ºC, mean)`, " (", `Temp. (ºC, min)`, ", ", `Temp. (ºC, max)`, ")", sep = "")) %>% 
+  select(`Ecology group`, `Ecol. subgroups`,
+         test_category3,
+         `N species`,
+         `N studies`,
+         `N trials`,
+         `N datapoints`,
+          `Mass (g); mean (min, max))`,
+          `Temperature (ºC; mean (min, max))`) %>% 
+  rename("Temperature category" = test_category3) %>% 
+  flextable()
+
+```
+
+#### Table S12.** Summary data of MMR dataset with sample sizes, body mass and temperature ranges in fish grouped by different ecologies and morphologies.
+```{r min max data by ecology and morphology MMR}
+data.amr %>%
+  pivot_longer(cols = c(Climate, DemersPelag, BodyShapeI, salintyComb),
+               names_to = "Ecology group", values_to = "Ecol. subgroups" ) %>% 
+  dplyr:::group_by(`Ecology group`, `Ecol. subgroups`, test_category3) %>%
+  summarise(`Mass (g, mean)` = mean(BW_g),
+            `Mass (g, min)` = min(BW_g),
+            `Mass (g, max)` = max(BW_g),
+            `Temp. (ºC, mean)` = mean(tempTest), 
+            `Temp. (ºC, min)` = min(tempTest),
+            `Temp. (ºC, max)` = max(tempTest),
+            `N species` = length(unique(species)),
+            `N datapoints` = length(BW_g),
+            `N trials` = length(unique(trial)),
+            `N studies` = length(unique(study_ID)))%>%
+  dplyr::mutate(across(2:10, ~ round(.x, 2))) %>% 
+  mutate("Mass (g); mean (min, max))" = paste(`Mass (g, mean)`, " (", `Mass (g, min)`, ", ", `Mass (g, max)`, ")", sep = ""),
+         "Temperature (ºC; mean (min, max))"= paste(`Temp. (ºC, mean)`, " (", `Temp. (ºC, min)`, ", ", `Temp. (ºC, max)`, ")", sep = "")) %>% 
+  select(`Ecology group`, `Ecol. subgroups`,
+         test_category3,
+         `N species`,
+         `N studies`,
+         `N trials`,
+         `N datapoints`,
+          `Mass (g); mean (min, max))`,
+          `Temperature (ºC; mean (min, max))`) %>% 
+  rename("Temperature category" = test_category3) %>% 
+  flextable()
+
+```
+
+#### Table S13.** Summary data of FAS dataset with sample sizes, body mass and temperature ranges in fish grouped by different ecologies and morphologies.
+```{r min max data by ecology and morphology FAS}
+data.fas %>%
+  pivot_longer(cols = c(Climate, DemersPelag, BodyShapeI, salintyComb), 
+               names_to = "Ecology group", values_to = "Ecol. subgroups" ) %>% 
+  dplyr:::group_by(`Ecology group`, `Ecol. subgroups`, test_category3) %>%
+  summarise(`Mass (g, mean)` = mean(BW_g),
+            `Mass (g, min)` = min(BW_g),
+            `Mass (g, max)` = max(BW_g),
+            `Temp. (ºC, mean)` = mean(tempTest), 
+            `Temp. (ºC, min)` = min(tempTest),
+            `Temp. (ºC, max)` = max(tempTest),
+            `N species` = length(unique(species)),
+            `N datapoints` = length(BW_g),
+            `N trials` = length(unique(trial)),
+            `N studies` = length(unique(study_ID)))%>%
+  dplyr::mutate(across(2:10, ~ round(.x, 2))) %>% 
+  mutate("Mass (g); mean (min, max))" = paste(`Mass (g, mean)`, " (", `Mass (g, min)`, ", ", `Mass (g, max)`, ")", sep = ""),
+         "Temperature (ºC; mean (min, max))"= paste(`Temp. (ºC, mean)`, " (", `Temp. (ºC, min)`, ", ", `Temp. (ºC, max)`, ")", sep = "")) %>% 
+  select(`Ecology group`, `Ecol. subgroups`,
+         test_category3,
+         `N species`,
+         `N studies`,
+         `N trials`,
+         `N datapoints`,
+          `Mass (g); mean (min, max))`,
+          `Temperature (ºC; mean (min, max))`) %>% 
+  rename("Temperature category" = test_category3) %>% 
+  flextable()
+
+```
+
 
 ## Scaling parameters 
 
+### Global models
+#### Table S14.** Parameters of global scaling relationships in fish.
 ```{r scaling parameters, echo = F}
-scaling.params %>%
-  mutate_at(c('lnBWg', "(Intercept)", 'tempTestK1000', "E(ev)"), as.numeric) %>% 
-  kbl(digits = 3) %>%
-  kable_classic_2(full_width = F)
+
+read.csv(here("./Data_exports/Phylo/scaling_parameters.csv")) %>% 
+  dplyr::mutate(lnBWg = round(lnBWg, 3)) %>%
+  rename("MR metric" = performance,
+         "Temperature Category" = temp_categ, 
+         "Scaling slope" = lnBWg, 
+         "Scaling intercept" = X.Intercept.,
+         "Temperature" = tempTest) %>% 
+  dplyr::mutate(`Temperature Category`= str_replace(`Temperature Category`,
+                                                    "er", "optimal")) %>% 
+
+  flextable()
+
 
 ```
 
+#### Table S15.** Confidence intervals for each model parameter.
+```{r confidence intervals1}
 
-## Confidence intervals 
+read.csv(here("./Data_exports/Phylo/Table_CIsummary.csv")) %>% 
+  select(MR, temp_cat, var, X5.., X95..) %>% 
+  dplyr::mutate(across(X5..:X95.., ~ round(.x, 3))) %>% 
+  rename("CI 5%" = X5..,
+         "CI 95%" = X95..,
+         "Parameter" = var,
+         "MR metric" = MR,
+         "Temperature category" = temp_cat) %>% 
+  filter(!grepl(pattern = ".sig", Parameter)) %>%
+  dplyr::mutate(`Temperature category`= str_replace(`Temperature category`,
+                                                    "ER", "optimal"),
+                `Temperature category`= str_replace(`Temperature category`,
+                                                    "W", "warm")) %>% 
+  flextable()
 
+
+```
+
+### Scaling relationship parameters and summary statistics for each ecological and morphological fish group. 
+#### Table S16.** MMR scaling relationship estimates and 95% confidence interval in fish sharing similar ecologies and morphologies. 
 ```{r}
+read.csv(here("Data_exports/Ecologies/ecologies_MMR.csv")) %>% 
+  select(Ecol, ecology_subgroup, test_category3, slope, slope.ciL, slope.ciH, intercept) %>% 
+  rename("Ecology group" = Ecol, 
+         "Ecol. subgroup" = ecology_subgroup, 
+         "Temperature category" = test_category3,
+         "Slope value (b)" = slope,
+         "Slope CI 2.5%" = slope.ciL,
+         "Slope CI 97.5%" = slope.ciH,
+         "Intercept (a)" = intercept) %>% 
+  flextable()
+```
 
-sum_CItable %>% 
-  kbl(digits = 3) %>%
-  kable_classic_2(full_width = F)
+#### Table S17.** RMR scaling relationship estimates and 95% confidence interval in fish sharing similar ecologies and morphologies. 
+```{r}
+read.csv(here("Data_exports/Ecologies/ecologies_RMR.csv")) %>% 
+  select(Ecol, ecology_subgroup, test_category3, slope, slope.ciL, slope.ciH, intercept) %>% 
+  rename("Ecology group" = Ecol, 
+         "Ecol. subgroup" = ecology_subgroup, 
+         "Temperature category" = test_category3,
+         "Slope value (b)" = slope,
+         "Slope CI 2.5%" = slope.ciL,
+         "Slope CI 97.5%" = slope.ciH,
+         "Intercept (a)" = intercept) %>% 
+  flextable()
+
+
+dd_mmr<-read.csv(here("Data_exports/Ecologies/ecologies_MMR.csv"))
+dd_rmr<-read.csv(here("Data_exports/Ecologies/ecologies_rMR.csv"))
+dd_mmr$MR<-"MMR"
+dd_rmr$MR<-"RMR"
+
+comparison1<-rbind(dd_mmr, dd_rmr) %>% 
+  select(ecol_temp_cat, slope, MR, test_category3, ecology_subgroup) %>% 
+  pivot_wider(names_from = c("MR"), values_from = (slope)) %>% 
+  mutate(scaling_change = if_else(MMR > RMR, "GOOD", "BAD"),
+         scaling_diff = MMR - RMR) 
+
+comparison2<-rbind(dd_mmr, dd_rmr) %>% 
+  select(slope, MR, test_category3, ecology_subgroup) %>% 
+  pivot_wider(names_from = c("test_category3"), values_from = (slope)) %>% 
+  mutate(scaling_change = if_else(warm > optimal, "BAD", "GOOD"),
+         scaling_diff = optimal - warm)
 
 ```
 
-<br>
+#### Table S18.** FAS scaling relationship estimates and 95% confidence interval in fish sharing similar ecologies and morphologies. 
+```{r}
+read.csv(here("Data_exports/Ecologies/ecologies_FAS.csv")) %>% 
+  select(Ecol, ecology_subgroup, test_category3, slope, slope.ciL, slope.ciH, intercept) %>% 
+  rename("Ecology group" = Ecol, 
+         "Ecol. subgroup" = ecology_subgroup, 
+         "Temperature category" = test_category3,
+         "Slope value (b)" = slope,
+         "Slope CI 2.5%" = slope.ciL,
+         "Slope CI 97.5%" = slope.ciH,
+         "Intercept (a)" = intercept) %>% 
+  flextable()
+
+
+
+```
+
+
+```{r species not exported table only figure, eval = FALSE}
+sum1<-read.csv(here("Data_exports/Species/species_MMR.csv")) %>%  
+  group_by(test_category3) %>% 
+  summarize(min_slope = min(slope), 
+            max_slope = max(slope),
+            n = n()) 
+
+sum2<-read.csv(here("Data_exports/Species/species_RMR.csv")) %>%
+  group_by(test_category3) %>%
+  summarize(min_slope = min(slope),
+            max_slope = max(slope),
+            n = n())
+
+## ecology mass specific rships 
+# read.csv(here("Data_exports/Ecologies/ecologies_data_anova.csv")) %>% view()
+
+sum3<-data.as %>% 
+  group_by(test_category3, DemersPelag) %>% 
+  summarize(n = n(),
+            minFAS = min(FAS),
+            maxFAS = max(FAS, na.rm= T),
+            meanFAS = mean(FAS),
+            minASmasspec = min(mass_specas),
+            maxASmasspec = max(mass_specas),
+            meanASmasspec = mean(mass_specas))
+sum4<-data.as %>% 
+  group_by(test_category3, BodyShapeI) %>% 
+  summarize(n = n(),
+            minFAS = min(FAS),
+            maxFAS = max(FAS, na.rm= T),
+            meanFAS = mean(FAS),
+            minASmasspec = min(mass_specas),
+            maxASmasspec = max(mass_specas),
+            meanASmasspec = mean(mass_specas))
+
+
+```
+
+
 <br>
 
+# Figures 
+
+
+```{r, out.width  = 1.1, out.height = 1}
+knitr::include_graphics((here("Figures", "Suppl_Size_hist.png") ))
+```
+#### Figure S1
+Histograms of body size (A, C, E) and temperature (B, D, F) for maximum metabolic rates (MMR; A,B), resting metabolic rate (RMR; C,D), and aerobic scopes (FAS and AS; E, F). Black bars are fish exposed to supra-optimal (warm) temperatures acutely. The dashed vertical lines show body mass at 1000 g (1kg), and 25ºC. 
+
+
+```{r, out.width  = 1, out.height = 0.9}
+knitr::include_graphics((here("Figures", "Supl_fig1_boxplots_Phylo.png") ))
+```
+#### Figure S2. 
+Comparison of mass-specific individual aerobic performances in warm temperatures (acute and acclimated exposures separated in top panels). Maximum metabolic rates (MMR; panels A,D), resting metabolic rate (RMR; B, E), factorial aerobic scopes (FAS; C, F). The values were mass-corrected using scaling exponents from the best fish global scaling models. FAS is not mass corrected. 
+
+
+```{r, out.width  = 0.75, out.height = 1}
+knitr::include_graphics((here("Figures/suppl_MMRvsRMR.png") ))
+```
+#### Figure S3. 
+Correlation between resting metabolic rate (RMR) and maximum metabolic rate (MMR). The panels are divided by fish body size to improve visual quality. The dots on in diamond are _Somniosus microcephalus_, the largest species in the dataset.
+
+```{r, out.width  = 0.75, out.height = 1}
+knitr::include_graphics((here("Figures/suppl_RMRvsAS.png") ))
+```
+#### Figure S4. 
+Correlation between resting metabolic rate (RMR) and aerobic scope (AS). The panels are divided by fish body size to improve visual quality. The dots on in diamond are _Somniosus microcephalus_, the largest species in the dataset.
+
+```{r, out.width  = 0.75, out.height = 1}
+knitr::include_graphics((here("Figures/suppl_MMRvsAS.png") ))
+
+```
+#### Figure S5. 
+Correlation between maximum metabolic rate (MMR) and aerobic scope (AS). The panels are divided by fish body size to improve visual quality. The dots on in diamond are _Somniosus microcephalus_, the largest species in the dataset.
+
+```{r, out.width  = 0.9, out.height = 1}
+knitr::include_graphics((here("Figures", "Suppl_Figure_t.png") ))
+```
+#### Figure S6. 
+Metobolic rate measurements (log scale) in response to temperature. (A) Maximum metabolic rates (MMR), (B) Resting metabolic rates (RMR), (C) Aerobic scopes, and (D) Factorial aerobic scopes (FAS). The predictions are from the best fit metabolic scaling models. Each dot is an individual fish, the large red dots show adult salmon in warm temperatures (one of the largest fish in our dataset). The colored dots and lines are fosh in 'warm' temperatures, and grey dots are fish in 'optimal' temperatures. AS and FAS best models include second order polynomial terms for temperature leading to non-linear temperature effects. All temperature predicted lines are for fish at 119 grams (RMR, AS, FAS), and lines in MMR are for fish at 0.078 g, 11.7 g, 86.48 g, and 1053.6 g. 
+
+```{r, out.width  = 0.5, out.height = 1}
+knitr::include_graphics(here("Figures/suppl_speciesSlopesRMR.png"))
+```
+#### Figure S7.
+Species-specific scaling slope values (dots) of resting metaoblic rates with its 95% confidence interval (CI, the error bar). All slopes were developed using simple linear models. The number in the panel is sample size and all species are ordered by the width of the confidence interval (top, smallest CI range; bottom = largest CI range). 
+
+```{r, out.width  = 0.45, out.height = 1}
+knitr::include_graphics(here("Figures/suppl_speciesSlopesMMR.png"))
+```
+#### Figure S8. 
+Species-specific scaling slope values (dots) of maximum metaoblic rates with its 95% confidence interval (CI, the error bar). All slopes were developed using simple linear models. The number in the panel is sample size and all species are ordered by the width of the confidence interval (top, smallest CI range; bottom = largest CI range). 
+
+```{r, out.width  = 0.5, out.height = 1}
+knitr::include_graphics(here("Figures/suppl_speciesSlopesFAS.png"))
+
+```
+#### Figure S9. 
+Species-specific scaling slope values (dots) of factorial aerobic scopes with its 95% confidence interval (CI, the error bar). All slopes were developed using simple linear models. The number in the panel is sample size and all species are ordered by the width of the confidence interval (top, smallest CI range; bottom = largest CI range). 
+
+```{r, out.width  = 0.55,  out.height = 1}
+knitr::include_graphics(here("Figures/Suppl_ecol_hist.png"))
+```
+#### Figure S10. 
+The histogram of all scaling slopes for fish grouped by their ecological and morphological characteristics.(A) Maximum metabolic rates, (B) resting metabolic rates, (C) factorial aerobic scopes. The vertical lines are the mean of all slopes for each temperature condition (optimal = grey-scale, and warm = colored). 
+
+```{r, out.width  = 0.55,  out.height = 1}
+knitr::include_graphics(here("Figures/Suppl_species_hist.png"))
+```
+#### Figure S11. 
+The histogram of all scaling slopes for all fish species included in the dataset. (A) Maximum metabolic rates, (B) resting metabolic rates, (C) factorial aerobic scopes. The vertical lines are the mean of all slopes for each temperature condition (optimal = grey-scale, and warm = colored).
+
+```{r,  out.width  = 0.45,  out.height = 1}
+knitr::include_graphics(here("Data_exports/FAS warm_treeplot.png"))
+```
+#### Figure S12.
+The phylogenetic tree representing species included in the dataset to analyze scaling relationships of factorial aerobic scopes (FAS) in warm temperatures. 
+
+```{r,  out.width  = 0.45,  out.height = 1}
+knitr::include_graphics(here("Data_exports/FAS optimal_treeplot.png"))
+```
+#### Figure S13. 
+The phylogenetic tree representing species included in the dataset to analyze scaling relationships of factorial aerobic scopes (FAS) in optimal temperatures. 
+
+```{r,  out.width  = 0.45,  out.height = 1}
+knitr::include_graphics(here("Data_exports/AAS warm_treeplot.png"))
+```
+#### Figure S14. 
+The phylogenetic tree representing species included in the dataset to analyze scaling relationships of aerobic scopes (AS) in warm temperatures. 
+
+```{r,  out.width  = 0.45,  out.height = 1}
+knitr::include_graphics(here("Data_exports/AAS optimal_treeplot.png"))
+```
+#### Figure S15. 
+The phylogenetic tree representing species included in the dataset to analyze scaling relationships of aerobic scopes (AS) in optimal temperatures. 
+
+```{r,  out.width  = 0.45,  out.height = 1}
+knitr::include_graphics(here("Data_exports/MMR warm_treeplot.png"))
+```
+#### Figure S16. 
+The phylogenetic tree representing species included in the dataset to analyze scaling relationships of maximum metabolic rates (MMR) in warm temperatures. 
+
+```{r,  out.width  = 0.45,  out.height = 1}
+knitr::include_graphics(here("Data_exports/MMR optimal_treeplot.png"))
+```
+#### Figure S17. 
+The phylogenetic tree representing species included in the dataset to analyze scaling relationships of maximum metabolic rates (MMR) in optimal temperatures. 
+
+```{r,  out.width  = 0.45,  out.height = 1}
+knitr::include_graphics(here("Data_exports/RMR warm_treeplot.png"))
+```
+#### Figure S18. 
+The phylogenetic tree representing species included in the dataset to analyze scaling relationships of resting metabolic rates (RMR) in warm temperatures. 
+
+```{r,  out.width  = 0.45,  out.height = 1}
+knitr::include_graphics(here("Data_exports/RMR optimal_treeplot.png"))
+```
+#### Figure S19. 
+The phylogenetic tree representing species included in the dataset to analyze scaling relationships of resting metabolic rates (RMR) in optimal temperatures. 
 

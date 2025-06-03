@@ -1,9 +1,5 @@
 
-library(reshape2)
-library(here)
-library(tidyverse)
-library(dplyr)
-library(emmeans)
+
 options(dplyr.summarise.inform = FALSE)
 # *****************************************************************************
 #  not needed for final version
@@ -22,7 +18,7 @@ emm_options(lmerTest.limit = 7000)
 # GLOBAL DATA (with mass specific values) ---------
 
 # 1) for phylo mixed models
-source(here("R", "phylo_mixed_model.R")) # get final model outputs; this will take a minute to run. 
+# source(here("R", "phylo_mixed_model.R")) # get final model outputs; this will take a minute to run. 
 source(here("R/colors_themes.R"))
 # 2) for non-phylo mixed models 
 # source("./R/nonPhylo_mixed_models.R")
@@ -295,12 +291,12 @@ ecology_data.AMRd_w<-ecology_data.AMRd[grepl("warm", as.character(ecology_data.A
 ecology_data.FASd_w<-ecology_data.FASd[grepl("warm", as.character(ecology_data.FASd$ecol_temp_cat)), ]
 
 # ecol relev only:
-ecology_data.RMRd_er<-ecology_data.RMRd[grepl("ecol_relev", as.character(ecology_data.RMRd$ecol_temp_cat)), ]
-ecology_data.AMRd_er<-ecology_data.AMRd[grepl("ecol_relev", as.character(ecology_data.AMRd$ecol_temp_cat)), ]
-ecology_data.FASd_er<-ecology_data.FASd[grepl("ecol_relev", as.character(ecology_data.FASd$ecol_temp_cat)), ]
+ecology_data.RMRd_er<-ecology_data.RMRd[grepl("optimal", as.character(ecology_data.RMRd$ecol_temp_cat)), ]
+ecology_data.AMRd_er<-ecology_data.AMRd[grepl("optimal", as.character(ecology_data.AMRd$ecol_temp_cat)), ]
+ecology_data.FASd_er<-ecology_data.FASd[grepl("optimal", as.character(ecology_data.FASd$ecol_temp_cat)), ]
 
 order.ecology_data.FASd.W <- order.ecology_data.FASd[grepl("warm", as.character(order.ecology_data.FASd$ecol_temp_cat)), ]
-order.ecology_data.FASd.ER <- order.ecology_data.FASd[grepl("ecol_relev", as.character(order.ecology_data.FASd$ecol_temp_cat)), ]
+order.ecology_data.FASd.ER <- order.ecology_data.FASd[grepl("optimal", as.character(order.ecology_data.FASd$ecol_temp_cat)), ]
 
 ecology_data.RMRd_er$DIFF_mmr_rmr<-ecology_data.RMRd_er$slope - ecology_data.AMRd_er$slope
 # ecology_data.RMRd_er[ecology_data.RMRd_er$DIFF_mmr_rmr > 0,] # bMMR < bRMR
@@ -466,11 +462,11 @@ species.amr <- summarise_speciesLM.AMR(lmdata.AMR, summarylm.AMR)
 
 # Data curating for plotting
 species.fas.w<-species.fas[species.fas$test_category3=="warm", ]
-species.fas.er<-species.fas[species.fas$test_category3=="ecol_relev", ]
+species.fas.er<-species.fas[species.fas$test_category3=="optimal", ]
 species.rmr.w<-species.rmr[species.rmr$test_category3=="warm", ]
-species.rmr.er<-species.rmr[species.rmr$test_category3=="ecol_relev", ]
+species.rmr.er<-species.rmr[species.rmr$test_category3=="optimal", ]
 species.amr.w<-species.amr[species.amr$test_category3=="warm", ]
-species.amr.er<-species.amr[species.amr$test_category3=="ecol_relev", ]
+species.amr.er<-species.amr[species.amr$test_category3=="optimal", ]
 
 # saving 
 write.csv(file = "./Data_exports/Species/species_FAS.csv", species.fas, row.names=FALSE)
@@ -744,14 +740,17 @@ ggsave(filename = paste("./Figures/Figure3.png", sep=""),
 ## Species ------
 
 sp1_amr<-ggplot(data=species.amr, aes(y=slope, x=fct_reorder(species, (slope.ciL-slope.ciH)), color = test_category3))+
-  geom_hline(yintercept = 0.81, colour="black", lty="solid")+
+  geom_hline(yintercept = 1, colour="black", lty="solid")+
+  geom_hline(yintercept = 0.75, colour="black", lty="solid")+
   ylim(min(species.amr$slope.ciL)-0.1, max(species.amr$slope.ciH)+0.1)+
-  geom_linerange(aes(ymin = slope, ymax = slope.ciH, color = test_category3), size=1.2, alpha=1)+
-  geom_linerange(aes(ymin = slope, ymax = slope.ciL, color = test_category3), size=1.2, alpha=1)+
+  geom_linerange(aes(ymin = slope, ymax = slope.ciH, color = test_category3),
+                 size=0.6, alpha=1)+
+  geom_linerange(aes(ymin = slope, ymax = slope.ciL, color = test_category3),
+                 size=0.6, alpha=1)+
   geom_point(pch=1, color="black", size=1)+
   geom_text(aes(label = n, y = -3.4, color = test_category3), hjust = "inward",  family = "Helvetica", size=3)+
   ylab(expression(Slope~value~(italic(b))))+
-  scale_color_manual(values = c("black", "red"))+
+  scale_color_manual(values = c("black", cols.amr[2]))+
   facet_grid(.~test_category3)+
   coord_flip()+
   theme_pubr()+
@@ -760,20 +759,22 @@ sp1_amr<-ggplot(data=species.amr, aes(y=slope, x=fct_reorder(species, (slope.ciL
         axis.title.y = element_blank(),
         legend.position = "none",
         plot.margin = unit(c(5.5, 5.8, 5.5, 5.5), "pt"),
-        text=element_text(size=20,  family="Helvetica"))
-ggsave(filename = paste("./Figures/suppl_MMRx5.png", sep=""),
-       plot=sp1_amr, width = 6, height = 9, units = "in")
+        text=element_text(size=16,  family="Helvetica"))
+ggsave(filename = paste("./Figures/suppl_speciesSlopesMMR.png", sep=""),
+       plot=sp1_amr, width = 9, height = 9, units = "in")
 
 
 sp1_rmr<-ggplot(data=species.rmr, aes(y=slope, x=fct_reorder(species, (slope.ciL-slope.ciH)), color = test_category3))+
-  geom_hline(yintercept = 0.81, colour="black", lty="solid")+
-  ylim(min(species.rmr$slope.ciL)-0.1, max(species.rmr$slope.ciH)+0.1)+
-  geom_linerange(aes(ymin = slope, ymax = slope.ciH, color = test_category3), size=1.2, alpha=1)+
-  geom_linerange(aes(ymin = slope, ymax = slope.ciL, color = test_category3), size=1.2, alpha=1)+
+  geom_hline(yintercept = 1, colour="black", lty="solid")+
+  geom_hline(yintercept = 0.75, colour="black", lty="solid")+  ylim(min(species.rmr$slope.ciL)-0.1, max(species.rmr$slope.ciH)+0.1)+
+  geom_linerange(aes(ymin = slope, ymax = slope.ciH, color = test_category3),
+                 size=0.6, alpha=1)+
+  geom_linerange(aes(ymin = slope, ymax = slope.ciL, color = test_category3),
+                 size=0.6, alpha=1)+
   geom_point(pch=1, color="black", size=1)+
   geom_text(aes(label = n, y = -4, color = test_category3), hjust = "inward",  family = "Helvetica", size=3)+
   ylab(expression(Slope~value~(italic(b))))+
-  scale_color_manual(values = c("black", "red"))+
+  scale_color_manual(values = c("black", cols.rmr[2]))+
   facet_grid(.~test_category3)+
   coord_flip()+
   theme_pubr()+
@@ -782,20 +783,22 @@ sp1_rmr<-ggplot(data=species.rmr, aes(y=slope, x=fct_reorder(species, (slope.ciL
         axis.title.y = element_blank(),
         legend.position = "none",
         plot.margin = unit(c(5.5, 5.8, 5.5, 5.5), "pt"),
-        text=element_text(size=20,  family="Helvetica"))
-ggsave(filename = paste("./Figures/suppl_RMRx6.png", sep=""),
-       plot=sp1_rmr, width = 8, height = 12, units = "in")
+        text=element_text(size=16,  family="Helvetica"))
+ggsave(filename = paste("./Figures/suppl_speciesSlopesRMR.png", sep=""),
+       plot=sp1_rmr, width = 9, height = 10, units = "in")
 
 
 sp1_fas<-ggplot(data=species.fas, aes(y=slope, x=fct_reorder(species, (slope.ciL-slope.ciH)), color = test_category3))+
   geom_hline(yintercept = 0, colour="black", lty="solid")+
   ylim(min(species.fas$slope.ciL)-0.1, max(species.fas$slope.ciH)+0.1)+
-  geom_linerange(aes(ymin = slope, ymax = slope.ciH, color = test_category3), size=1.2, alpha=1)+
-  geom_linerange(aes(ymin = slope, ymax = slope.ciL, color = test_category3), size=1.2, alpha=1)+
+  geom_linerange(aes(ymin = slope, ymax = slope.ciH, color = test_category3),
+                 size=0.6, alpha=1)+
+  geom_linerange(aes(ymin = slope, ymax = slope.ciL, color = test_category3),
+                 size=0.6, alpha=1)+
   geom_point(pch=1, color="black", size=1)+
   geom_text(aes(label = n, y = -5, color = test_category3), hjust = "inward",  family = "Helvetica", size=3)+
   ylab(expression(Slope~value~(italic(b))))+
-  scale_color_manual(values = c("black", "red"))+
+  scale_color_manual(values = c("black", cols.fas[2]))+
   facet_grid(.~test_category3)+
   coord_flip()+
   theme_pubr()+
@@ -804,134 +807,202 @@ sp1_fas<-ggplot(data=species.fas, aes(y=slope, x=fct_reorder(species, (slope.ciL
         axis.title.y = element_blank(),
         legend.position = "none",
         plot.margin = unit(c(5.5, 5.8, 5.5, 5.5), "pt"),
-        text=element_text(size=20,  family="Helvetica"))
-ggsave(filename = paste("./Figures/suppl_FASx7.png", sep=""),
-       plot=sp1_fas, width = 6, height = 8, units = "in")
+        text=element_text(size=16,  family="Helvetica"))
+ggsave(filename = paste("./Figures/suppl_speciesSlopesFAS.png", sep=""),
+       plot=sp1_fas, width = 9, height = 8.5, units = "in")
 
 
- ### SUPPL: histograms of slopes -----
-plot_hist2_amrlm<-ggplot(ecology_data.AMRd, aes(x=slope)) +
-  geom_vline(xintercept = mean(ecology_data.AMRd_er$slope), color="black", lty="solid", lwd=1)+
-  geom_vline(xintercept = mean(ecology_data.AMRd_w$slope), color="red", lty="solid", lwd=1)+
-  geom_text(mapping = aes(x= 1.3, y = 4.6), label = paste(round(mean(ecology_data.AMRd_er$slope),2), " (", round(sd(ecology_data.AMRd_er$slope),2) ,")", sep =""), family = "Helvetica", size=6, fontface="bold", color="black")+
-  geom_text(mapping = aes(x= 1.3, y = 4), label = paste(round(mean(ecology_data.AMRd_w$slope),2), " (", round(sd(ecology_data.AMRd_w$slope),2) ,")", sep =""), family = "Helvetica", size=6, fontface="bold", color="red")+
-  geom_histogram(show.legend = FALSE, bins=30, fill = cols.amr[1] , alpha = 1)+
-  scale_color_manual(values = c("black", "red"))+
+ ## SUPPL: histograms of slopes -----
+ ### by ecolgies =------
+annotationER<-annotate(geom = "text",
+                     x= 1.3, y = 4.6, 
+                     label = paste(round(mean(ecology_data.AMRd_er$slope),2), " (sd ", round(sd(ecology_data.AMRd_er$slope),2) ,")", sep =""), family = "Helvetica", size=4, color="black")
+annotationW<-annotate(geom = "text", 
+                      x= 1.3, y = 4,
+                      label = paste(round(mean(ecology_data.AMRd_w$slope),2), " (sd ", round(sd(ecology_data.AMRd_w$slope),2) ,")", sep =""),
+                      family = "Helvetica", size=4,  color=cols.amr[2])
+
+plot_hist2_amrlm<-ggplot(ecology_data.AMRd, aes(x=slope, fill = test_category3, 
+                                                color = test_category3)) +
+  geom_vline(xintercept = mean(ecology_data.AMRd_er$slope), color="black",
+             lty="solid", lwd=1)+
+  geom_vline(xintercept = mean(ecology_data.AMRd_w$slope), color=cols.amr[2],
+             lty="solid", lwd=1)+
+  geom_histogram(show.legend = FALSE, bins=30, alpha = 0.4, linewidth = 0.)+
+  scale_color_manual(values = c("black", cols.amr[2]))+
+  scale_fill_manual(values = c("black", cols.amr[2]))+
   ylim(0,5)+
   scale_x_continuous(limits=c(0.5, 1.5))+
-  facet_wrap(.~test_category3)
-ggformat(plot_hist2_amrlm, x_title = expression(Scaling~slope~(italic(b))), y_title = "Frequency", print = FALSE)
-plot_hist2_amrlm <- plot_hist2_amrlm + theme(axis.title.x = element_text(size=25,  family="Helvetica"),
-                                             axis.text.x = element_text(size=21,  family="Helvetica"),
-                                             axis.title.y = element_text(size=25,  family="Helvetica"),
-                                             axis.text.y = element_text(size=21,  family="Helvetica"))
+  facet_wrap(.~test_category3)+
+  at_panel(annotationER, PANEL == 1)+
+  at_panel(annotationW, PANEL == 1)
 
-plot_hist2_rmrlm<-ggplot(ecology_data.RMRd, aes(x=slope)) +
-  geom_vline(xintercept = mean(ecology_data.RMRd_er$slope), color="black", lty="solid", lwd=1)+
-  geom_vline(xintercept = mean(ecology_data.RMRd_w$slope), color="red", lty="solid", lwd=1)+
-  geom_text(mapping = aes(x= 1.3, y = 4.6), label = paste(round(mean(ecology_data.RMRd_er$slope),2), " (", round(sd(ecology_data.RMRd_er$slope),2) ,")", sep =""), family = "Helvetica", size=6, fontface="bold", color="black")+
-  geom_text(mapping = aes(x= 1.3, y = 4), label = paste(round(mean(ecology_data.RMRd_w$slope),2), " (", round(sd(ecology_data.RMRd_w$slope),2) ,")", sep =""), family = "Helvetica", size=6, fontface="bold", color="red")+
-  geom_histogram(show.legend = FALSE, bins=30, fill = cols.rmr[1] , alpha = 1)+
-  scale_color_manual(values = c("black", "red"))+
+ggformat(plot_hist2_amrlm, x_title = expression(Scaling~slope~(italic(b))), y_title = "Frequency", print = F)
+plot_hist2_amrlm <- plot_hist2_amrlm + theme(axis.title.x = element_text(size=12,  family="Helvetica"),
+                                             axis.text.x = element_text(size=12,  family="Helvetica"),
+                                             axis.title.y = element_text(size=12,  family="Helvetica"),
+                                             axis.text.y = element_text(size=12,  family="Helvetica"))
+
+annotationER<-annotate(geom = "text",
+                     x= 1.3, y = 4.6, 
+                     label = paste(round(mean(ecology_data.RMRd_er$slope),2), " (sd ", round(sd(ecology_data.RMRd_er$slope),2) ,")", sep =""), family = "Helvetica", size=4, color="black")
+annotationW<-annotate(geom = "text", 
+                      x= 1.3, y = 4,
+                      label = paste(round(mean(ecology_data.RMRd_w$slope),2), " (sd ", round(sd(ecology_data.RMRd_w$slope),2) ,")", sep =""),
+                      family = "Helvetica", size=4,  color=cols.rmr[2])
+
+plot_hist2_rmrlm<-ggplot(ecology_data.RMRd, aes(x=slope, fill = test_category3, 
+                                                color = test_category3)) +
+  geom_vline(xintercept = mean(ecology_data.RMRd_er$slope), color="black",
+             lty="solid", lwd=1)+
+  geom_vline(xintercept = mean(ecology_data.RMRd_w$slope), color=cols.rmr[2],
+             lty="solid", lwd=1)+
+  geom_histogram(show.legend = FALSE, bins=30, alpha = 0.4, linewidth = 0.)+
+  scale_color_manual(values = c("black", cols.rmr[2]))+
+  scale_fill_manual(values = c("black", cols.rmr[2]))+
   ylim(0,5)+
-  scale_x_continuous(limits=c(0.4, 1.5))+
-  facet_wrap(.~test_category3)
-ggformat(plot_hist2_rmrlm, x_title = expression(Scaling~slope~(italic(b))), y_title = "Frequency", print = FALSE)
-plot_hist2_rmrlm <- plot_hist2_rmrlm + theme(axis.title.x = element_text(size=25,  family="Helvetica"),
-                                             axis.text.x = element_text(size=21,  family="Helvetica"),
-                                             axis.title.y = element_text(size=25,  family="Helvetica"),
-                                             axis.text.y = element_text(size=21,  family="Helvetica"))
+  scale_x_continuous(limits=c(0.5, 1.5))+
+  facet_wrap(.~test_category3)+
+  at_panel(annotationER, PANEL == 1)+
+  at_panel(annotationW, PANEL == 1)
 
+ggformat(plot_hist2_rmrlm, x_title = expression(Scaling~slope~(italic(b))), y_title = "Frequency", print = F)
+plot_hist2_rmrlm <- plot_hist2_rmrlm + theme(axis.title.x = element_text(size=12,  family="Helvetica"),
+                                             axis.text.x = element_text(size=12,  family="Helvetica"),
+                                             axis.title.y = element_text(size=12,  family="Helvetica"),
+                                             axis.text.y = element_text(size=12,  family="Helvetica"))
 
-plot_hist2_faslm<-ggplot(ecology_data.FASd, aes(x=slope)) +
-  geom_vline(xintercept = mean(ecology_data.FASd_er$slope), color="black", lty="solid", lwd=1)+
-  geom_vline(xintercept = 0, color="grey30", lty="dashed", lwd=0.5)+
-  geom_vline(xintercept = mean(ecology_data.FASd_w$slope), color="red", lty="solid", lwd=1)+
-  geom_text(mapping = aes(x= -0.5, y = 5.5), label = paste(round(mean(ecology_data.FASd_er$slope),2), " (", round(sd(ecology_data.FASd_er$slope),2) ,")", sep =""), family = "Helvetica", size=6, fontface="bold", color="black")+
-  geom_text(mapping = aes(x= -0.5, y = 4.5), label = paste(round(mean(ecology_data.FASd_w$slope),2), " (", round(sd(ecology_data.FASd_w$slope),2) ,")", sep =""), family = "Helvetica", size=6, fontface="bold", color="red")+
-  geom_histogram(show.legend = FALSE, bins=40, fill = cols.fas[1], alpha = 1)+
-  scale_color_manual(values = c("black", "red"))+
-  # ylim(0,12)+
-  # scale_x_continuous(limits=c(-0.1, 1.7))+
-  facet_wrap(.~test_category3)
-ggformat(plot_hist2_faslm, x_title = expression(Scaling~slope~(italic(b))), y_title = "Frequency", print = FALSE)
-plot_hist2_faslm <- plot_hist2_faslm + theme(axis.title.x = element_text(size=25,  family="Helvetica"),
-                                             axis.text.x = element_text(size=21,  family="Helvetica"),
-                                             axis.title.y = element_text(size=25,  family="Helvetica"),
-                                             axis.text.y = element_text(size=21,  family="Helvetica"))
+annotationER<-annotate(geom = "text",
+                     x= -0.5, y = 7.9, 
+                     label = paste(round(mean(ecology_data.FASd_er$slope),2), " (sd ", round(sd(ecology_data.FASd_er$slope),2) ,")", sep =""), family = "Helvetica", size=4, color="black")
+annotationW<-annotate(geom = "text", 
+                      x= -0.5, y = 7,
+                      label = paste(round(mean(ecology_data.FASd_w$slope),2), " (sd ", round(sd(ecology_data.FASd_w$slope),2) ,")", sep =""),
+                      family = "Helvetica", size=4,  color=cols.fas[2])
+
+plot_hist2_faslm<-ggplot(ecology_data.FASd, aes(x=slope, fill = test_category3, 
+                                                color = test_category3)) +
+  geom_vline(xintercept = mean(ecology_data.FASd_er$slope), color="black",
+             lty="solid", lwd=1)+
+  geom_vline(xintercept = mean(ecology_data.FASd_w$slope), color=cols.fas[2],
+             lty="solid", lwd=1)+
+  geom_histogram(show.legend = FALSE, bins=30, alpha = 0.4, linewidth = 0.)+
+  scale_color_manual(values = c("black", cols.fas[2]))+
+  scale_fill_manual(values = c("black", cols.fas[2]))+
+  ylim(0,8.5)+
+  # scale_x_continuous(limits=c(-0.6, 0.1))+
+  facet_wrap(.~test_category3)+
+  at_panel(annotationER, PANEL == 1)+
+  at_panel(annotationW, PANEL == 1)
+
+ggformat(plot_hist2_faslm, x_title = expression(Scaling~slope~(italic(b))), y_title = "Frequency", print = F)
+plot_hist2_faslm <- plot_hist2_faslm + theme(axis.title.x = element_text(size=12,  family="Helvetica"),
+                                             axis.text.x = element_text(size=12,  family="Helvetica"),
+                                             axis.title.y = element_text(size=12,  family="Helvetica"),
+                                             axis.text.y = element_text(size=12,  family="Helvetica"))
 
 
 ecolhist.plot<-cowplot:::plot_grid(plot_hist2_amrlm, plot_hist2_rmrlm,plot_hist2_faslm,
                                    align = "hv",
                                    axis = "l",
                                    nrow = 3,
-                                   ncol = 1) 
+                                   ncol = 1, 
+                              labels = "AUTO") 
 save_plot(filename = paste("./Figures/Suppl_ecol_hist.png", sep=""),
-          ecolhist.plot, base_width = 8, base_height = 12, units = "in")
+          ecolhist.plot, base_width = 10, base_height = 8, units = "in")
 
 
 
 # (SUPPL) Hist of slopes for the species ---
-plot_hist3_amrlm<-ggplot(species.amr, aes(x=slope)) +
-  # geom_vline(xintercept = mean(d_bind.rmr$MLEslope[d_bind.rmr$parameter=="lnBWg"]), colour="black", lty=2, lwd=1)+
+# ### by species =------
+annotationER<-annotate(geom = "text",
+                     x= 2, y = 11.5,
+                     label = paste(round(mean(species.amr.er$slope),2), " (", round(sd(species.amr.er$slope),2) ,")", sep =""), family = "Helvetica", size=4, color="black")
+annotationW<-annotate(geom = "text", 
+                      x= 2, y = 10.1,
+                      label = paste(round(mean(species.amr.w$slope),2), " (", round(sd(species.amr.w$slope),2) ,")", sep =""),
+                      family = "Helvetica", size=4,  color=cols.amr[2])
+
+plot_hist3_amrlm<-ggplot(species.amr, aes(x=slope, color = test_category3, fill = test_category3)) +
   geom_vline(xintercept = mean(species.amr.er$slope), color="black", lty="solid", lwd=1)+
-  geom_text(mapping = aes(x= 2, y = 11.5), label = paste(round(mean(species.amr.er$slope),2), " (", round(sd(species.amr.er$slope),2) ,")", sep =""), family = "Helvetica", size=6, fontface="bold", color="black")+
-  geom_text(mapping = aes(x= 2, y = 10.1), label = paste(round(mean(species.amr.w$slope),2), " (", round(sd(species.amr.w$slope),2) ,")", sep =""), family = "Helvetica", size=6, fontface="bold", color="red")+
-  geom_vline(xintercept = mean(species.amr.w$slope), color="red", lty="solid", lwd=1)+
-  geom_histogram(show.legend = FALSE, bins=50, fill = cols.amr[1], alpha = 1 )+
-  scale_color_manual(values = c("black", "red"))+
+  geom_vline(xintercept = mean(species.amr.w$slope), color=cols.amr[2], lty="solid", lwd=1)+
+  geom_histogram(show.legend = FALSE, bins=50, alpha = 0.5, linewidth = 0)+
+  scale_color_manual(values = c("black", cols.amr[2]))+
+  scale_fill_manual(values = c("black", cols.amr[2]))+
   ylim(0,12)+
-  scale_x_continuous(limits=c(-1, 3))+
-  facet_wrap(.~test_category3)
+  # scale_x_continuous(limits=c(-1, 3))+
+  facet_wrap(.~test_category3)+
+  at_panel(annotationER, PANEL == 1)+
+  at_panel(annotationW, PANEL == 1)
+
  ggformat(plot_hist3_amrlm, x_title = expression(Scaling~slope~(italic(b))), y_title = "Frequency", print = FALSE)
-plot_hist3_amrlm <- plot_hist3_amrlm + theme(axis.title.x = element_text(size=25,  family="Helvetica"),
-                                             axis.text.x = element_text(size=21,  family="Helvetica"),
-                                             axis.title.y = element_text(size=25,  family="Helvetica"),
-                                             axis.text.y = element_text(size=21,  family="Helvetica"))
+plot_hist3_amrlm <- plot_hist3_amrlm + theme(axis.title.x = element_text(size=12,  family="Helvetica"),
+                                             axis.text.x = element_text(size=12,  family="Helvetica"),
+                                             axis.title.y = element_text(size=12,  family="Helvetica"),
+                                             axis.text.y = element_text(size=12,  family="Helvetica"))
 
 
-plot_hist3_rmrlm<-ggplot(species.rmr, aes(x=slope)) +
-  # geom_vline(xintercept = mean(d_bind.rmr$MLEslope[d_bind.rmr$parameter=="lnBWg"]), colour="black", lty=2, lwd=1)+
+annotationER<-annotate(geom = "text",
+                     x= -0.5, y = 11.5,
+                     label = paste(round(mean(species.rmr.er$slope),2), " (", round(sd(species.rmr.er$slope),2) ,")", sep =""), family = "Helvetica", size=4, color="black")
+annotationW<-annotate(geom = "text", 
+                      x= -0.5, y = 10.1,
+                      label = paste(round(mean(species.rmr.w$slope),2), " (", round(sd(species.rmr.w$slope),2) ,")", sep =""),
+                      family = "Helvetica", size=4,  color=cols.rmr[2])
+
+plot_hist3_rmrlm<-ggplot(species.rmr, aes(x=slope, color = test_category3, fill = test_category3)) +
   geom_vline(xintercept = mean(species.rmr.er$slope), color="black", lty="solid", lwd=1)+
-  geom_vline(xintercept = mean(species.rmr.w$slope), color="red", lty="solid", lwd=1)+
-  geom_text(mapping = aes(x= 1.7, y = 11.5), label = paste(round(mean(species.rmr.er$slope),2), " (", round(sd(species.rmr.er$slope),2) ,")", sep =""), family = "Helvetica", size=6, fontface="bold", color="black")+
-  geom_text(mapping = aes(x= 1.7, y = 10.1), label = paste(round(mean(species.rmr.w$slope),2), " (", round(sd(species.rmr.w$slope),2) ,")", sep =""), family = "Helvetica", size=6, fontface="bold", color="red")+
-  geom_histogram(show.legend = FALSE, bins=50, fill = cols.rmr[1] , alpha = 1 )+
-  scale_color_manual(values = c("black", "red"))+
+  geom_vline(xintercept = mean(species.rmr.w$slope), color=cols.rmr[2], lty="solid", lwd=1)+
+  geom_histogram(show.legend = FALSE, bins=50, alpha = 0.5, linewidth = 0)+
+  scale_color_manual(values = c("black", cols.rmr[2]))+
+  scale_fill_manual(values = c("black", cols.rmr[2]))+
   ylim(0,12)+
-  scale_x_continuous(limits=c(-0.5, 2.5))+
-  facet_wrap(.~test_category3)
-ggformat(plot_hist3_rmrlm, x_title = expression(Scaling~slope~(italic(b))), y_title = "Frequency", print = FALSE)
-plot_hist3_rmrlm <- plot_hist3_rmrlm + theme(axis.title.x = element_text(size=25,  family="Helvetica"),
-                                             axis.text.x = element_text(size=21,  family="Helvetica"),
-                                             axis.title.y = element_text(size=25,  family="Helvetica"),
-                                             axis.text.y = element_text(size=21,  family="Helvetica"))
+  # scale_x_continuous(limits=c(-1, 3))+
+  facet_wrap(.~test_category3)+
+  at_panel(annotationER, PANEL == 1)+
+  at_panel(annotationW, PANEL == 1)
+
+ ggformat(plot_hist3_rmrlm, x_title = expression(Scaling~slope~(italic(b))), y_title = "Frequency", print = FALSE)
+plot_hist3_rmrlm <- plot_hist3_rmrlm + theme(axis.title.x = element_text(size=12,  family="Helvetica"),
+                                             axis.text.x = element_text(size=12,  family="Helvetica"),
+                                             axis.title.y = element_text(size=12,  family="Helvetica"),
+                                             axis.text.y = element_text(size=12,  family="Helvetica"))
 
 
-plot_hist3_faslm<-ggplot(species.fas, aes(x=slope)) +
-  # geom_vline(xintercept = mean(d_bind.rmr$MLEslope[d_bind.rmr$parameter=="lnBWg"]), colour="black", lty=2, lwd=1)+
+annotationER<-annotate(geom = "text",
+                     x= 2, y = 11.5,
+                     label = paste(round(mean(species.fas.er$slope),2), " (", round(sd(species.fas.er$slope),2) ,")", sep =""), family = "Helvetica", size=4, color="black")
+annotationW<-annotate(geom = "text", 
+                      x= 2, y = 10.1,
+                      label = paste(round(mean(species.fas.w$slope),2), " (", round(sd(species.fas.w$slope),2) ,")", sep =""),
+                      family = "Helvetica", size=4,  color=cols.fas[2])
+
+plot_hist3_faslm<-ggplot(species.fas, aes(x=slope, color = test_category3, fill = test_category3)) +
   geom_vline(xintercept = mean(species.fas.er$slope), color="black", lty="solid", lwd=1)+
-  geom_vline(xintercept = 0, color="grey30", lty="dashed", lwd=0.5)+
-  geom_vline(xintercept = mean(species.fas.w$slope), color="red", lty="solid", lwd=1)+
-  geom_text(mapping = aes(x= 2, y = 11.5), label = paste(round(mean(species.fas.er$slope),2), " (", round(sd(species.fas.er$slope),2) ,")", sep =""), family = "Helvetica", size=6, fontface="bold", color="black")+
-  geom_text(mapping = aes(x= 2, y = 10.1), label = paste(round(mean(species.fas.w$slope),2), " (", round(sd(species.fas.w$slope),2) ,")", sep =""), family = "Helvetica", size=6, fontface="bold", color="red")+
-  geom_histogram(show.legend = FALSE, bins=40, fill = cols.fas[1], alpha = 1)+
-  scale_color_manual(values = c("black", "red"))+
+  geom_vline(xintercept = mean(species.fas.w$slope), color=cols.fas[2], lty="solid", lwd=1)+
+  geom_histogram(show.legend = FALSE, bins=50, alpha = 0.5, linewidth = 0)+
+  scale_color_manual(values = c("black", cols.fas[2]))+
+  scale_fill_manual(values = c("black", cols.fas[2]))+
   ylim(0,12)+
-  scale_x_continuous(limits=c(-2, 3.5))+
-  facet_wrap(.~test_category3)
-ggformat(plot_hist3_faslm, x_title = expression(Scaling~slope~(italic(b))), y_title = "Frequency", print = FALSE)
-plot_hist3_faslm <- plot_hist3_faslm + theme(axis.title.x = element_text(size=25,  family="Helvetica"),
-                                             axis.text.x = element_text(size=21,  family="Helvetica"),
-                                             axis.title.y = element_text(size=25,  family="Helvetica"),
-                                             axis.text.y = element_text(size=21,  family="Helvetica"))
+  # scale_x_continuous(limits=c(-1.5, 3))+
+  facet_wrap(.~test_category3)+
+  at_panel(annotationER, PANEL == 1)+
+  at_panel(annotationW, PANEL == 1)
+
+ ggformat(plot_hist3_faslm, x_title = expression(Scaling~slope~(italic(b))), y_title = "Frequency", print = FALSE)
+plot_hist3_faslm <- plot_hist3_faslm + theme(axis.title.x = element_text(size=12,  family="Helvetica"),
+                                             axis.text.x = element_text(size=12,  family="Helvetica"),
+                                             axis.title.y = element_text(size=12,  family="Helvetica"),
+                                             axis.text.y = element_text(size=12,  family="Helvetica"))
+
 
 spechist.plot<-cowplot:::plot_grid(plot_hist3_amrlm, plot_hist3_rmrlm,plot_hist3_faslm,
                               align = "hv",
                               axis = "l",
                               nrow = 3,
-                              ncol = 1) 
+                              ncol = 1, 
+                              labels = "AUTO") 
 save_plot(filename = paste("./Figures/Suppl_species_hist.png", sep=""),
-      spechist.plot, base_width = 8, base_height = 12, units = "in")
+      spechist.plot, base_width = 10, base_height = 8, units = "in")
 
 

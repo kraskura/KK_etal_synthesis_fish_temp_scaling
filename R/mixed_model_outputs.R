@@ -9,7 +9,8 @@ model_outputs<-function(phylo=TRUE,
                         best.model.amr.w,
                         best.model.as.w,
                         best.model.fas.w,
-                        estimate.CI = TRUE){
+                        estimate.CI = TRUE,
+                        RMRint = FALSE){
   if(phylo){
     foldername.phylo<-"Phylo"
   }else{
@@ -216,6 +217,31 @@ model_outputs<-function(phylo=TRUE,
   AMR.slopes$temp_categ<-"er"
   AMR.slopes$`(Intercept)` <- NA
   
+  if(RMRint){
+    # predicted slopes for RMR interaction 
+    RMR.slopes<-(emtrends(best.model.rmr.er, pairwise ~ tempTest,
+                          pbkrtest.limit = 4000, var="lnBWg",
+                          at=list(tempTest=c(5,
+                                            15,
+                                            25,
+                                            35)))) # 0, 10, 20, 30, 35 C
+    
+    RMR.slopes<-data.frame(RMR.slopes$emtrends)
+    # RMR.slopes<-RMR.slopes
+    RMR.slopes$performance<-"MMR"
+    RMR.slopes$temp_categ<-"er"
+    RMR.slopes$`(Intercept)` <- NA
+    
+    RMR_er_row<-RMR.slopes[, c("performance", "temp_categ", "lnBWg.trend",
+                              "(Intercept)", "tempTest")]
+  }else{
+    RMR_er_row<-as.data.frame(t(c("performance" = "RMR",
+                  "temp_categ" = "er",
+                  RMR_slope,
+                  RMR_int, 
+                  "tempTest" = NA)))
+  }
+  
   # AMR.slopes$`E(ev)`<-NA
   # fixed effects activation energies:
   # MMR_E_ER<-(emtrends(best.model.amr.er, pairwise ~ lnBWg , pbkrtest.limit = 4000,
@@ -252,11 +278,6 @@ model_outputs<-function(phylo=TRUE,
                               "(Intercept)",
                               "tempTest")
 
-  RMR_er_row<-as.data.frame(t(c("performance" = "RMR",
-                  "temp_categ" = "er",
-                  RMR_slope,
-                  RMR_int, 
-                  "tempTest" = NA)))
   RMR_W_row<-as.data.frame(t(c("performance" = "RMR",
                   "temp_categ" = "warm",
                   RMR_slope_w,

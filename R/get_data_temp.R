@@ -47,8 +47,7 @@ get_data_temp <- function(data.amr, data.rmr,
   # mahi mahi
   # California killifish
 
-    # curing AMR *****************************
-  
+  # curing AMR *****************************
   cols.numeric<-c(1,4,8,9,10)
   data.amr[, cols.numeric]<-sapply(data.amr[, cols.numeric], as.numeric)
   
@@ -57,19 +56,19 @@ get_data_temp <- function(data.amr, data.rmr,
   data.amr$lnAMR<-log(data.amr$AMR)
   data.amr$lnBWg<-log(data.amr$BW_g)
   
-  data.amr$trial_ID<-as.factor(data.amr$trial_ID)
-  data.amr$study_ID<-as.factor(data.amr$study_ID)
-  data.amr$fish_ID<-as.factor(data.amr$fish_ID)
-  data.amr$test_category<-factor(data.amr$test_category)
-  data.amr$trial<-as.factor(data.amr$trial)
-  data.amr$species<-factor(data.amr$species)
-  
   # adding Factorial Scope and Aerobic scope to ony AMR dataframe
   data.amr$FAS<-data.amr$AMR/data.amr$RMR
   data.amr$AS<-data.amr$AMR-data.amr$RMR
   data.amr$lnAS<-log(data.amr$AS)
   data.amr$lnFAS<-log(data.amr$FAS)
   data.amr$tempTestK<-celsius.to.kelvin(data.amr$tempTest, round = 2)
+  
+  data.amr$trial_ID<-as.factor(data.amr$trial_ID)
+  data.amr$study_ID<-as.factor(data.amr$study_ID)
+  data.amr$fish_ID<-as.factor(data.amr$fish_ID)
+  data.amr$test_category<-factor(data.amr$test_category)
+  data.amr$trial<-as.factor(data.amr$trial)
+  data.amr$species<-factor(data.amr$species)
   
   # dummy variable for temp category (k-1 variables so 2) 
   # d1(acute): ecol_relev = 0, acute=1, acclim =0 
@@ -120,7 +119,6 @@ get_data_temp <- function(data.amr, data.rmr,
   data.rmr$species<-factor(data.rmr$species)
   data.rmr$tempTestK<-celsius.to.kelvin(data.rmr$tempTest, round = 2)
   
-  
   # add dummy variable for temp category (k-1 variables so 2) 
   # d1(acute): ecol_relev = 0, acute=1, acclim =0 
   # d2(acclim): ecol_relev = 0, acute=0, acclim =1
@@ -135,7 +133,15 @@ get_data_temp <- function(data.amr, data.rmr,
   data.rmr$d1[data.rmr$test_category=="acclim"]<-0
   data.rmr$d2[data.rmr$test_category=="acclim"]<-1
   
+  # ********************************************************************
+  # Take out MMR from study # 415:
+  # Wootton, H.F., Morrongiello, J.R., Schmitt, T., Audzijonyte, A., 2022 Smaller adult fish size in warmer water is not explained by elevated metabolism. Ecology Letters. https://doi.org/10.1111/ele.13989
+  # Measurements produce FAS > 20; only RMR assumed usable. 
+  data.amr<-data.amr[!data.amr$study_ID == 415,]
+  message("EXCLUDING Study # 415 MMR measurements")
+  # ********************************************************************
   
+  # dont include data that were below optimal temperature range. 
   if(onlyTop.above){
     # take out fish that are acclimated to Top min ranges.
     # "Gasterosteus aculeatus" acclimated at 10 for warm Populations: "POPMyvW", "POPGTS", "POPAshnW"
