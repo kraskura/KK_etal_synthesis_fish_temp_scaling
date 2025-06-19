@@ -5,8 +5,8 @@
 # run full model comparison analysis ( run = TRUE), or figures, best models, only (run = FALSE)?
 # this is set for full execution of code (sourcing code); see message below
 # if run is FALSE the last run's 90% CI are used; not estimated new (take a few)
-run = FALSE
-# run = TRUE 
+# run = FALSE
+run = TRUE
 
 if(run){
   message("running all models and BIC comparison: this will take a while")
@@ -549,11 +549,12 @@ model_out<-model_outputs(phylo = TRUE,
               best.model.fas.w = fas_mod_W,
               estimate.CI = run) # takes a few hours; outputs saved 
 
-# read.csv("./Data_exports/Phylo/Table_CIsummary.csv")
-# colnames(sum_CItable)<-c("var", "ci5", "ci95","var_repeat", "MR", "temp_cat") # if from read.csv 
+read.csv("./Data_exports/Phylo/Table_CIsummary.csv")
+colnames(sum_CItable)<-c("var", "ci5", "ci95","var_repeat", "MR", "temp_cat") # if from read.csv
 
+# use this 
 sum_CItable<-data.frame(model_out[[1]])
-colnames(sum_CItable)<-c("var", "ci5", "ci95","var_repeat", "MR", "temp_cat")
+colnames(sum_CItable)<-c("ci5", "ci95","var_repeat", "MR", "temp_cat")
 
 scaling.params<-data.frame(model_out[[2]])
 sum_data<-data.frame(model_out[[3]])
@@ -571,9 +572,9 @@ AMR_slope15<-round(as.numeric(scaling.params[scaling.params$performance == "MMR"
 AMR_slope25<-round(as.numeric(scaling.params[scaling.params$performance == "MMR" & 
                             scaling.params$temp_categ == "er" & 
                             scaling.params$tempTest == "25"  , "lnBWg"]),2)
-AMR_slope35<-round(as.numeric(scaling.params[scaling.params$performance == "MMR" & 
+AMR_slope31<-round(as.numeric(scaling.params[scaling.params$performance == "MMR" & 
                             scaling.params$temp_categ == "er" & 
-                            scaling.params$tempTest == "35"  , "lnBWg"]),2)
+                            scaling.params$tempTest == "31"  , "lnBWg"]),2)
 FAS_slope<-round(as.numeric(scaling.params[scaling.params$performance == "FAS" & 
                             scaling.params$temp_categ == "er", "lnBWg"]),2)
 AS_slope<-round(as.numeric(scaling.params[scaling.params$performance == "AS" & 
@@ -762,11 +763,10 @@ set.seed(51423)
 # General scaling plots ------
 AMRmodel_plot1<-ggplot(data=data.amrER, aes(x=lnBWg, y=lnAMR)) +
   geom_point(alpha=0.9,  size=1, pch=1, color="grey75")+
-  geom_line(data=data.plotAMRint_ER[c(round(data.plotAMRint_ER$tempTest,2)== 0 |
-                                      round(data.plotAMRint_ER$tempTest,2)== 10 |
-                                      round(data.plotAMRint_ER$tempTest,2)== 20|
-                                      round(data.plotAMRint_ER$tempTest,2)== 30|
-                                      round(data.plotAMRint_ER$tempTest,2)== 35),],
+  geom_line(data=data.plotAMRint_ER[round(data.plotAMRint_ER$tempTest,2)== 5 |
+                                      round(data.plotAMRint_ER$tempTest,2)== 15|
+                                      round(data.plotAMRint_ER$tempTest,2)== 25|
+                                      round(data.plotAMRint_ER$tempTest,2)== 31,],
             aes(y = model_predFE, x=lnBWg,  group=tempTest, color = tempTest),
             linewidth=0.5, lty=1,alpha=0.8, show.legend=FALSE) +
   geom_point(data=data.amr.test, aes(x=lnBWg, y=lnAMR),
@@ -791,7 +791,7 @@ AMRmodel_plot1<-ggplot(data=data.amrER, aes(x=lnBWg, y=lnAMR)) +
            label = bquote(25*degree*C:~italic(b)[MMR] == .(AMR_slope25)),
            size=3.5, hjust=0, family="Helvetica", color = "black")+
   annotate("text",  x = 2.5, y = -6,
-           label = bquote(35*degree*C:~italic(b)[MMR] == .(AMR_slope35)),
+           label = bquote(31*degree*C:~italic(b)[MMR] == .(AMR_slope31)),
            size=3.5, hjust=0, family="Helvetica", color = "black")+
   # scale_fill_gradient( low = cols.amr[5], high = cols.amr[1])+
   scale_color_gradient( low = "grey", high = "black")+
@@ -892,7 +892,7 @@ scaling<-cowplot:::plot_grid(AMRmodel_plot1, RMRmodel_plot1,
                              label_y = c(0.895, 0.895),
                               label_size = 12)
 # scaling
-ggsave(filename = paste("./Figures/Figure2.png", sep=""),
+ggsave(filename = paste("./Figures/Figure3.png", sep=""),
        plot=scaling, width = 6.8, height = 6.8, units = "in")
 
 
@@ -1074,15 +1074,25 @@ MRmodel_plot_inset<-
   ggplot(data = sum_CItable[sum_CItable$var_repeat == "lnBWg" &  sum_CItable$MR == "RMR" &
                               sum_CItable$temp_cat == "ER",])+
   geom_linerange(aes(ymin = ci5, ymax = ci95, x = MR))+
-  geom_point(mapping = aes(x = "MMR", y = AMR_slope25), size = 2)+
+  geom_point(mapping = aes(x = "MMR", y = AMR_slope31), size = 2, pch = 21,
+             color = "black", stroke = 0.5,fill = "#5d7d7c")+
+  geom_point(mapping = aes(x = "MMR", y = AMR_slope5), size = 2, pch = 21,
+             color = "black", stroke = 0.5,fill = "#c4c7cc")+
+  geom_point(mapping = aes(x = "MMR", y = AMR_slope15), size = 2, pch = 21,
+             color = "black", stroke = 0.5,fill = "#a2adb5")+
+  geom_point(mapping = aes(x = "MMR", y = AMR_slope25), size = 2, pch = 21,
+             color = "black", stroke = 0.5, fill = "#7e959b")+
   geom_point(mapping = aes(x = "RMR", y = RMR_slope), size = 2)+
-  annotate(geom = "text", y = 0.9, x = 1.2, label = "25ºC", size = 3)+
+  annotate(geom = "text", x = 1.25, y = 0.7, label = "5", size = 2, angle = 45, hjust =0)+
+  annotate(geom = "text", x = 1.25, y = 0.75, label = "15", size = 2, angle = 45, hjust =0)+
+  annotate(geom = "text", x = 1.25, y = 0.80, label = "25", size = 2, angle = 45, hjust =0)+
+  annotate(geom = "text", x = 1.25, y = 0.84, label = "31ºC", size = 2, angle = 45, hjust =0)+
   theme_classic()+
   coord_flip()+
   ylim(0.5, 1)+
   xlab("")+
   ylab("Slope value")+
-  geom_hline(yintercept = c(0.75, 1), linetype = "dashed", linewidth = 0.4)+
+  geom_hline(yintercept = c(0.75, 1), linetype = "dashed", linewidth = 0.1)+
   theme(axis.text = element_text(size = 8, family = "Helvetica"),
         axis.title.x = element_text(size = 9, family = "Helvetica"),
       panel.background = element_rect(fill = "transparent",
@@ -1104,10 +1114,10 @@ MRmodel_plot2<-
   geom_line(data=data.plotAMRint_ER[round(data.plotAMRint_ER$tempTest,2)==5 | 
                                         round(data.plotAMRint_ER$tempTest,2)==15 |
                                         round(data.plotAMRint_ER$tempTest,2)==25 |
-                                        round(data.plotAMRint_ER$tempTest,2)==35,],
-            aes(y = model_predFE, x=lnBWg,  group=tempTest, color= tempTest),
+                                        round(data.plotAMRint_ER$tempTest,2)==31,],
+            aes(y = model_predFE, x=lnBWg,  group=factor(tempTest), color= factor(tempTest)),
             size=0.7, lty=1, show.legend=FALSE) +
-  scale_color_gradient( low = "grey", high = "black")+
+  scale_color_manual(values = c("#c4c7cc", "#a2adb5", "#7e959b","#5d7d7c"))+
   ylim(x = -6.3, 12)+
   xlim(x = -6.3, 12)+
   annotate("text",  x = -5.8, y = 11.8, label = "B", fontface =2,
@@ -1131,7 +1141,7 @@ MRmodel_plot2<-
 		axis.title.x=element_text(size=12),
 		panel.border = element_rect(linetype = "solid",fill=NA, colour = "black"))+
   inset_element(MRmodel_plot_inset, 0.01, 0.6, 0.7, 1)
-# MRmodel_plot2
+MRmodel_plot2
   
 # warm final plots 
 # # All fish together:
@@ -1139,7 +1149,7 @@ MRmodel_plot_inset_w<-
   ggplot(data = sum_CItable[sum_CItable$var_repeat == "lnBWg" &
                               c(sum_CItable$MR == "RMR" | sum_CItable$MR == "MMR") &
                               sum_CItable$temp_cat == "W",])+
-  geom_hline(yintercept = c(0.75, 1), linetype = "dashed", linewidth = 0.4)+
+  geom_hline(yintercept = c(0.75, 1), linetype = "dashed", linewidth = 0.1)+
   geom_linerange(aes(ymin = ci5, ymax = ci95, x = MR, color = MR), show.legend = F)+
   geom_point(mapping = aes(x = "MMR", y = AMR_slope_w), size = 2, color = cols.amr[3])+
   geom_point(mapping = aes(x = "RMR", y = RMR_slope_w), size = 2, color = cols.rmr[3])+
@@ -1151,15 +1161,15 @@ MRmodel_plot_inset_w<-
   ylab("Slope value")+
   theme(axis.text = element_text(size = 8, family = "Helvetica"),
         axis.title.x = element_text(size = 9, family = "Helvetica"),
-      panel.background = element_rect(fill = "transparent",
-                                      colour = NA_character_), # necessary to avoid drawing panel outline
-      panel.grid.major = element_blank(), # get rid of major grid
-      panel.grid.minor = element_blank(), # get rid of minor grid
-      plot.background = element_rect(fill = "transparent",
-                                     colour = NA_character_), # necessary to avoid drawing plot outline
-      legend.background = element_rect(fill = "transparent"),
-      legend.box.background = element_rect(fill = "transparent"),
-      legend.key = element_rect(fill = "transparent"))
+        panel.background = element_rect(fill = "transparent",
+                                        colour = NA_character_), # necessary to avoid drawing panel outline
+        panel.grid.major = element_blank(), # get rid of major grid
+        panel.grid.minor = element_blank(), # get rid of minor grid
+        plot.background = element_rect(fill = "transparent",
+                                       colour = NA_character_), # necessary to avoid drawing plot outline
+        legend.background = element_rect(fill = "transparent"),
+        legend.box.background = element_rect(fill = "transparent"),
+        legend.key = element_rect(fill = "transparent"))
 
 MRmodel_plot2_w<-
   ggplot(data=data.rmr.test, aes(x=lnBWg, y=lnRMR)) +
@@ -1201,7 +1211,7 @@ data_sim<-read.csv(here("./Data/Conceptual_fig_data.csv"))
 psim<-ggplot(data_sim[data_sim$simID==3,], aes(x=log(BW_kg), y=log(pred.mmr.mgO2min) ))+
   geom_abline(slope = data_sim[data_sim$simID==3,"slope.MMR"][1],
               intercept = data_sim[data_sim$simID==3,"int.MMR"][1],
-              color = "black", linewidth=0.7)+ # MMR
+              color = "#7e959b", linewidth=0.7)+ # MMR
   geom_abline(slope = data_sim[data_sim$simID==3,"slope.SMR"][1],
               intercept = data_sim[data_sim$simID==3,"int.SMR"][1],
               color = "black", linewidth=0.7)+ # MMR
@@ -1209,9 +1219,9 @@ psim<-ggplot(data_sim[data_sim$simID==3,], aes(x=log(BW_kg), y=log(pred.mmr.mgO2
   annotate("text",  x = -4.3, y = 4.4, label = "A", fontface =2,
            size=4.5, hjust=1, family="Helvetica", color = "black")+
   annotate("text",  x = 0.8, y = 3.5, label = expression(paste("MMR")),
-       size=5, hjust=0, family="Helvetica", angle = 40, color = "black")+
+       size=5, hjust=0, family="Helvetica", angle = 42, color = "#7e959b")+
   annotate("text",  x = 1, y = 0.9, label = expression(paste("RMR")),
-           size=5, hjust=0, family="Helvetica", angle = 31, color = "black")+
+           size=5, hjust=0, family="Helvetica", angle = 33, color = "black")+
   annotate("text",  x = -2, y = -4.15, label = expression(paste("OPTIMAL TEMPERATURES")),
            size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
   annotate("text",  x = -3.8, y = 4.3, label = expression(paste("HYPOTHESIS")),
@@ -1256,9 +1266,9 @@ psim_w<-ggplot(data_sim[data_sim$simID==1,], aes(x=log(BW_kg), y=log(pred.mmr.mg
   annotate("text",  x = -4.3, y = 4.4, label = "C", fontface =2,
            size=4.5, hjust=1, family="Helvetica", color = "black")+
   annotate("text",  x = 0.8, y = 3.3, label = expression(paste("MMR")),
-       size=5, hjust=0, family="Helvetica", angle = 27, color = cols.amr[2])+
+       size=5, hjust=0, family="Helvetica", angle = 32, color = cols.amr[2])+
   annotate("text",  x = 1, y = 0.9, label = expression(paste("RMR")),
-           size=5, hjust=0, family="Helvetica", angle = 42, color = cols.rmr[2])+
+           size=5, hjust=0, family="Helvetica", angle = 47, color = cols.rmr[2])+
   annotate("text",  x = -2, y = -4.15, label = expression(paste("WARM TEMPERATURES")),
            size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
   annotate("text",  x = -3.8, y = 4.3, label = expression(paste("HYPOTHESIS")),

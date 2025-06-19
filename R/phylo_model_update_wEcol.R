@@ -432,273 +432,550 @@ write.csv(file = here("./Data_exports/Ecologies/ecologies_data_modelParams.csv")
 
 
 ## Ecologies: violin lots, AS and FAS ecology size independent -------------
-# Demersal Pelagic MMR, RMR, AS ------
-ecolAS1<-ggplot(data=data.as, aes(y=mass_specas, fill=DemersPelag, x=test_category3,
-                                  group = interaction(test_category3, DemersPelag)))+
-  geom_violin(data=data.rmr, aes(y=mass_specrmr, fill=DemersPelag, x=test_category3,
-                                group = interaction(test_category3, DemersPelag)), 
-              alpha=1, size=0.2)+
-  geom_violin(data=data.amr, aes(y=mass_specamr, fill=DemersPelag, x=test_category3,
-                                  group = interaction(test_category3, DemersPelag)), 
-              alpha=0.1, size=0.2)+  # geom_boxplot( outlier.shape = NA) +
-  geom_pointrange(data.as, mapping=aes(x=test_category3, y = mass_specas,
-                                       fill=DemersPelag, 
-                                       group = interaction(test_category3, DemersPelag)),
-                  stat = "summary",
-                  position=position_dodge(width = 0.9), color = "black", pch=23)+
-  scale_fill_viridis_d(option = "A")+
-  scale_x_discrete(labels=c("Optimal", "Warm"))+
-  ylim(0,8)+
-  geom_segment(aes(x = 2.12, y = 6, xend = 2.2, yend = 6.2), size = 0.1)+
-  geom_segment(aes(x = 2.12, y = 3.5, xend = 2.2, yend = 4.4), size = 0.1)+
-  geom_segment(aes(x = 2.12, y = 1.2, xend = 2.2, yend = 3.5), size = 0.1)+
-  annotate(geom = "text", y = 6.25, x = 2.21, label = "MMR", size = 3, hjust =0)+
-  annotate(geom = "text", y = 4.45, x = 2.21, label = "AS", size = 3, hjust =0)+
-  annotate(geom = "text", y = 3.55, x = 2.21, label = "RMR", size = 3, hjust =0)+
-  
-  annotate(geom = "text", y = 7.9, x = 0.65, label = "(RMR, MMR) BIC *", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7.3, x = 0.65, label = "(AS) BIC ns", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7.9, x = 2.05, label = "(all) BIC ns", size = 3)+
-  geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
-ggformat(ecolAS1, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=F, size_text = 11)
+### Demersal Pelagic MMR, RMR, AS ------
+data.as$DemersPelag_plot<-paste(data.as$DemersPelag, data.as$test_category3, sep = "-")
+data.amr$DemersPelag_plot<-paste(data.amr$DemersPelag, data.amr$test_category3, sep = "-")
+data.rmr$DemersPelag_plot<-paste(data.rmr$DemersPelag, data.rmr$test_category3, sep = "-")
+data.fas$DemersPelag_plot<-paste(data.fas$DemersPelag, data.fas$test_category3, sep = "-")
 
+data.fas$DemersPelag_plot<-factor(data.fas$DemersPelag_plot, c(
+                                  "benthopelagic-ecol_relev",
+                                  "demersal-ecol_relev" ,
+                                  "pelagic-ecol_relev", 
+                                  "reef-associated-ecol_relev",
+                                  "benthopelagic-warm",
+                                  "demersal-warm" ,
+                                  "pelagic-warm" ,
+                                  "reef-associated-warm"
+                                  ))
+
+data.rmr$DemersPelag_plot<-factor(data.rmr$DemersPelag_plot, c(
+                                  "benthopelagic-ecol_relev",
+                                  "demersal-ecol_relev" ,
+                                  "pelagic-ecol_relev", 
+                                  "reef-associated-ecol_relev",
+                                  "benthopelagic-warm",
+                                  "demersal-warm" ,
+                                  "pelagic-warm" ,
+                                  "reef-associated-warm"
+                                  ))
+
+data.as$DemersPelag_plot<-factor(data.as$DemersPelag_plot, c(
+                                  "benthopelagic-ecol_relev",
+                                  "demersal-ecol_relev" ,
+                                  "pelagic-ecol_relev", 
+                                  "reef-associated-ecol_relev",
+                                  "benthopelagic-warm",
+                                  "demersal-warm" ,
+                                  "pelagic-warm" ,
+                                  "reef-associated-warm"
+                                  ))
+
+data.amr$DemersPelag_plot<-factor(data.amr$DemersPelag_plot, c(
+                                    "benthopelagic-ecol_relev",
+                                  "demersal-ecol_relev" ,
+                                  "pelagic-ecol_relev", 
+                                  "reef-associated-ecol_relev",
+                                  "benthopelagic-warm",
+                                  "demersal-warm" ,
+                                  "pelagic-warm" ,
+                                  "reef-associated-warm"
+                                  ))
+
+ecolAS1<-ggplot(data=data.as, aes(y=mass_specas, fill=DemersPelag_plot,
+                                  x=DemersPelag_plot,
+                                  group = DemersPelag_plot))+
+  geom_violin(data=data.rmr, aes(y=mass_specrmr, fill=DemersPelag_plot,
+                                 x=DemersPelag_plot,
+                                group = DemersPelag_plot), 
+              alpha=1, size=0.2)+
+  geom_violin(data=data.amr, aes(y=mass_specamr, fill=DemersPelag_plot,
+                                 x=DemersPelag_plot,
+                                 group = DemersPelag_plot), 
+              alpha=0.3, size=0.2)+  
+  geom_pointrange(data.as, mapping=aes(x=DemersPelag_plot, y = mass_specas,
+                                       fill=DemersPelag_plot, 
+                                       group = DemersPelag_plot),
+                  stat = "summary", color = "black", pch=23)+
+  scale_fill_manual(values = c("#781c6d", 
+                               "#bc3754",
+                               "#ed6925", 
+                               "#fcffa4", 
+                               "#781c6d", 
+                               "#bc3754",
+                               "white", 
+                               "#fcffa4"))+
+  scale_x_discrete(labels=c( "benthopelagic-ecol_relev" = "Bentho- \n pelagic",
+                                  "demersal-ecol_relev" = "Demersal" ,
+                                  "pelagic-ecol_relev" = "Pelagic",
+                                  "reef-associated-ecol_relev" = "Reef- \n associac.",
+                                  "benthopelagic-warm" = "Bentho- \n pelagic",
+                                  "demersal-warm" = "Demersal" ,
+                                  "reef-associated-warm" = "Reef- \n associac.",
+                                  "pelagic-warm" = "Pelagic"))+
+  ylim(0,8)+
+  geom_segment(aes(x = 7.02, y = 6, xend = 7.2, yend = 6.2), size = 0.1)+
+  geom_segment(aes(x = 7.02, y = 3.5, xend = 7.2, yend = 4.4), size = 0.1)+
+  geom_segment(aes(x = 7.02, y = 1.2, xend = 7.2, yend = 3.5), size = 0.1)+
+  annotate(geom = "text", y = 6.25, x = 7.21, label = "MMR", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 4.45, x = 7.21, label = "AS", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 3.55, x = 7.21, label = "RMR", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 7.9, x = 1, label = "(RMR, MMR) BIC *", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 7.3, x = 1, label = "(AS) BIC ns", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 7.9, x = 5.0, label = "(all) BIC ns", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 7.55, x = 4.3, label = "OPTIMAL\n TEMPERATURES",
+           hjust = 1, fontface = "bold", size = 3)+
+  annotate(geom = "text", y = 7.9, x = 8.2, label = "WARM",size = 3, hjust = 1, fontface = "bold")+
+  geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
+ggformat(ecolAS1, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=F, size_text = 11)
 ecolAS1 <- ecolAS1 + theme(
   plot.title = element_text(face = "bold", size=15, hjust = 0.5),
+  # axis.text.x = element_text(angle = 45, size = 8, vjust = 0.8),
+  axis.text.x = element_blank(),
   legend.position = "none",
   legend.title = element_blank(),
   legend.direction = "vertical",
   legend.justification='center',
   legend.margin=margin(0,0,0,0),
   legend.box.margin=margin(0,0,6,0),
-  plot.margin = margin(5.5, 5.5, 5.35, 5.5))
-# ecolAS1
+  plot.margin = margin(0, 5, -6, 5))
+ecolAS1
 
-# Body shape MMR, RMR, AS ------
-ecolAS2<-ggplot(data=data.as, aes(y=mass_specas, fill=BodyShapeI, x=test_category3,
-                                  group = interaction(test_category3, BodyShapeI)))+
-  geom_violin(data=data.rmr[!c(data.rmr$BodyShapeI == "dorsoventrflattened" |
-                              data.rmr$BodyShapeI == "eel-like"),], aes(y=mass_specrmr, fill=BodyShapeI, x=test_category3,
-                                group = interaction(test_category3, BodyShapeI)),
-              alpha=1, size=0.2)+
-  geom_violin(data=data.amr, aes(y=mass_specamr, fill=BodyShapeI, x=test_category3,
-                                  group = interaction(test_category3, BodyShapeI)), 
-              alpha=0.1, size=0.2)+ 
-  geom_pointrange(data.as, mapping=aes(x=test_category3, y = mass_specas,
-                                       fill=BodyShapeI, 
-                                       group = interaction(test_category3, BodyShapeI)),
-                  stat = "summary", fun.ymin = min,fun.ymax = max,fun.y = mean, 
-                  position=position_dodge(width = 0.9), color = "black", pch=23)+
-  scale_fill_viridis_d(option = "E")+
-  scale_x_discrete(labels=c("Optimal", "Warm"))+
+### Body shape MMR, RMR, AS ------
+data.as$BodyShapeI_plot<-paste(data.as$BodyShapeI, data.as$test_category3, sep = "-")
+data.amr$BodyShapeI_plot<-paste(data.amr$BodyShapeI, data.amr$test_category3, sep = "-")
+data.rmr$BodyShapeI_plot<-paste(data.rmr$BodyShapeI, data.rmr$test_category3, sep = "-")
+data.fas$BodyShapeI_plot<-paste(data.fas$BodyShapeI, data.fas$test_category3, sep = "-")
+
+data.as$BodyShapeI_plot<-factor(data.as$BodyShapeI_plot, c(
+                            "elongated-ecol_relev",
+                            "fusiform-ecol_relev",
+                            "short/deep-ecol_relev",
+                            "elongated-warm",
+                            "fusiform-warm",
+                            "short/deep-warm") )
+data.rmr$BodyShapeI_plot<-factor(data.rmr$BodyShapeI_plot, c(
+                            "dorsoventrflattened-ecol_relev",
+                            "eel-like-ecol_relev",
+                            "elongated-ecol_relev",
+                            "fusiform-ecol_relev",
+                            "short/deep-ecol_relev",
+                            "elongated-warm",
+                            "fusiform-warm",
+                            "short/deep-warm") )
+data.amr$BodyShapeI_plot<-factor(data.amr$BodyShapeI_plot, c(                            
+                            "elongated-ecol_relev",
+                            "fusiform-ecol_relev",
+                            "short/deep-ecol_relev",
+                            "elongated-warm",
+                            "fusiform-warm",
+                            "short/deep-warm") )
+data.fas$BodyShapeI_plot<-factor(data.fas$BodyShapeI_plot, c(                            
+                            "elongated-ecol_relev",
+                            "fusiform-ecol_relev",
+                            "short/deep-ecol_relev",
+                            "elongated-warm",
+                            "fusiform-warm",
+                            "short/deep-warm") )
+
+ecolAS2<-ggplot(data=data.as, aes(y=mass_specas, fill=BodyShapeI_plot,
+                                  x=BodyShapeI_plot))+
+  geom_violin(data=data.rmr, aes(y=mass_specrmr, fill=BodyShapeI_plot,
+                                 x=BodyShapeI_plot,),
+              alpha=1, size=0.2, drop = FALSE)+
+  geom_violin(data=data.amr, aes(y=mass_specamr, fill=BodyShapeI_plot,
+                                 x=BodyShapeI_plot),
+              alpha=0.3, size=0.2)+ 
+  geom_pointrange(data.as, mapping=aes(x=BodyShapeI_plot,
+                                       y = mass_specas,
+                                       fill=BodyShapeI_plot),
+                  stat = "summary", fun.ymin = min,fun.ymax = max,mfun.y = mean, 
+                  # position=position_dodge2(width = c(0.9,1)), 
+                  color = "black", pch=23)+
+  scale_fill_manual(values = c("white", "white",
+                               "#fde725", "#5ec962", "#440154",
+                               "white", "#5ec962", "white"))+
+  scale_x_discrete(labels=c("dorsoventrflattened-ecol_relev" = "Dorsoventr. \n flat",
+                            "eel-like-ecol_relev" = "Eel-like",
+                            "elongated-ecol_relev" = "Elongated",
+                            "fusiform-ecol_relev" = "Fusiform",
+                            "short/deep-ecol_relev" = "Short/Deep",
+                            "elongated-warm" = "Elongated",
+                            "fusiform-warm" = "Fusiform",
+                            "short/deep-warm" = "Short/Deep"))+
   ylim(0,8)+
-  # geom_segment(aes(x = 0.8, y = 7.8, xend = 1.1, yend = 7.8), size = 0.1)+
-  # geom_segment(aes(x = 1.9, y = 7.8, xend = 2.2, yend = 7.8), size = 0.1)+
-  annotate(geom = "text", y = 7.9, x = 0.65, label = "(RMR, RMR) BIC *", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7.3, x = 0.65, label = "(AS) BIC ns", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7.9, x = 2.05, label = "(AS) BIC *", size = 3)+
-  annotate(geom = "text", y = 7.3, x = 2.05, label = "(RMR, MMR) BIC ns", size = 3)+
-  geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
+  annotate(geom = "text", y = 7.9, x = 1, label = "(RMR, RMR) BIC *", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7.3, x = 1, label = "(AS) BIC ns", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7.9, x = 6, label = "(AS) BIC *", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7.3, x = 6, label = "(RMR, MMR) BIC ns", size = 3, hjust =0)+
+  geom_vline(xintercept = 5.5, color = "grey", linetype = "dashed")
 ggformat(ecolAS2, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=F, size_text = 11)
 ecolAS2 <- ecolAS2 + theme(
   plot.title = element_text(face = "bold", size=15, hjust = 0.5),
+  # axis.text.x = element_text(angle = 45, size = 8, vjust = 0.8),
+  axis.text.x = element_blank(),
   legend.position = "none",
   legend.title = element_blank(),
   legend.direction = "vertical",
   legend.justification='center',
   legend.margin=margin(0,0,0,0),
   legend.box.margin=margin(0,0,6,0),
-  plot.margin = margin(5.5, 5.5, 5.35, 5.5))
+  plot.margin = margin(0, 5, -6, 5))
+ecolAS2
 
-# Salinity  MMR, RMR, AS ------
-ecolAS3<-ggplot(data=data.as, aes(y=mass_specas, fill=salintyComb, x=test_category3,
-                                  group = interaction(test_category3, salintyComb)))+
-  geom_violin(data=data.rmr, aes(y=mass_specrmr, fill=salintyComb, x=test_category3,
-                                group = interaction(test_category3, salintyComb)), 
+### Salinity  MMR, RMR, AS ------
+data.as$salintyComb_plot<-paste(data.as$salintyComb, data.as$test_category3, sep = "-")
+data.amr$salintyComb_plot<-paste(data.amr$salintyComb, data.amr$test_category3, sep = "-")
+data.rmr$salintyComb_plot<-paste(data.rmr$salintyComb, data.rmr$test_category3, sep = "-")
+data.fas$salintyComb_plot<-paste(data.fas$salintyComb, data.fas$test_category3, sep = "-")
+
+data.rmr$salintyComb_plot<-factor(data.rmr$salintyComb_plot, c(
+      "Freshwater-ecol_relev",
+      "Freshwater; brackish-ecol_relev",
+      "Marine-ecol_relev",
+      "Marine; brackish-ecol_relev",
+      "Marine; freshwater; brackish-ecol_relev",
+      "Freshwater-warm",
+      "Freshwater; brackish-warm",
+      "Marine-warm",
+      "Marine; brackish-warm",
+      "Marine; freshwater; brackish-warm"
+))
+data.fas$salintyComb_plot<-factor(data.fas$salintyComb_plot, c(
+      "Freshwater-ecol_relev",
+      "Freshwater; brackish-ecol_relev",
+      "Marine-ecol_relev",
+      "Marine; brackish-ecol_relev",
+      "Marine; freshwater; brackish-ecol_relev",
+      "Freshwater-warm",
+      "Freshwater; brackish-warm",
+      "Marine-warm",
+      "Marine; brackish-warm",
+      "Marine; freshwater; brackish-warm"
+))
+data.amr$salintyComb_plot<-factor(data.amr$salintyComb_plot, c(
+      "Freshwater-ecol_relev",
+      "Freshwater; brackish-ecol_relev",
+      "Marine-ecol_relev",
+      "Marine; brackish-ecol_relev",
+      "Marine; freshwater; brackish-ecol_relev",
+      "Freshwater-warm",
+      "Freshwater; brackish-warm",
+      "Marine-warm",
+      "Marine; brackish-warm",
+      "Marine; freshwater; brackish-warm"
+))
+data.as$salintyComb_plot<-factor(data.as$salintyComb_plot, c(
+      "Freshwater-ecol_relev",
+      "Freshwater; brackish-ecol_relev",
+      "Marine-ecol_relev",
+      "Marine; brackish-ecol_relev",
+      "Marine; freshwater; brackish-ecol_relev",
+      "Freshwater-warm",
+      "Freshwater; brackish-warm",
+      "Marine-warm",
+      "Marine; brackish-warm",
+      "Marine; freshwater; brackish-warm"
+))
+
+ecolAS3<-ggplot(data=data.as, aes(y=mass_specas, fill=salintyComb_plot, x=salintyComb_plot))+
+  geom_violin(data=data.rmr, aes(y=mass_specrmr, fill=salintyComb_plot, x=salintyComb_plot), 
               alpha=1, size=0.2)+
-  geom_violin(data=data.amr, aes(y=mass_specamr, fill=salintyComb, x=test_category3,
-                                  group = interaction(test_category3, salintyComb)), 
-              alpha=0.1, size=0.2)+  
-  geom_pointrange(data.as, mapping=aes(x=test_category3, y = mass_specas,
-                                       fill=salintyComb, 
-                                       group = interaction(test_category3, salintyComb)),
+  geom_violin(data=data.amr, aes(y=mass_specamr, fill=salintyComb_plot, x=salintyComb_plot), 
+              alpha=0.3, size=0.2)+  
+  geom_pointrange(data.as, mapping=aes(x=salintyComb_plot, y = mass_specas,
+                                       fill=salintyComb_plot),
                   stat = "summary", fun.ymin = min,fun.ymax = max,fun.y = mean, 
-                  position=position_dodge(width = 0.9), color = "black", pch=23)+
-  scale_fill_viridis_d(option = "D", direction = -1)+
-  scale_x_discrete(labels=c("Optimal", "Warm"))+
+                  color = "black", pch=23)+
+  scale_fill_manual(values = c("#fcfdbf", "#fe9f6d", "#de4968",
+                               "white", "#3b0f70",
+                               "white", "white", "#de4968",
+                               "white", "#3b0f70"))+
+  scale_x_discrete(labels=c( 
+      "Freshwater-ecol_relev" = "Freshwater",
+      "Freshwater; brackish-ecol_relev" = "Freshwater/ \n brackish",
+      "Marine-ecol_relev" = "Marine",
+      "Marine; brackish-ecol_relev" = "Marine/ \n brackish",
+      "Marine; freshwater; brackish-ecol_relev" = "All \n salinities",
+      "Freshwater-warm" = "Freshwater",
+      "Freshwater; brackish-warm" ="Freshwater/ \n brackish",
+      "Marine-warm" = "Marine",
+      "Marine; brackish-warm" = "Marine/ \n brackish",
+      "Marine; freshwater; brackish-warm" = "All \n salinities"))+
   ylim(0,8)+
-  # geom_segment(aes(x = 0.8, y = 7.8, xend = 1.1, yend = 7.8), size = 0.1)+
-  # geom_segment(aes(x = 1.9, y = 7.8, xend = 2.2, yend = 7.8), size = 0.1)+
-  annotate(geom = "text", y = 7.9, x = 0.65, label = "(RMR, MMR) BIC *", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7.3, x = 0.65, label = "(AS) BIC ns", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7.9, x = 2.05, label = "(all) BIC ns", size = 3)+
-  geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
+  annotate(geom = "text", y = 7.9, x = 1, label = "(RMR, MMR) BIC *", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7.3, x = 1, label = "(AS) BIC ns", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7.9, x = 6.05, label = "(all) BIC ns", size = 3, hjust= 0)+
+  geom_vline(xintercept = 5.5, color = "grey", linetype = "dashed")
 ggformat(ecolAS3, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=F, size_text = 11)
-
 ecolAS3 <- ecolAS3 + theme(
   plot.title = element_text(face = "bold", size=15, hjust = 0.5),
+  # axis.text.x = element_text(angle = 45, size = 8, vjust = 0.8),
+  axis.text.x = element_blank(),
   legend.position = "none",
   legend.title = element_blank(),
   legend.direction = "vertical",
   legend.justification='center',
   legend.margin=margin(0,0,0,0),
   legend.box.margin=margin(0,0,6,0),
-  plot.margin = margin(5.5, 5.5, 5.35, 5.5))
+  plot.margin = margin(0, 5, -6, 5))
+ecolAS3
 
-# Climate MMR, RMR, AS ------
-ecolAS4<-ggplot(data=data.as, aes(y=mass_specas, fill=Climate, x=test_category3,
-                                  group = interaction(test_category3, Climate)))+
-  geom_violin(data=data.rmr, aes(y=mass_specrmr, fill=Climate, x=test_category3,
-                                group = interaction(test_category3, Climate)), 
+### Climate MMR, RMR, AS ------
+data.as$Climate_plot<-paste(data.as$Climate, data.as$test_category3, sep = "-")
+data.amr$Climate_plot<-paste(data.amr$Climate, data.amr$test_category3, sep = "-")
+data.rmr$Climate_plot<-paste(data.rmr$Climate, data.rmr$test_category3, sep = "-")
+data.fas$Climate_plot<-paste(data.fas$Climate, data.fas$test_category3, sep = "-")
+
+data.fas$Climate_plot<-factor(data.fas$Climate_plot, c(
+                                "Polar-ecol_relev",
+                                "Temperate-ecol_relev",
+                                "Subtropical-ecol_relev",
+                                "Tropical-ecol_relev",
+                                "Polar-warm",
+                                "Temperate-warm",
+                                "Subtropical-warm",
+                                "Tropical-warm"
+                                ))
+data.rmr$Climate_plot<-factor(data.rmr$Climate_plot, c(
+                                "Polar-ecol_relev",
+                                "Temperate-ecol_relev",
+                                "Subtropical-ecol_relev",
+                                "Tropical-ecol_relev",
+                                "Polar-warm",
+                                "Temperate-warm",
+                                "Subtropical-warm",
+                                "Tropical-warm"
+                                ))
+data.amr$Climate_plot<-factor(data.amr$Climate_plot, c(
+                                "Polar-ecol_relev",
+                                "Temperate-ecol_relev",
+                                "Subtropical-ecol_relev",
+                                "Tropical-ecol_relev",
+                                "Polar-warm",
+                                "Temperate-warm",
+                                "Subtropical-warm",
+                                "Tropical-warm"
+                                ))
+data.as$Climate_plot<-factor(data.as$Climate_plot, c(
+                                "Polar-ecol_relev",
+                                "Temperate-ecol_relev",
+                                "Subtropical-ecol_relev",
+                                "Tropical-ecol_relev",
+                                "Polar-warm",
+                                "Temperate-warm",
+                                "Subtropical-warm",
+                                "Tropical-warm"
+                                ))
+
+ecolAS4<-ggplot(data=data.as, aes(y=mass_specas, fill=Climate_plot, x=Climate_plot))+
+  geom_violin(data=data.rmr, aes(y=mass_specrmr, fill=Climate_plot, x=Climate_plot), 
               alpha=1, size=0.2)+
-  geom_violin(data=data.amr, aes(y=mass_specamr, fill=Climate, x=test_category3,
-                                  group = interaction(test_category3, Climate)), 
-              alpha=0.1, size=0.2)+  # geom_boxplot( outlier.shape = NA) +
-  geom_pointrange(data.as, mapping=aes(x=test_category3, y = mass_specas,
-                                       fill=Climate, 
-                                       group = interaction(test_category3, Climate)),
-                  stat = "summary", fun.ymin = min,fun.ymax = max,fun.y = mean, 
-                  position=position_dodge(width = 0.9), color = "black", pch=23)+
-  scale_fill_viridis_d(option = "C", direction = 1)+
-  scale_x_discrete(labels=c("Optimal", "Warm"))+
+  geom_violin(data=data.amr, aes(y=mass_specamr, fill=Climate_plot, x=Climate_plot), 
+              alpha=0.3, size=0.2)+  # geom_boxplot( outlier.shape = NA) +
+  geom_pointrange(data.as, mapping=aes(x=Climate_plot, y = mass_specas,
+                                       fill=Climate_plot),
+                  stat = "summary", fun.ymin = min,fun.ymax = max,fun.y = mean, color = "black", pch=23)+
+  scale_fill_manual(values = c("white", "#fca636","#f0f921", "#b12a90",
+                               "white", "#fca636","#f0f921", "#b12a90"))+
+  scale_x_discrete(labels=c("Polar-ecol_relev" = "Polar",
+                                "Temperate-ecol_relev" = "Temperate",
+                                "Subtropical-ecol_relev" = "Subtropical",
+                                "Tropical-ecol_relev" = "Tropical",
+                                "Polar-warm" = "Polar",
+                                "Temperate-warm" = "Temperate",
+                                "Subtropical-warm" = "Subtropical",
+                                "Tropical-warm" = "Tropical"))+
   ylim(0,8)+
-  # geom_segment(aes(x = 0.8, y = 7.8, xend = 1.1, yend = 7.8), size = 0.1)+
-  # geom_segment(aes(x = 1.9, y = 7.8, xend = 2.2, yend = 7.8), size = 0.1)+
-  annotate(geom = "text", y = 7.9, x = 0.65, label = "(RMR, MMR) BIC *", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7.3, x = 0.65, label = "(AS) BIC ns", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7.9, x = 2.05, label = "(all) BIC ns", size = 3)+
-  geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
+  annotate(geom = "text", y = 7.9, x = 1, label = "(RMR, MMR) BIC *", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7.3, x = 1, label = "(AS) BIC ns", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7.9, x = 5.0, label = "(all) BIC ns", size = 3, hjust = 0)+
+  geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
 ggformat(ecolAS4, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=F, size_text = 11)
 ecolAS4 <- ecolAS4 + theme(
   plot.title = element_text(face = "bold", size=15, hjust = 0.5),
+  # axis.text.x = element_text(angle = 45, size = 8, vjust = 0.8),
+  axis.text.x = element_blank(),
   legend.position = "none",
   legend.title = element_blank(),
   legend.direction = "vertical",
   legend.justification='center',
   legend.margin=margin(0,0,0,0),
   legend.box.margin=margin(0,0,6,0),
-  plot.margin = margin(5.5, 5.5, 5.35, 5.5))
+  plot.margin = margin(0, 5, -6, 5))
+ecolAS4
 
-# Demersal Pelagic FAS -----------
-ecolFAS1<-ggplot(data=data.fas, aes(y=FAS, fill=DemersPelag, x=test_category3,
-                                  group = interaction(test_category3, DemersPelag)))+
+### Demersal Pelagic FAS -----------
+ecolFAS1<-ggplot(data=data.fas, aes(y=FAS, fill=DemersPelag_plot, x=DemersPelag_plot))+
   geom_violin(alpha = 1, outlier.size = 0.2, size = 0.2)+
-  scale_fill_viridis_d(option = "A", labels=c('Benthopelagic', 'Demersal',"Pelagic", "Reef" ), "Lifestyle")+
-  scale_x_discrete(labels=c("Optimal", "Warm"))+
+  scale_fill_manual(values = c("#781c6d", 
+                               "#bc3754",
+                               "#ed6925", 
+                               "#fcffa4", 
+                               "#781c6d", 
+                               "#bc3754",
+                               "white", 
+                               "#fcffa4"))+ 
+  scale_x_discrete(labels=c( "benthopelagic-ecol_relev" = "Bentho- \n pelagic",
+                                  "demersal-ecol_relev" = "Demersal" ,
+                                  "pelagic-ecol_relev" = "Pelagic",
+                                  "reef-associated-ecol_relev" = "Reef- \n associac.",
+                                  "benthopelagic-warm" = "Bentho- \n pelagic",
+                                  "demersal-warm" = "Demersal" ,
+                                  "pelagic-warm" = "Pelagic",
+                                  "reef-associated-warm" = "Reef- \n associac."
+                                  ))+
   ylim(0,20)+
-  # geom_segment(aes(x = 0.8, y = 19, xend = 1.1, yend = 19), size = 0.1)+
-  # geom_segment(aes(x = 1.9, y = 19, xend = 2.2, yend = 19), size = 0.1)+
-  annotate(geom = "text", y = 19.5, x = 0.95, label = "BIC ns", size = 3)+
-  annotate(geom = "text", y = 19.5, x = 2.05, label = "BIC ns", size = 3)+
-  geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
+  annotate(geom = "text", y = 19.5, x = 1, label = "BIC ns", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 19.5, x = 5.0, label = "BIC ns", size = 3, hjust = 0)+
+  geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
 ggformat(ecolFAS1, y_title = bquote("FAS"), x_title = element_blank() , print=T, size_text = 11)
 ecolFAS1 <- ecolFAS1 + theme(
   plot.title = element_text(face = "bold", size=15, hjust = 0.5),
-  legend.position = "right",
+  legend.position = "none",
   legend.direction = "vertical",
   legend.justification='center',
+  axis.text.x = element_text(angle = 45, size = 10, vjust = 0.8),
   legend.margin=margin(0,0,0,0),
   legend.box.margin=margin(0,0,6,0),
-  plot.margin = margin(5.5, 5.5, 5.35, 5.5),
+  plot.margin = margin(-12, 5, -5, 5),
   legend.spacing.y = unit(0.5, 'cm'),
   legend.text = element_text(margin = margin(l = 0.1, unit = c("cm"))),
   legend.key.height= unit(0.5, 'cm'),
   legend.key.width= unit(0.5, 'cm'))
-# ecolFAS1
+ecolFAS1
 
-ecolFAS2<-ggplot(data=data.fas, aes(FAS, fill=BodyShapeI, x=test_category3,
-                                  group = interaction(test_category3, BodyShapeI)))+
-  geom_violin(alpha = 1, outlier.size = 0.2, size = 0.2)+
-  scale_fill_viridis_d(option = "E", labels=c('Elongated', 'Fusiform',"Short, Deep" ), "Body Shape")+
-  scale_x_discrete(labels=c("Optimal", "Warm"))+
+### Body shape FAS -----------
+# add empty layers for plotting x-axis. 
+data.fas$BodyShapeI_plot<-factor(data.fas$BodyShapeI_plot, c(
+  "dorsoventrflattened-ecol_relev" ,
+  "eel-like-ecol_relev",
+  "elongated-ecol_relev",
+  "fusiform-ecol_relev",
+  "short/deep-ecol_relev",
+  "elongated-warm",
+  "fusiform-warm",
+  "short/deep-warm" ))
+  
+ecolFAS2<-ggplot(data=data.fas, aes(FAS, fill=BodyShapeI_plot, x=BodyShapeI_plot))+
+  geom_violin(alpha = 1, outlier.size = 0.2, size = 0.2, drop = FALSE)+
+  scale_fill_manual(values = c("#fde725", "#5ec962", "#440154",
+                               "white", "#5ec962", "white"))+
+  scale_x_discrete(labels=c("dorsoventrflattened-ecol_relev" = "Dorsoventr. \n flat",
+                            "eel-like-ecol_relev" = "Eel-like",
+                            "elongated-ecol_relev" = "Elongated",
+                            "fusiform-ecol_relev" = "Fusiform",
+                            "short/deep-ecol_relev" = "Short/Deep",
+                            "elongated-warm" = "Elongated",
+                            "fusiform-warm" = "Fusiform",
+                            "short/deep-warm" = "Short/Deep"), drop = FALSE)+
+                   # expand = expansion(mult = c(0.5, 0)))+
   ylim(0,20)+
-  # geom_segment(aes(x = 0.8, y = 19, xend = 1.1, yend = 19), size = 0.1)+
-  # geom_segment(aes(x = 1.9, y = 19, xend = 2.2, yend = 19), size = 0.1)+
-  annotate(geom = "text", y = 19.5, x = 0.95, label = "BIC ns", size = 3)+
-  annotate(geom = "text", y = 19.5, x = 2.05, label = "BIC ns", size = 3)+
-  geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
-ggformat(ecolFAS2, y_title = bquote("FAS"), x_title = element_blank() , print=T, size_text = 11)
+  annotate(geom = "text", y = 19.5, x = 1, label = "BIC ns", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 19.5, x = 6.05, label = "BIC ns", size = 3, hjust = 0)+
+  geom_vline(xintercept = 5.5, color = "grey", linetype = "dashed")
+ggformat(ecolFAS2, y_title = bquote("FAS"), x_title = element_blank() , print=F, size_text = 11)
 ecolFAS2 <- ecolFAS2 + theme( 
   plot.title = element_text(face = "bold", size=15, hjust = 0.5),
-  legend.position = "right",
+  legend.position = "none",
+  axis.text.x = element_text(angle = 45, size = 10, vjust = 0.8),
   legend.direction = "vertical",
   legend.justification='center',
   legend.margin=margin(0,0,0,0),
   legend.box.margin=margin(0,0,6,0),
-  plot.margin = margin(5.5, 5.5, 5.35, 5.5),
+  plot.margin = margin(-12, 5, -5, 5),
   legend.spacing.y = unit(0.5, 'cm'),
   legend.text = element_text(margin = margin(l = 0.1, unit = c("cm"))),
   legend.key.height= unit(0.5, 'cm'),
   legend.key.width= unit(0.5, 'cm'))
+ecolFAS2
 
-
-ecolFAS3<-ggplot(data=data.fas, aes(FAS, fill=salintyComb, x=test_category3,
-                                  group = interaction(test_category3, salintyComb)))+
+### Salinity violin FAS ------
+ecolFAS3<-ggplot(data=data.fas, aes(FAS, fill=salintyComb_plot, x=salintyComb_plot))+
   geom_violin(alpha = 1, outlier.size = 0.2, size = 0.2)+
-  scale_fill_viridis_d(option = "D", direction = -1,
-                       labels=c('Freshw.', 'Freshw.-sal',"Marine", "Marine.-fresh", "All" ), "Salinity")+
-  scale_x_discrete(labels=c("Optimal", "Warm"))+
+  scale_fill_manual(values = c("#fcfdbf", "#fe9f6d", "#de4968",
+                               "white", "#3b0f70",
+                               "white", "white", "#de4968",
+                               "white", "#3b0f70"))+
+  scale_x_discrete(labels=c( 
+      "Freshwater-ecol_relev" = "Freshwater",
+      "Freshwater; brackish-ecol_relev" = "Freshwater/ \n brackish",
+      "Marine-ecol_relev" = "Marine",
+      "Marine; brackish-ecol_relev" = "Marine/ \n brackish",
+      "Marine; freshwater; brackish-ecol_relev" = "All \n salinities",
+      "Freshwater-warm" = "Freshwater",
+      "Freshwater; brackish-warm" ="Freshwater/ \n brackish",
+      "Marine-warm" = "Marine",
+      "Marine; brackish-warm" = "Marine/ \n brackish",
+      "Marine; freshwater; brackish-warm" = "All \n salinities"))+
   ylim(0,20)+
-  # geom_segment(aes(x = 0.8, y = 19, xend = 1.1, yend = 19), size = 0.1)+
-  # geom_segment(aes(x = 1.9, y = 19, xend = 2.2, yend = 19), size = 0.1)+
-  annotate(geom = "text", y = 19.5, x = 0.95, label = "BIC ns", size = 3)+
-  annotate(geom = "text", y = 19.5, x = 2.05, label = "BIC ns", size = 3)+
-  geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
-ggformat(ecolFAS3, y_title = bquote("FAS"), x_title = element_blank() , print=T, size_text = 11)
+  annotate(geom = "text", y = 19.5, x = 1, label = "BIC ns", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 19.5, x = 6.05, label = "BIC ns", size = 3, hjust = 0)+
+  geom_vline(xintercept = 5.5, color = "grey", linetype = "dashed")
+ggformat(ecolFAS3, y_title = bquote("FAS"), x_title = element_blank() , print=F, size_text = 11)
 ecolFAS3 <- ecolFAS3 + theme(
   plot.title = element_text(face = "bold", size=15, hjust = 0.5),
-  legend.position = "right",
+  legend.position = "none",
   legend.direction = "vertical",
   legend.justification='center',
+  axis.text.x = element_text(angle = 45, size = 10, vjust = 0.8),
   legend.margin=margin(0,0,0,0),
   legend.box.margin=margin(0,0,6,0),
-  plot.margin = margin(5.5, 5.5, 5.35, 5.5),
+  plot.margin = margin(-12, 5, -5, 5),
   legend.spacing.y = unit(0.5, 'cm'),
   legend.text = element_text(margin = margin(l = 0.1, unit = c("cm"))),
   legend.key.height= unit(0.5, 'cm'),
   legend.key.width= unit(0.5, 'cm'))
+ecolFAS3
 
-ecolFAS4<-ggplot(data=data.fas, aes(FAS, fill=Climate, x=test_category3,
-                                  group = interaction(test_category3, Climate)))+
+### Climate violin FAS ----------
+ecolFAS4<-ggplot(data=data.fas, aes(FAS, fill=Climate_plot, x=Climate_plot))+
   geom_violin(alpha = 1, outlier.size = 0.2, size = 0.2)+
-  scale_fill_viridis_d(option = "C", direction = 1, "Climate")+
-  scale_x_discrete(labels=c("Optimal", "Warm"))+
+  scale_fill_manual(values = c("white", "#fca636","#f0f921", "#b12a90",
+                               "white", "#fca636","#f0f921", "#b12a90"))+
+  scale_x_discrete(labels=c("Polar-ecol_relev" = "Polar",
+                                "Temperate-ecol_relev" = "Temperate",
+                                "Subtropical-ecol_relev" = "Subtropical",
+                                "Tropical-ecol_relev" = "Tropical",
+                                "Polar-warm" = "Polar",
+                                "Temperate-warm" = "Temperate",
+                                "Subtropical-warm" = "Subtropical",
+                                "Tropical-warm" = "Tropical"))+
   ylim(0,20)+
-  # geom_segment(aes(x = 0.8, y = 19, xend = 1.1, yend = 19), size = 0.1)+
-  # geom_segment(aes(x = 1.9, y = 19, xend = 2.2, yend = 19), size = 0.1)+
-  annotate(geom = "text", y = 19.5, x = 0.95, label = "BIC *", size = 3)+
-  annotate(geom = "text", y = 19.5, x = 2.05, label = "BIC ns", size = 3)+
-  geom_vline(xintercept = 1.5, color = "grey", linetype = "dashed")
-ggformat(ecolFAS4, y_title = bquote("FAS"), x_title = element_blank() , print=T, size_text = 11)
+  annotate(geom = "text", y = 19.5, x = 1, label = "BIC *", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 19.5, x = 5, label = "BIC ns", size = 3, hjust = 0)+
+  geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
+ggformat(ecolFAS4, y_title = bquote("FAS"), x_title = element_blank() , print=F, size_text = 11)
 ecolFAS4 <- ecolFAS4 + theme(
   plot.title = element_text(face = "bold", size=15, hjust = 0.5),
-  legend.position = "right",
+  legend.position = "none",
   legend.direction = "vertical",
   legend.justification='center',
+  axis.text.x = element_text(angle = 45, size = 10, vjust = 0.8),
   legend.margin=margin(0,0,0,0),
   legend.box.margin=margin(0,0,6,0),
-  plot.margin = margin(5.5, 5.5, 5.35, 5.5),
+  plot.margin = margin(-12, 5, -5, 5),
   legend.spacing.y = unit(0.5, 'cm'),
   legend.text = element_text(margin = margin(l = 0.1, unit = c("cm"))),
   legend.key.height= unit(0.5, 'cm'),
   legend.key.width= unit(0.5, 'cm'))
 
-plot_grid(ecolAS1,ecolFAS1,
-          ecolAS2, ecolFAS2,
-          ecolAS3, ecolFAS3, 
-          ecolAS4, ecolFAS4,
-          align = "h",
+#### save violin plots -------
+ plot_grid(ecolAS1, ecolAS2,
+          ecolFAS1, ecolFAS2,
+          ecolAS3, ecolAS4, 
+          ecolFAS3, ecolFAS4,
+          align = "v",
           labels = c("AUTO"),
           label_size = 12,
           nrow = 4,
           ncol = 2,
-          label_x = c(0.163, 0.123),
-          label_y = c(0.85, 0.85), 
-          rel_widths = c(1, 1.35)) %>% 
-ggsave(filename = "./Figures/Figure4.png", width = 7.5, height = 10)
-   
+          label_x = c(0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1),
+          label_y = c(0.88, 0.88, 0.92, 0.92,0.88, 0.88, 0.92, 0.92 )) %>% 
+ggsave(filename = "./Figures/Figure5.png", width = 12, height = 9)
+ 
 
-
-# TPC: FAS, AS, MR, mass-independent values ----------
+ # TPC: FAS, AS, MR, mass-independent values ----------
 AMRmodel_plot1_t<-ggplot(data=data.amrER, aes(x=tempTest, y=mass_specamr)) +
   geom_point(alpha=0.9,  size=1, pch=1, color="grey75")+
   geom_point(data=data.amr.test, aes(x=tempTest, y=mass_specamr),

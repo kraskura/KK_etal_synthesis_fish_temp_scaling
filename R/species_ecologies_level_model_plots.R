@@ -18,20 +18,15 @@ emm_options(lmerTest.limit = 7000)
 # GLOBAL DATA (with mass specific values) ---------
 
 # 1) for phylo mixed models
-# source(here("R", "phylo_mixed_model.R")) # get final model outputs; this will take a minute to run. 
+source(here("R", "phylo_mixed_model.R")) # get final model outputs
 source(here("R/colors_themes.R"))
 # 2) for non-phylo mixed models 
 # source("./R/nonPhylo_mixed_models.R")
 
-# arrhenius temps, not needed
-# data.amrER$tempTestK1000_inC<-((1000/data.amrER$tempTestK1000))-273.15
-# data.amr$tempTestK1<-1/data.amr$tempTestK
-# data.amr$tempTestK1000<-1000/data.amr$tempTestK
-
-
 # *********************************************************************************
 # **********************************************************************************
 # ECOLOGY - SPECIFIC (estimate scaling) ----
+# 
 summarise_ecologiesLM<-function(scalingGood=FALSE,
                                 NAMEecol,
                                 lmdata.AMRW,
@@ -719,7 +714,7 @@ cowplot::plot_grid(rmr.WARM.ER.good,
                   rel_widths = c(1, 0.5),
                   label_x = c(0.22, -00.1),
                   label_y = c(0.89, 0.89)) 
-ggsave(filename = paste("./Figures/Figure3.png", sep=""),
+ggsave(filename = paste("./Figures/Figure4.png", sep=""),
          width = 9.5, height = 6)
 
 

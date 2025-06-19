@@ -209,7 +209,7 @@ model_outputs<-function(phylo=TRUE,
                         at=list(tempTest=c(5,
                                           15,
                                           25,
-                                          35)))) # 0, 10, 20, 30, 35 C
+                                          31)))) # 0, 10, 20, 30, 31 C (not predict out of the range)
   
   AMR.slopes<-data.frame(AMR.slopes$emtrends)
   # AMR.slopes<-AMR.slopes
@@ -224,7 +224,7 @@ model_outputs<-function(phylo=TRUE,
                           at=list(tempTest=c(5,
                                             15,
                                             25,
-                                            35)))) # 0, 10, 20, 30, 35 C
+                                            31)))) # 0, 10, 20, 30, 31 C
     
     RMR.slopes<-data.frame(RMR.slopes$emtrends)
     # RMR.slopes<-RMR.slopes
