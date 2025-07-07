@@ -1,12 +1,17 @@
-# last run: april 27 2025
+# Author: Krista Kraskura
+# Description: 
+#   - phylogentic models 
+#   - main text figures
+# ********************************************
+# ********************************************
 
 
 # **************************************************
 # run full model comparison analysis ( run = TRUE), or figures, best models, only (run = FALSE)?
 # this is set for full execution of code (sourcing code); see message below
 # if run is FALSE the last run's 90% CI are used; not estimated new (take a few)
-# run = FALSE
-run = TRUE
+run = FALSE
+# run = TRUE
 
 if(run){
   message("running all models and BIC comparison: this will take a while")
@@ -15,12 +20,11 @@ if(run){
 }
 
 # **************************************************
-
 ## Source the data and functions------------
 source(here("R", "get_data_temp.R")) # dataset warngling (gets the right species names from fishbase, calculates AS, FAS, and seperates everything in temperature categories)
 source(here("R", "mixed_model_outputs.R")) # function for extracting 90% CI and making prediction dataframes 
 source(here("R", "get_data_phylo_matrix.R")) # phylogenetics work, extracts phylo matrix, saves it, makes plots and saves them, 
-source(here("R", "colors_themes.R")) # common color schemes
+source(here("R", "colors_themes.R")) # get data, common color schemes and libraries
 
 # function to order model selection based on the lowest BIC score
 BICdelta<-function(BICtable){
@@ -29,57 +33,6 @@ BICdelta<-function(BICtable){
   return(BIC.t)
 }
 
-# Data for models ------
-data.list<-get_data_temp(data.amr = here("Data", "Fish_AMR_temp_dataset_mar2022.csv"),
-                         data.rmr = here("Data","Fish_RMR_temp_dataset_mar2022.csv"),
-                         ecology.data = here("Data", "Kraskura_species_ecologies_mar2022.csv"),
-                         onlyTop.above = TRUE, save.FishBase.species.data = F,
-                         calc_mass_specific = FALSE)
-
-# data.list.NO.SALMON<-get_data_temp(data.amr = here("Data", "Fish_AMR_temp_dataset_mar2022.csv"),
-#                                  data.rmr = here("Data","Fish_RMR_temp_dataset_mar2022.csv"),
-#                                  ecology.data = here("Data", "Kraskura_species_ecologies_mar2022.csv"),
-#                                  onlyTop.above = TRUE, save.FishBase.species.data = F,
-#                                  calc_mass_specific = FALSE)
-
-data.amrAC<-data.frame(data.list[1])
-data.rmrAC<-data.frame(data.list[2])
-data.amrAM<-data.frame(data.list[3])
-data.rmrAM<-data.frame(data.list[4])
-data.amrER<-data.frame(data.list[5])
-data.rmrER<-data.frame(data.list[6])
-
-data.asAC<-data.frame(data.list[7])
-data.fasAC<-data.frame(data.list[8])
-data.asAM<-data.frame(data.list[9])
-data.fasAM<-data.frame(data.list[10])
-data.asER<-data.frame(data.list[11])
-data.fasER<-data.frame(data.list[12])
-
-data.amr<-data.frame(data.list[13])
-data.rmr<-data.frame(data.list[14])
-dataMR<-data.frame(data.list[15])
-data.as<-data.frame(data.list[16])
-data.fas<-data.frame(data.list[17])
-
-# the warm ones
-data.amr.test<-rbind(data.amrAC, data.amrAM)
-data.rmr.test<-rbind(data.rmrAC, data.rmrAM)
-data.fas.test<-rbind(data.fasAC, data.fasAM)
-data.as.test<-rbind(data.asAC, data.asAM)
-data.fas.test<-data.fas.test[c(!is.na(data.fas.test$FAS) & is.finite(data.fas.test$FAS)) , ]
-data.as.test<-data.as.test[c(!is.na(data.as.test$lnAS) & is.finite(data.as.test$lnAS)) , ]
-
-# test categories
-data.fas$test_category3 <- "warm"
-data.fas[data.fas$test_category == "ecol_relev", "test_category3"] <- "optimal"
-data.as$test_category3 <- "warm"
-data.as[data.as$test_category == "ecol_relev", "test_category3"] <- "optimal"
-data.amr$test_category3 <- "warm"
-data.amr[data.amr$test_category == "ecol_relev", "test_category3"] <- "optimal"
-data.rmr$test_category3 <- "warm"
-data.rmr[data.rmr$test_category == "ecol_relev", "test_category3"] <- "optimal"
- 
 # Phylo models -----------------
 # get phylo trees:
 data.rmrER<-droplevels(data.rmrER)
@@ -462,20 +415,6 @@ if (run){
   
 }else{
   
-  # Phylo_RMR_model5 <- Almer(lnRMR ~ lnBWg + tempTest  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-  # Phylo_MMR_model4int <- Almer(lnAMR ~ lnBWg * tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
-  # running best models only 
-    # Phylo_AS_model4 <- Almer(lnAS ~ lnBWg + tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.asER, REML=FALSE, A = list(species = A.aas.er))
-    # Phylo_FAS_model4 <- Almer(log(FAS) ~ lnBWg + tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.fasER, REML=FALSE, A = list(species = A.fas.er))
-    
-  # Phylo_RMR_W_model1 <- Almer(lnRMR ~ lnBWg + tempTest + (1|species) + (1|species:trial), data=data.rmr.test, REML=FALSE, A = list(species = A.rmr.w))
-  # Phylo_MMR_W_model4 <- Almer(lnAMR ~ lnBWg + tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amr.test, REML=FALSE, A = list(species = A.mmr.w))   
-  # Phylo_AS_W_model2.POLY <- Almer(lnAS ~ lnBWg + poly(tempTest,2, raw = TRUE) + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.as.test, REML=FALSE, A = list(species = A.aas.w))
-  # Phylo_FAS_W_model2.POLY <- Almer(lnFAS ~ lnBWg + poly(tempTest,2, raw = TRUE) + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w)) 
-  
-  # with interaction
-  # rmr_mod_ER <- Almer(lnRMR ~ lnBWg * tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
-
   # without the interaction.
   rmr_mod_ER <-  Almer(lnRMR ~ lnBWg + tempTest  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A))
   amr_mod_ER <- Almer(lnAMR ~ lnBWg * tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.amrER, REML=FALSE, A = list(species = A.mmr.er))
@@ -488,7 +427,6 @@ if (run){
   fas_mod_W <- Almer(lnFAS ~ lnBWg + poly(tempTest,2, raw = TRUE) + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.fas.test, REML=FALSE, A = list(species = A.fas.w)) 
   
 }
-
 
 # un-comment to see best model summaries or view output from R markdown
 # # Ecol relev
@@ -549,8 +487,8 @@ model_out<-model_outputs(phylo = TRUE,
               best.model.fas.w = fas_mod_W,
               estimate.CI = run) # takes a few hours; outputs saved 
 
-read.csv("./Data_exports/Phylo/Table_CIsummary.csv")
-colnames(sum_CItable)<-c("var", "ci5", "ci95","var_repeat", "MR", "temp_cat") # if from read.csv
+# sum_CItable<-read.csv("./Data_exports/Phylo/Table_CIsummary.csv")
+# colnames(sum_CItable)<-c("var", "ci5", "ci95","var_repeat", "MR", "temp_cat") # if from read.csv
 
 # use this 
 sum_CItable<-data.frame(model_out[[1]])
@@ -602,137 +540,8 @@ data.plotFAS_warm<-read.csv(file = here("./Data_exports/Phylo/dataPred_FAS_warm.
 # *****************************************************************************
 
 
-
-
-# ******************************************************************************
-# Breakpoint? (NOT USED) ------------
-# library(segmented)
-# 
-# 
-# seg.amrER <-lm(log(mass_specamr) ~ tempTestK1000, data=data.amrER)
-# seg.amr.test <-lm(log(mass_specamr) ~ tempTestK1000, data=data.amr.test)
-# 
-# seg.rmrER <-lm(log(mass_specrmr) ~ tempTestK1000, data=data.rmrER)
-# seg.rmr.test <-lm(log(mass_specrmr) ~ tempTestK1000, data=data.rmr.test)
-# 
-# seg.asER <-lm(log(mass_specas) ~ tempTestK1000, data=data.asER)
-# seg.as.test <-lm(log(mass_specas) ~ tempTestK1000, data=data.as.test)
-# 
-# 
-# seg.amrER.r <- segmented(seg.amrER , ~tempTestK1000)
-# seg.amr.test.r <- segmented(seg.amr.test , ~tempTestK1000)
-# 
-# plot(y = log(data.amrER$mass_specamr), x = data.amrER$tempTestK1000)
-# plot(seg.amrER.r, add = TRUE)
-# plot(y = log(data.amr.test$mass_specamr), x = data.amr.test$tempTestK1000)
-# plot(seg.amr.test.r, add = TRUE)
-# 
-
-
-# ******************************************************************************
-# ******************************************************************************
-# models within SIC 7  -------
-# 
-# models_SIC<-list(Phylo_RMR_model5, 
-#               Phylo_RMR_model4,
-#               Phylo_RMR_model4int,
-#               Phylo_MMR_model4int,
-#               Phylo_MMR_model4,
-#               Phylo_AS_model4,
-#               Phylo_AS_model4int,
-#               Phylo_FAS_model4,
-#               Phylo_FAS_model4int,
-#               Phylo_FAS_model5,
-#               Phylo_RMR_W_model1,
-#               Phylo_RMR_W_model2,
-#               Phylo_RMR_W_model1int,
-#               Phylo_RMR_W_model1.POLY,
-#               Phylo_RMR_W_model4,
-#               Phylo_RMR_W_model2.POLY,
-#               Phylo_RMR_W_model5,
-#               Phylo_MMR_W_model4,
-#               Phylo_MMR_W_model5,
-#               Phylo_MMR_W_model5int,
-#               Phylo_MMR_W_model4int,
-#               Phylo_MMR_W_model1int,
-#               Phylo_MMR_W_model1,
-#               Phylo_MMR_W_model2int,
-#               Phylo_MMR_W_model4.POLY,
-#               Phylo_MMR_W_model5.POLY,
-#               Phylo_AS_W_model2.POLY,
-#               Phylo_AS_W_model2int,
-#               Phylo_FAS_W_model2.POLY,
-#               Phylo_FAS_W_model1,
-#               Phylo_FAS_W_model1intPOLY,
-#               Phylo_FAS_W_model2intPOLY)
-# f <- function(x) {
-#     d <- substitute(x)
-#     n <- sapply(d[-1],deparse)
-#     return(n)
-#  }
-# models_SIC_names<-f(c(Phylo_RMR_model5, 
-#               Phylo_RMR_model4,
-#               Phylo_RMR_model4int,
-#               Phylo_MMR_model4int,
-#               Phylo_MMR_model4,
-#               Phylo_AS_model4,
-#               Phylo_AS_model4int,
-#               Phylo_FAS_model4,
-#               Phylo_FAS_model4int,
-#               Phylo_FAS_model5,
-#               Phylo_RMR_W_model1,
-#               Phylo_RMR_W_model2,
-#               Phylo_RMR_W_model1int,
-#               Phylo_RMR_W_model1.POLY,
-#               Phylo_RMR_W_model4,
-#               Phylo_RMR_W_model2.POLY,
-#               Phylo_RMR_W_model5,
-#               Phylo_MMR_W_model4,
-#               Phylo_MMR_W_model5,
-#               Phylo_MMR_W_model5int,
-#               Phylo_MMR_W_model4int,
-#               Phylo_MMR_W_model1int,
-#               Phylo_MMR_W_model1,
-#               Phylo_MMR_W_model2int,
-#               Phylo_MMR_W_model4.POLY,
-#               Phylo_MMR_W_model5.POLY,
-#               Phylo_AS_W_model2.POLY,
-#               Phylo_AS_W_model2int,
-#               Phylo_FAS_W_model2.POLY,
-#               Phylo_FAS_W_model1,
-#               Phylo_FAS_W_model1intPOLY,
-#               Phylo_FAS_W_model2intPOLY))
-# 
-# new_df <- data.frame(matrix(ncol = 6, nrow = 0))
-# # loop to get all neccessary data for model comparisons 
-# for(i in 1:length(models_SIC)){
-#   print(i)
-#   Almer_model<-models_SIC[[i]]
-#   
-#   model_name<-capture.output(summary(Almer_model))[2]
-#   BIC_val<-BIC(Almer_model)
-#   slope_val<-fixef(Almer_model)["lnBWg"]
-#   interc_val<-fixef(Almer_model)["(Intercept)"]
-#   temp_val<-fixef(Almer_model)["tempTest"]
-#   model_type<-models_SIC_names[[i]]
-#   
-#   colnames(new_df)<- c("metabolism metric",	"model",	"BIC",
-#                        "scaling slope",	"intercept coef",	"temperature coef")
-#   new_vals<-as.data.frame(t(c(model_type, model_name,
-#                      BIC_val, slope_val,
-#                      interc_val, temp_val)))
-#   colnames(new_vals)<- c("metabolism metric",	"model",	"BIC",
-#                        "scaling slope",	"intercept coef",	"temperature coef")
-#   
-#   new_df<-rbind(new_df, new_vals)
-# 
-# }
-# write.csv(file = here("Data_exports/model_comparison.csv"), x = new_df, row.names = F)
-
-
 # ******************************************************************************
 # Figures -------
-
 
 set.seed(51423)
 # MMR and AMR used interchangeably throughout 
@@ -1007,66 +816,6 @@ scaling_t<-cowplot:::plot_grid(AMRmodel_plot1_t, RMRmodel_plot1_t,
 ggsave(filename = paste("./Figures/Suppl_Figure_t.png", sep=""),
        plot=scaling_t, width = 6.8, height = 6.8, units = "in")
 
-# Both Activation energies together: (NOT USED) -------
-# model_predFE << is in lnMR units 
-# MMR
-# AMRmodel_plot3.E_ALL<-ggplot(data.amrER[data.amrER$lnBWg==0,]) +
-#   geom_point(data.amrER, mapping=aes(x=tempTest, y=log(mass_specamr), fill= tempTest, size = lnBWg), color="grey50", fill="grey70", alpha=1, pch=21, show.legend = FALSE)+
-#   geom_point(data.amr.test, mapping=aes(x=tempTest, y=log(mass_specamr), fill= tempTest, size = lnBWg), color="black",  alpha=1, pch=21,  show.legend = FALSE)+
-#   scale_fill_gradient( low = cols.amr[3], high = cols.amr[1])+
-#   scale_color_gradient( low = "grey80", high = "grey0")+
-#   ylim(-5.7,4)+
-#   annotate("text",  x = 3.27, y = 3.5, label = bquote(italic(E)[MMR] == change~with~mass),size=5, hjust=0, family="Helvetica", color = "black")+
-#   annotate("text",  x = 3.27, y = 2.5, label = bquote(italic(E)[MMR] == .(round(MMR_E_W_eV,3))),size=5, hjust=0, family="Helvetica", color = cols.amr[1])+
-#   annotate("text",  x = 3.27, y = -3.2, label = bquote(1*g~italic(E)== .(round(MMR_E_ER$MMR_E_ER_eV[1],3))),size=4, hjust=0, family="Helvetica", color = "black")+
-#   annotate("text",  x = 3.27, y = -4, label = bquote(10*g~italic(E) == .(round(MMR_E_ER$MMR_E_ER_eV[2],3))),size=4, hjust=0, family="Helvetica", color = "black")+
-#   annotate("text",  x = 3.27, y = -4.8, label = bquote(100*g~italic(E) == .(round(MMR_E_ER$MMR_E_ER_eV[3],3))),size=4, hjust=0, family="Helvetica", color = "black")+
-#   annotate("text",  x = 3.27, y = -5.6, label = bquote(1000*g~italic(E) == .(round(MMR_E_ER$MMR_E_ER_eV[4],3))),size=4, hjust=0, family="Helvetica", color = "black")+
-#   scale_x_continuous(limits = c(3.25, 3.661), sec.axis = sec_axis(~ ((1000/.))-273.15, name = expression(Temperature~degree*C), breaks = c(32, 25, 17, 10, 3 )))+
-#   geom_line(data = data.plotAMR_warm[which(round(data.plotAMR_warm$lnBWg, 1) == round(log(1.4), 1)),],
-#             aes(y = log((exp(model_predFE)/exp(lnBWg))), x=tempTest, group=lnBWg) ,color=cols.amr[2], linewidth=1, lty=1, show.legend=FALSE)+
-#   geom_line(data = data.plotAMRint_ER[exp(data.plotAMRint_ER$lnBWg) <= 1000, ], aes(y = log((exp(model_predFE)/exp(lnBWg))), x=tempTest, group=lnBWg, color = lnBWg), linewidth=0.5, lty=1, show.legend=FALSE)
-# ggformat(AMRmodel_plot3.E_ALL, x_title= expression(Temperature^-1~(1000/K)), y_title=expression(italic(ln)*MMR~(mg~O[2]~h^-1~g^-1)), print = F)
-# 
-# RMRmodel_plot3.E_ALL<-ggplot(data.rmrER[data.rmrER$lnBWg==0,]) +
-#   geom_point(data.rmrER, mapping=aes(x=tempTest, y=log(mass_specrmr), fill= tempTest, size = lnBWg), color="grey50", fill="grey70", alpha=1, pch=21)+
-#   geom_point(data.rmr.test, mapping=aes(x=tempTest, y=log(mass_specrmr), fill= tempTest, size = lnBWg), color = "black", alpha=1, pch=21, show.legend = FALSE)+
-#   scale_fill_gradient( low = cols.rmr[3], high = cols.rmr[1])+
-#   annotate("text",  x = 3.27, y = 3.5, label = bquote(italic(E)[RMR] == .(round(RMR_E_ER_eV,3))),size=5, hjust=0, family="Helvetica", color = "black")+
-#   annotate("text",  x = 3.27, y = 2.5, label = bquote(italic(E)[RMR] == .(round(RMR_E_W_eV,3))),size=5, hjust=0, family="Helvetica", color = cols.rmr[1])+
-#   ylim(-5.7,4)+
-#   scale_size_continuous(name="Mass (g)",
-#                       breaks=c(log(0.1), log(10), log(1000)),
-#                       labels=c("0.1", "10", "1000"))+
-#   scale_x_continuous(limits = c(3.25, 3.661), sec.axis = sec_axis(~ ((1000/.))-273.15, name = expression(Temperature~degree*C), breaks = c(32, 25, 17, 10, 3 )))+
-#   geom_line(data = data.plotRMR_ER[which(round(data.plotRMR_ER$lnBWg, 1) == round(log(1.35), 1)),], aes(y = log((exp(model_predFE)/exp(lnBWg))), x=tempTest, group=lnBWg ) ,color="black", linewidth=1, lty=1, show.legend=FALSE)+
-#   geom_line(data = data.plotRMR_warm[which(round(data.plotRMR_warm$lnBWg, 1) == round(log(1.35), 1)),], aes(y = log((exp(model_predFE)/exp(lnBWg))), x=tempTest, group=lnBWg), color = cols.rmr[2], linewidth=1, lty=1, show.legend=FALSE)
-# ggformat(RMRmodel_plot3.E_ALL, x_title= expression(Temperature^-1~(1000/K)), y_title=expression(italic(ln)*RMR~(mg~O[2]~h^-1~g^-1)), print = FALSE)
-# RMRmodel_plot3.E_ALL <- RMRmodel_plot3.E_ALL + theme(legend.position = c(0.87, 0.82))
-# 
-# ASmodel_plot3.E_ALL<-ggplot(data.asER[data.asER$lnBWg==0,]) +
-#   geom_point(data.asER, mapping=aes(x=tempTest, y=log(mass_specas), fill= tempTest, size = lnBWg), color="grey50", fill="grey70", alpha=1, pch=21, show.legend = FALSE)+
-#   geom_point(data.as[!c(data.as$test_category=="ecol_relev"),], mapping=aes(x=tempTest, y=log(mass_specas), fill= tempTest, size = lnBWg), color = "black", alpha=1, pch=21, show.legend = FALSE)+
-#   scale_fill_gradient( low = cols.as[3], high = cols.as[1])+
-#   annotate("text",  x = 3.27, y = 3.5, label = bquote(italic(E)[AS] == .(round(AS_E_ER_eV,3))),size=5, hjust=0, family="Helvetica", color = "black")+
-#   annotate("text",  x = 3.27, y = 2.5, label = bquote(italic(E)[AS] == .(round(AS_E_W_eV,3))),size=5, hjust=0, family="Helvetica", color = cols.as[1])+
-#   ylim(-5.7,4)+
-#   scale_x_continuous(limits = c(3.25, 3.661), sec.axis = sec_axis(~ ((1000/.))-273.15, name = expression(Temperature~degree*C), breaks = c(32, 25, 17, 10, 3 )))+
-#   geom_line(data = data.plotAS_ER[which(round(data.plotAS_ER$lnBWg, 1) == round(log(1.35), 1)),], aes(y = log((exp(model_predFE)/exp(lnBWg))), x=tempTest, group=lnBWg ) ,color="black", linewidth=1, lty=1, show.legend=FALSE)+
-#   geom_line(data = data.plotAS_warm[which(round(data.plotAS_warm$lnBWg, 1) == round(log(1.4), 1)),], aes(y = log((exp(model_predFE)/exp(lnBWg))), x=tempTest, group=lnBWg), color = cols.as[2], linewidth=1, lty=1, show.legend=FALSE)
-# ggformat(ASmodel_plot3.E_ALL, x_title= expression(Temperature^-1~(1000/K)), y_title=expression(italic(ln)*AS~(mg~O[2]~h^-1~g^-1)), print = F)
-# 
-# Arh.plot<-cowplot:::plot_grid(AMRmodel_plot3.E_ALL, RMRmodel_plot3.E_ALL, ASmodel_plot3.E_ALL, 
-#           align = "hv",
-#           axis = "l",
-#           nrow = 1,
-#           ncol = 3,
-#           labels = "AUTO",
-#           label_y = 0.95,
-#           label_size = 17)
-# ggsave(filename = paste("./Figures/Figure5.png", sep=""),
-#        plot=Arh.plot, width = 13, height = 5, units = "in")
-
 
 # Final plots with conceptual figure ---------
 # All fish together:
@@ -1075,13 +824,13 @@ MRmodel_plot_inset<-
                               sum_CItable$temp_cat == "ER",])+
   geom_linerange(aes(ymin = ci5, ymax = ci95, x = MR))+
   geom_point(mapping = aes(x = "MMR", y = AMR_slope31), size = 2, pch = 21,
-             color = "black", stroke = 0.5,fill = "#5d7d7c")+
+             color = "black", stroke = 0.4,fill = "#5d7d7c")+
   geom_point(mapping = aes(x = "MMR", y = AMR_slope5), size = 2, pch = 21,
-             color = "black", stroke = 0.5,fill = "#c4c7cc")+
+             color = "black", stroke = 0.4,fill = "#c4c7cc")+
   geom_point(mapping = aes(x = "MMR", y = AMR_slope15), size = 2, pch = 21,
-             color = "black", stroke = 0.5,fill = "#a2adb5")+
+             color = "black", stroke = 0.4,fill = "#a2adb5")+
   geom_point(mapping = aes(x = "MMR", y = AMR_slope25), size = 2, pch = 21,
-             color = "black", stroke = 0.5, fill = "#7e959b")+
+             color = "black", stroke = 0.4, fill = "#7e959b")+
   geom_point(mapping = aes(x = "RMR", y = RMR_slope), size = 2)+
   annotate(geom = "text", x = 1.25, y = 0.7, label = "5", size = 2, angle = 45, hjust =0)+
   annotate(geom = "text", x = 1.25, y = 0.75, label = "15", size = 2, angle = 45, hjust =0)+
@@ -1126,8 +875,8 @@ MRmodel_plot2<-
   #          size=5, hjust=0, family="Helvetica", color = "black", angle = 42)+
   # annotate("text",  x = 9, y = 4.1, label = expression(paste("RMR")),
   #          size=5, hjust=0, family="Helvetica", color = "black", angle = 42)+
-  annotate("text",  x = -1, y = -5.9, label = expression(paste("OPTIMAL TEMPERATURES")),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
+  annotate("text",  x = -2.4, y = -5.75, label = expression(paste("OPTIMAL TEMPERATURES")),
+           size=3.5, hjust=0, family="Helvetica", color = "black", angle = 0)+
   xlab(expression(italic(ln)*Body~mass~(g)))+
   ylab(expression(italic(ln)*MR~(mg~O[2]~h^-1)))+
   theme(axis.text.y=element_text(size=12, colour= 'black'),
@@ -1151,8 +900,10 @@ MRmodel_plot_inset_w<-
                               sum_CItable$temp_cat == "W",])+
   geom_hline(yintercept = c(0.75, 1), linetype = "dashed", linewidth = 0.1)+
   geom_linerange(aes(ymin = ci5, ymax = ci95, x = MR, color = MR), show.legend = F)+
-  geom_point(mapping = aes(x = "MMR", y = AMR_slope_w), size = 2, color = cols.amr[3])+
-  geom_point(mapping = aes(x = "RMR", y = RMR_slope_w), size = 2, color = cols.rmr[3])+
+  geom_point(mapping = aes(x = "MMR", y = AMR_slope_w), size = 2, pch=21, 
+             color = "black", fill = cols.amr[3], stroke = 0.4)+
+  geom_point(mapping = aes(x = "RMR", y = RMR_slope_w), size = 2,pch =21,
+             color = "black", fill = cols.rmr[3], stroke = 0.4)+
   theme_classic()+
   coord_flip()+
   scale_color_manual(values = c(cols.amr[2], cols.rmr[2]))+
@@ -1188,8 +939,8 @@ MRmodel_plot2_w<-
   #          size=5, hjust=0, family="Helvetica", angle = 30, color = cols.amr[1])+
   # annotate("text",  x = 6.7, y = 3.1, label = expression(paste("RMR")),
   #          size=5, hjust=0, family="Helvetica", angle = 42, color = cols.rmr[1])+
-  annotate("text",  x = -1, y = -5.9, label = expression(paste("WARM TEMPERATURES")),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
+  annotate("text", x = -2.4, y = -5.75, label = expression(paste("WARM TEMPERATURES")),
+           size=3.5, hjust=0, family="Helvetica", color = "black", angle = 0)+
   xlab(expression(italic(ln)*Body~mass~(g)))+
   ylab(expression(italic(ln)*MR~(mg~O[2]~h^-1)))+
   theme(axis.text.y=element_text(size=12, colour= 'black'),
@@ -1222,24 +973,24 @@ psim<-ggplot(data_sim[data_sim$simID==3,], aes(x=log(BW_kg), y=log(pred.mmr.mgO2
        size=5, hjust=0, family="Helvetica", angle = 42, color = "#7e959b")+
   annotate("text",  x = 1, y = 0.9, label = expression(paste("RMR")),
            size=5, hjust=0, family="Helvetica", angle = 33, color = "black")+
-  annotate("text",  x = -2, y = -4.15, label = expression(paste("OPTIMAL TEMPERATURES")),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
+  annotate("text",  x = -3.5, y = -4.2, label = expression(paste("OPTIMAL TEMPERATURES")),
+           size=3.5, hjust=0, family="Helvetica", color = "black", angle = 0)+
   annotate("text",  x = -3.8, y = 4.3, label = expression(paste("HYPOTHESIS")),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
+           size=4, hjust=0, family="Helvetica", color = "black", angle = 0)+
   annotate("text",  x = -3.8, y = 3.6, label = expression(italic(b)[MMR]~">"~italic(b)[RMR]),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
-  annotate("text",  x = 2, y = -0.8,
+           size=3.5, hjust=0, family="Helvetica", color = "black", angle = 0)+
+  annotate("text",  x = 1.75, y = -0.8,
            label = expression(italic(b)[MMR]~"="~1.00),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
-  annotate("text",  x = 2, y = -1.5,
+           size=3.5, hjust=0, family="Helvetica", color = "black", angle = 0)+
+  annotate("text",  x = 1.75, y = -1.5,
            label = expression(italic(b)[RMR]~"="~0.89),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
-  annotate("text",  x = 2, y = -2.2,
+           size=3.5, hjust=0, family="Helvetica", color = "black", angle = 0)+
+  annotate("text",  x = 1.75, y = -2.2,
            label = expression(italic(b)[AS]~"="~1.05),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
-  annotate("text",  x = 2, y = -2.9,
+           size=3,5, hjust=0, family="Helvetica", color = "black", angle = 0)+
+  annotate("text",  x = 1.75, y = -2.9,
            label = expression(italic(b)[FAS]~"="~0.11),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
+           size=3.5, hjust=0, family="Helvetica", color = "black", angle = 0)+
   xlab(expression(italic(ln)*Body~mass~(g)))+
   ylab(expression(italic(ln)*MR~(mg~O[2]~h^-1)))+
   theme(axis.text.y=element_text(size=12, colour= 'black'),
@@ -1269,24 +1020,24 @@ psim_w<-ggplot(data_sim[data_sim$simID==1,], aes(x=log(BW_kg), y=log(pred.mmr.mg
        size=5, hjust=0, family="Helvetica", angle = 32, color = cols.amr[2])+
   annotate("text",  x = 1, y = 0.9, label = expression(paste("RMR")),
            size=5, hjust=0, family="Helvetica", angle = 47, color = cols.rmr[2])+
-  annotate("text",  x = -2, y = -4.15, label = expression(paste("WARM TEMPERATURES")),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
+  annotate("text",  x = -3.3, y = -4.2, label = expression(paste("WARM TEMPERATURES")),
+           size=3.5, hjust=0, family="Helvetica", color = "black", angle = 0)+
   annotate("text",  x = -3.8, y = 4.3, label = expression(paste("HYPOTHESIS")),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
+           size=4, hjust=0, family="Helvetica", color = "black", angle = 0)+
   annotate("text",  x = -3.8, y = 3.6, label = expression(italic(b)[MMR]~"<"~italic(b)[RMR]),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
-  annotate("text",  x = 2, y = -0.8,
+           size=4, hjust=0, family="Helvetica", color = "black", angle = 0)+
+  annotate("text",  x = 1.75, y = -0.8,
            label = expression(italic(b)[MMR]~"="~0.75),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
-  annotate("text",  x = 2, y = -1.5,
+           size=3.5, hjust=0, family="Helvetica", color = "black", angle = 0)+
+  annotate("text",  x = 1.75, y = -1.5,
            label = expression(italic(b)[RMR]~"="~0.95),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
-  annotate("text",  x = 2, y = -2.2,
+           size=3.5, hjust=0, family="Helvetica", color = "black", angle = 0)+
+  annotate("text",  x = 1.75, y = -2.2,
            label = expression(italic(b)[AS]~"="~0.69),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
-  annotate("text",  x = 2, y = -2.9,
+           size=3.5, hjust=0, family="Helvetica", color = "black", angle = 0)+
+  annotate("text",  x = 1.75, y = -2.9,
            label = expression(italic(b)[FAS]~"="~-0.14),
-           size=3, hjust=0, family="Helvetica", color = "black", angle = 0)+
+           size=3.5, hjust=0, family="Helvetica", color = "black", angle = 0)+
   xlab(expression(italic(ln)*Body~mass~(g)))+
   ylab(expression(italic(ln)*MR~(mg~O[2]~h^-1)))+
   theme(axis.text.y=element_text(size=12, colour= 'black'),
@@ -1313,9 +1064,9 @@ mainplot<-
                    align = "hv", nrow = 2)
 
 ggsave(filename = paste("./Figures/FigureMAIN.png", sep=""),
-       plot=mainplot, width = 7, height = 7, units = "in")
+       plot=mainplot, width = 6.8, height = 6.8, units = "in")
 
-# --- misc -----
+# --- misc NOT USED -----
 # fas_temp<-ggplot(data=data.fas, aes(y=FAS, x = tempTest))+
 #   geom_point(show.legend = F)+
 #   ylim(0,20)+

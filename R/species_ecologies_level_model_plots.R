@@ -1,32 +1,36 @@
+# Author: Krista Kraskura
+# Description: 
+#  - estimating species level scaling relationships (custom function, simple GLM)
+#     - export all scaling parameters 
+#  - estimating ecology group level scaling relationships (use tidyverse and broom, simle GLM)
+#     - export all scaling parameters 
+#  - get summary data for estimated scaling relationships 
+#  - plot species slopes (supplement)
+#  
+# 
+# ********************************************
+# ********************************************
 
-
-options(dplyr.summarise.inform = FALSE)
-# *****************************************************************************
-#  not needed for final version
-# k<-(8.62*10^(-5)) # Boltzmann's constant
-# E<-0.63 # activation energy MTE
-
-# *******************************************************************************
-
-# for emmeans library
-# Ecologically Relevant conditions: 
-emm_options(pbkrtest.limit = 7000)
-emm_options(lmerTest.limit = 7000)
-
-# *******************************************************************************
-# *******************************************************************************
 # GLOBAL DATA (with mass specific values) ---------
 
 # 1) for phylo mixed models
-source(here("R", "phylo_mixed_model.R")) # get final model outputs
+# source(here("R", "phylo_mixed_model.R")) # get final model outputs
+library(here)
 source(here("R/colors_themes.R"))
 # 2) for non-phylo mixed models 
 # source("./R/nonPhylo_mixed_models.R")
+# 
+options(dplyr.summarise.inform = FALSE)
+# *****************************************************************************
+# for emmeans library settings
+emm_options(pbkrtest.limit = 7000)
+emm_options(lmerTest.limit = 7000)
+
 
 # *********************************************************************************
 # **********************************************************************************
 # ECOLOGY - SPECIFIC (estimate scaling) ----
-# 
+# function to estimate scaling relationships
 summarise_ecologiesLM<-function(scalingGood=FALSE,
                                 NAMEecol,
                                 lmdata.AMRW,
@@ -293,6 +297,7 @@ ecology_data.FASd_er<-ecology_data.FASd[grepl("optimal", as.character(ecology_da
 order.ecology_data.FASd.W <- order.ecology_data.FASd[grepl("warm", as.character(order.ecology_data.FASd$ecol_temp_cat)), ]
 order.ecology_data.FASd.ER <- order.ecology_data.FASd[grepl("optimal", as.character(order.ecology_data.FASd$ecol_temp_cat)), ]
 
+# calculte difference between RMR and MMR slopes 
 ecology_data.RMRd_er$DIFF_mmr_rmr<-ecology_data.RMRd_er$slope - ecology_data.AMRd_er$slope
 # ecology_data.RMRd_er[ecology_data.RMRd_er$DIFF_mmr_rmr > 0,] # bMMR < bRMR
 # ecology_data.RMRd_er[ecology_data.RMRd_er$DIFF_mmr_rmr < 0,] # bMMR > bRMR
@@ -471,105 +476,6 @@ write.csv(file = "./Data_exports/Species/species_MMR.csv", species.amr, row.name
 # *****************************************************************************************
 # *****************************************************************************************
 # FIGURES ------------
-
-## SUPPLEMENT Ecologies: MMR and RMR trends (warm, optimal)  -------
-ecol_amr_sum1<-ggplot(ecology_data.AMRd.g, aes(color = test_category3)) +
-  geom_segment(aes(x = log(size_min),
-                   xend = log(size_max),
-                   y = intercept + slope*log(size_min),
-                   yend = intercept + slope*log(size_max)) ,
-               show.legend = FALSE )+
-  ylim(x = -7, 12 )+
-  xlim(x = -7, 12)+
-  scale_color_manual(values = c("black", cols.amr[2]))
-ggformat(ecol_amr_sum1,
-         x_title=expression(italic(ln)*Body~mass~(g)),
-         y_title=expression(italic(ln)*MMR~(mg~O[2]~h^-1)),
-         print = F)
-
-ecol_amr_sum1<-ecol_amr_sum1 +
-  ggtitle("ECOLOGIES") +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 15),
-    plot.margin = margin(unit(c(0,0,-2.5,0), "cm")),
-    # axis.title.y = element_blank(),
-    axis.title.x = element_blank(),
-    # axis.text.y = element_blank(),
-    axis.text.x = element_blank()
-    )
-
-
-ecol_rmr_sum1<-ggplot(ecology_data.RMRd.g, aes(color = test_category3)) +
-  geom_segment(aes(x = log(size_min),
-                   xend = log(size_max),
-                   y = intercept + slope*log(size_min), 
-                   yend = intercept + slope*log(size_max)),
-               show.legend = FALSE )+
-  ylim(x = -7,12 )+
-  xlim(x = -7, 12)+
-  scale_color_manual(values = c("black", cols.rmr[2]))
-ggformat(ecol_rmr_sum1, x_title=expression(italic(ln)*Body~mass~(g)),
-         y_title=expression(italic(ln)*RMR~(mg~O[2]~h^-1)), print = F)
-ecol_rmr_sum1<-ecol_rmr_sum1 +
-  theme(plot.margin = margin(unit(c(-2.5,0,0,0), "cm")))
-
-
-# Species specific groupings: 
-species_amr_sum1<-ggplot(species.amr, aes(color = test_category3)) +
-  geom_segment(aes(x = log(size_min),
-                   xend = log(size_max),
-                   y = intercept + slope*log(size_min),
-                   yend = intercept + slope*log(size_max)) ,
-               show.legend = FALSE )+
-  ylim(x = -7, 12 )+
-  xlim(x = -7, 12)+
-  scale_color_manual(values = c("black", cols.amr[2]))
-ggformat(species_amr_sum1, x_title=expression(italic(ln)*Body~mass~(g)),
-         y_title=expression(italic(ln)*MMR~(mg~O[2]~h^-1)), print = F)
-
-species_amr_sum1<-species_amr_sum1 +
-  ggtitle("SPECIES") +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 15),
-    plot.margin = margin(unit(c(0,0.5,-2.5,0), "cm")),
-    axis.title.y = element_blank(),
-    axis.title.x = element_blank(),
-    axis.text.y = element_blank(),
-    axis.text.x = element_blank()
-    )    
-
-species_rmr_sum1<-ggplot(species.rmr, aes(color = test_category3)) +
-  geom_segment(aes(x = log(size_min),
-                   xend = log(size_max),
-                   y = intercept + slope*log(size_min),
-                   yend = intercept + slope*log(size_max)) ,
-               show.legend = FALSE )+
-  ylim(x = -7, 12 )+
-  xlim(x = -7, 12)+
-  scale_color_manual(values = c("black", cols.rmr[2]))
-ggformat(species_rmr_sum1, x_title=expression(italic(ln)*Body~mass~(g)),
-         y_title=expression(italic(ln)*RMR~(mg~O[2]~h^-1)), print = F )
-
-species_rmr_sum1<-species_rmr_sum1 +
-  theme(plot.margin = margin(unit(c(-2.5,0.5,0,0), "cm")), 
-    axis.title.y = element_blank(),
-    axis.text.y = element_blank())
-
-
-grid2<-cowplot:::plot_grid(ecol_amr_sum1, species_amr_sum1,
-                          ecol_rmr_sum1, species_rmr_sum1,
-                          nrow = 2,
-                          ncol = 2,
-                          labels = c("B", "C", "D", "E"),
-                          label_size = 13, 
-                          label_x = c(0.24, 0.05),
-                          label_y = c(0.87, 0.88),
-                          rel_widths = c(1.3, 1), 
-                          rel_heights = c(1, 1.3))
-ggsave(filename = paste("./Figures/Suppl_Figurex.png", sep=""), grid2,
-       width = 6, height = 6, units = "in")
-
-  
 
  ## Ecologies: FAS trends (warm, optimal) -------
 rmr.WARM.ER.good<-
@@ -909,7 +815,7 @@ save_plot(filename = paste("./Figures/Suppl_ecol_hist.png", sep=""),
 
 
 # (SUPPL) Hist of slopes for the species ---
-# ### by species =------
+### by species =------
 annotationER<-annotate(geom = "text",
                      x= 2, y = 11.5,
                      label = paste(round(mean(species.amr.er$slope),2), " (", round(sd(species.amr.er$slope),2) ,")", sep =""), family = "Helvetica", size=4, color="black")
@@ -1000,4 +906,101 @@ spechist.plot<-cowplot:::plot_grid(plot_hist3_amrlm, plot_hist3_rmrlm,plot_hist3
 save_plot(filename = paste("./Figures/Suppl_species_hist.png", sep=""),
       spechist.plot, base_width = 10, base_height = 8, units = "in")
 
+
+## MISC: ## not used Ecologies: MMR and RMR trends (warm, optimal)  -------
+ecol_amr_sum1<-ggplot(ecology_data.AMRd.g, aes(color = test_category3)) +
+  geom_segment(aes(x = log(size_min),
+                   xend = log(size_max),
+                   y = intercept + slope*log(size_min),
+                   yend = intercept + slope*log(size_max)) ,
+               show.legend = FALSE )+
+  ylim(x = -7, 12 )+
+  xlim(x = -7, 12)+
+  scale_color_manual(values = c("black", cols.amr[2]))
+ggformat(ecol_amr_sum1,
+         x_title=expression(italic(ln)*Body~mass~(g)),
+         y_title=expression(italic(ln)*MMR~(mg~O[2]~h^-1)),
+         print = F)
+
+ecol_amr_sum1<-ecol_amr_sum1 +
+  ggtitle("ECOLOGIES") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 15),
+    plot.margin = margin(unit(c(0,0,-2.5,0), "cm")),
+    # axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    # axis.text.y = element_blank(),
+    axis.text.x = element_blank()
+    )
+
+
+ecol_rmr_sum1<-ggplot(ecology_data.RMRd.g, aes(color = test_category3)) +
+  geom_segment(aes(x = log(size_min),
+                   xend = log(size_max),
+                   y = intercept + slope*log(size_min), 
+                   yend = intercept + slope*log(size_max)),
+               show.legend = FALSE )+
+  ylim(x = -7,12 )+
+  xlim(x = -7, 12)+
+  scale_color_manual(values = c("black", cols.rmr[2]))
+ggformat(ecol_rmr_sum1, x_title=expression(italic(ln)*Body~mass~(g)),
+         y_title=expression(italic(ln)*RMR~(mg~O[2]~h^-1)), print = F)
+ecol_rmr_sum1<-ecol_rmr_sum1 +
+  theme(plot.margin = margin(unit(c(-2.5,0,0,0), "cm")))
+
+
+# Species specific groupings: 
+species_amr_sum1<-ggplot(species.amr, aes(color = test_category3)) +
+  geom_segment(aes(x = log(size_min),
+                   xend = log(size_max),
+                   y = intercept + slope*log(size_min),
+                   yend = intercept + slope*log(size_max)) ,
+               show.legend = FALSE )+
+  ylim(x = -7, 12 )+
+  xlim(x = -7, 12)+
+  scale_color_manual(values = c("black", cols.amr[2]))
+ggformat(species_amr_sum1, x_title=expression(italic(ln)*Body~mass~(g)),
+         y_title=expression(italic(ln)*MMR~(mg~O[2]~h^-1)), print = F)
+
+species_amr_sum1<-species_amr_sum1 +
+  ggtitle("SPECIES") +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 15),
+    plot.margin = margin(unit(c(0,0.5,-2.5,0), "cm")),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.text.x = element_blank()
+    )    
+
+species_rmr_sum1<-ggplot(species.rmr, aes(color = test_category3)) +
+  geom_segment(aes(x = log(size_min),
+                   xend = log(size_max),
+                   y = intercept + slope*log(size_min),
+                   yend = intercept + slope*log(size_max)) ,
+               show.legend = FALSE )+
+  ylim(x = -7, 12 )+
+  xlim(x = -7, 12)+
+  scale_color_manual(values = c("black", cols.rmr[2]))
+ggformat(species_rmr_sum1, x_title=expression(italic(ln)*Body~mass~(g)),
+         y_title=expression(italic(ln)*RMR~(mg~O[2]~h^-1)), print = F )
+
+species_rmr_sum1<-species_rmr_sum1 +
+  theme(plot.margin = margin(unit(c(-2.5,0.5,0,0), "cm")), 
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank())
+
+
+grid2<-cowplot:::plot_grid(ecol_amr_sum1, species_amr_sum1,
+                          ecol_rmr_sum1, species_rmr_sum1,
+                          nrow = 2,
+                          ncol = 2,
+                          labels = c("B", "C", "D", "E"),
+                          label_size = 13, 
+                          label_x = c(0.24, 0.05),
+                          label_y = c(0.87, 0.88),
+                          rel_widths = c(1.3, 1), 
+                          rel_heights = c(1, 1.3))
+# ggsave(filename = paste("./Figures/Suppl_Figurex.png", sep=""), grid2,
+#        width = 6, height = 6, units = "in")
 

@@ -42,9 +42,9 @@ get_phylo_matrix<-function(species.list,
 
   if(plot){
     A.plot<-ggtree(tree) +
-    geom_tiplab(as_ylab=TRUE, color='black', size = 7, align = TRUE)
+    geom_tiplab(as_ylab=TRUE, color='black', size = 12, align = TRUE)
     ggsave(plot = A.plot, filename = here(paste("Data_exports/",dataset.ID, "_treeplot.png", sep="")),
-           width = 7, height = 12)
+           width = 7, height = 15)
   } 
 
   assign(matrix.name, value = A, envir = .GlobalEnv)

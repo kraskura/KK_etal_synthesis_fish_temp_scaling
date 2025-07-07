@@ -1,11 +1,17 @@
-
+# Author: Krista Kraskura
+# Description: 
+#   - export scaling parameters
+#   - calculate mass specific values with scaling slopes
+#   - update models to include 'ecology' as a fixed factor and compare fit with SIC/BIC (export comaprison table)
+#   - get ANOVA, postHoc (export all datasets, ANOVA, emmeans)
+#   - main text violin plots 
+#   - suppl. box plots
+# 
+# ********************************************
+# ********************************************
 
 options(dplyr.summarise.inform = FALSE)
 # *********************************************************************************
-
-k<-(8.62*10^(-5)) # Boltzmann's constant
-E<-0.63 # activation energy MTE
-
 
 # for emmeans library
 # Ecologically Relevant conditions: 
@@ -18,13 +24,10 @@ emm_options(lmerTest.limit = 7000)
 
 # 1) for phylo mixed models
 source(here("R", "phylo_mixed_model.R")) # run first if not already done
-source(here("R/colors_themes.R"))
-# 2) for non-phylo mixed models 
-# source("./R/nonPhylo_mixed_models.R")
+source(here("R/colors_themes.R")) # color themes and libraries
 
-# data.amrER$tempTestK1000_inC<-((1000/data.amrER$tempTestK1000))-273.15
-# data.amr$tempTestK1<-1/data.amr$tempTestK
-# data.amr$tempTestK1000<-1000/data.amr$tempTestK
+# 2) for non-phylo mixed models (NOT USED)
+# source("./R/nonPhylo_mixed_models.R")
 
 scaling.params<-read.csv(here("./Data_exports/Phylo/scaling_parameters.csv"))
 
@@ -58,7 +61,7 @@ AMR_slope_w<-round(as.numeric(scaling.params[scaling.params$performance == "MMR"
 
 
 # ************************************************************************************
-# ************************************************************************************* 
+# ************************************************************************************
 # Reassign the data frames with scaling parameters ----
 # # reset datasets with mass specific values using scaling coefficients from the models.
 data.list<-get_data_temp(data.amr = "./Data/Fish_AMR_temp_dataset_mar2022.csv",
@@ -121,8 +124,8 @@ data.fas.test<-data.amr.test[c(!is.na(data.amr.test$FAS) & is.finite(data.amr.te
 data.as.test<-data.amr.test[c(!is.na(data.amr.test$lnAS) & is.finite(data.amr.test$lnAS)) , ]
 
 
-# ********************************************************************************************************************
-# ********************************************************************************************************************
+# ************************************************************************************
+# ************************************************************************************
 # Global models with ecology --------
 # standardized metric for contrasts
 # tempTest<-1000/(((20+273.15)))
@@ -136,8 +139,8 @@ ecol.model.update<-function(ecol.model.null,
                             data.EMMEANS = NULL, 
                             data.CONTRASTS = NULL, 
                             data.PARAMS = NULL,
-                            ref.tempTest, 
-                            ref.lnBWg, 
+                            ref.tempTest, # for estimate means reference grid
+                            ref.lnBWg, # for estimate means reference grid
                             phylo = TRUE){
   
   # if(phylo){
@@ -423,7 +426,7 @@ ecol.model.params<-rbind(output.AS.ER[[5]], output.AS.W[[5]],
       output.RMR.ER[[5]], output.RMR.W[[5]],
       output.MMR.ER[[5]], output.MMR.W[[5]])
 
-# save outputs -------
+# save stats tables for supplement ------------
 write.csv(file = here("./Data_exports/Ecologies/ecologies_data_emmeans.csv"), ecol.emmeans, row.names=FALSE)
 write.csv(file = here("./Data_exports/Ecologies/ecologies_data_anova.csv"), ecol.anova, row.names=FALSE)
 write.csv(file = here("./Data_exports/Ecologies/ecologies_data_posthoc.csv"), ecol.posthoc.comp, row.names=FALSE)
@@ -431,7 +434,7 @@ write.csv(file = here("./Data_exports/Ecologies/ecologies_data_bic.csv"), ecol.b
 write.csv(file = here("./Data_exports/Ecologies/ecologies_data_modelParams.csv"), ecol.model.params, row.names=FALSE)
 
 
-## Ecologies: violin lots, AS and FAS ecology size independent -------------
+## Ecologies: violin plots, AS and FAS ecology size independent -------------
 ### Demersal Pelagic MMR, RMR, AS ------
 data.as$DemersPelag_plot<-paste(data.as$DemersPelag, data.as$test_category3, sep = "-")
 data.amr$DemersPelag_plot<-paste(data.amr$DemersPelag, data.amr$test_category3, sep = "-")

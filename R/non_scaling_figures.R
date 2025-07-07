@@ -1,85 +1,22 @@
-# last run: april 27 2025
+# Author: Krista Kraskura
+# Description: 
+#   Supplemental material:
+#     - histograms 
+#     - correlations between MR metrics
+# ********************************************
+# ********************************************
 
 # import data, source local scripts ---------
 # source("./R/phylo_mixed_model.R") # need for scaling slopes 
 # source("./R/nonPhylo_mixed_models.R") # for comparison supplemental 
 set.seed(51423)
 # MMR and AMR used interchangeably throughout 
-
-library(ggplot2)
-library(ggpubr)
-library(cowplot)
-library(forcats)
 library(here)
-library(weathermetrics)
-library(ggformat2)
-  
-source("./R/get_data_temp.R")
-source("./R/colors_themes.R")
+source(here("R/get_data_temp.R"))
+source(here("R/colors_themes.R")) # data set, libraries, colors, etc. 
 
 # Data for models ------
-data.list<-get_data_temp(data.amr = here("Data", "Fish_AMR_temp_dataset_mar2022.csv"),
-                                 data.rmr = here("Data","Fish_RMR_temp_dataset_mar2022.csv"),
-                                 ecology.data = here("Data", "Kraskura_species_ecologies_mar2022.csv"),
-                                 onlyTop.above = TRUE,
-                                 save.FishBase.species.data = F,
-                                 calc_mass_specific = FALSE)
-
-# data.list.NO.SALMON<-get_data_temp(data.amr = here("Data", "Fish_AMR_temp_dataset_mar2022.csv"),
-#                                  data.rmr = here("Data","Fish_RMR_temp_dataset_mar2022.csv"),
-#                                  ecology.data = here("Data", "Kraskura_species_ecologies_mar2022.csv"),
-#                                  onlyTop.above = TRUE, save.FishBase.species.data = F,
-#                                  calc_mass_specific = FALSE)
-
-data.amrAC<-data.frame(data.list[1])
-data.rmrAC<-data.frame(data.list[2])
-data.amrAM<-data.frame(data.list[3])
-data.rmrAM<-data.frame(data.list[4])
-data.amrER<-data.frame(data.list[5])
-data.rmrER<-data.frame(data.list[6])
-
-data.asAC<-data.frame(data.list[7])
-data.fasAC<-data.frame(data.list[8])
-data.asAM<-data.frame(data.list[9])
-data.fasAM<-data.frame(data.list[10])
-data.asER<-data.frame(data.list[11])
-data.fasER<-data.frame(data.list[12])
-
-data.amr<-data.frame(data.list[13])
-data.rmr<-data.frame(data.list[14])
-dataMR<-data.frame(data.list[15])
-data.as<-data.frame(data.list[16])
-data.fas<-data.frame(data.list[17])
-
-# the warm ones
-data.amr.test<-rbind(data.amrAC, data.amrAM)
-data.rmr.test<-rbind(data.rmrAC, data.rmrAM)
-data.fas.test<-rbind(data.fasAC, data.fasAM)
-data.as.test<-rbind(data.asAC, data.asAM)
-data.fas.test<-data.fas.test[c(!is.na(data.fas.test$FAS) & is.finite(data.fas.test$FAS)) , ]
-data.as.test<-data.as.test[c(!is.na(data.as.test$lnAS) & is.finite(data.as.test$lnAS)) , ]
-
-# Get model data set specific phylogentics model matrixes -------
-data.rmrER<-droplevels(data.rmrER)
-data.rmr.test<-droplevels(data.rmr.test)
-data.amrER<-droplevels(data.amrER)
-data.amr.test<-droplevels(data.amr.test)
-data.asER<-droplevels(data.asER)
-data.as.test<-droplevels(data.as.test)
-data.fasER<-droplevels(data.fasER)
-data.fas.test<-droplevels(data.fas.test)
-
-# test categories
-data.fas$test_category3 <- "warm"
-data.fas[data.fas$test_category == "ecol_relev", "test_category3"] <- "optimal"
-data.as$test_category3 <- "warm"
-data.as[data.as$test_category == "ecol_relev", "test_category3"] <- "optimal"
-data.amr$test_category3 <- "warm"
-data.amr[data.amr$test_category == "ecol_relev", "test_category3"] <- "optimal"
-data.rmr$test_category3 <- "warm"
-data.rmr[data.rmr$test_category == "ecol_relev", "test_category3"] <- "optimal"
-
-
+#
 # Supplemental -----------
 ## Histograms of fish at different size suppl ----------
 plot_hist_amr<-ggplot(data.amr, aes(x=BW_g,
@@ -194,7 +131,7 @@ hist.plot<-cowplot:::plot_grid(plot_hist_amr, plot_hist_amr_T,
 ggsave(filename = paste("./Figures/Suppl_Size_hist.png", sep=""),
           hist.plot, width = 13, height = 9, units = "in")
 
-# Plots: Correlations metabolic rates ---------
+## Plots: Correlations metabolic rates ---------
 MRcorrel1.small<-ggplot(data.amr[data.amr$BW_g<1000,], aes(x=RMR, y=AMR, group=test_category3, color = tempTest, shape=test_category3, fill=tempTest)) +
   geom_point(alpha=1, pch=1,  show.legend = TRUE, size=1)+
   scale_fill_viridis_c(option = "C")+
