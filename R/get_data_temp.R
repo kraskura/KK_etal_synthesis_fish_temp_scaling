@@ -1,5 +1,8 @@
 
+# # test 
 
+
+library(here)
 get_data_temp <- function(data.amr, data.rmr,
                                   ecology.data,
                                   onlyTop.above = TRUE,
@@ -14,15 +17,17 @@ get_data_temp <- function(data.amr, data.rmr,
   
   # 1. import the latest AMR file , oct 4 2020 data
   data.amr<-read.csv(data.amr)
-  names(data.amr)<-c( "tempAccl","TempAcclDays", "test_category", "tempTest", "fish_ID", "species", "Common_name" , "BW_g", "AMR", "RMR","study_ID", "trial", "trial_ID") 
+  names(data.amr)<-c( "tempAccl","TempAcclDays", "test_category", "tempTest", "fish_ID", "species", "Common_name" , "BW_g", "AMR", "RMR","study_ID", "trial", "trial_ID", "lifestage", "chamber_vol_L", "h_starved", "MMR_method", "h_in_respo") 
   
   # 2. import the latest RMR file , oct 4 2020 note 
   data.rmr<-read.csv(data.rmr, header=TRUE, stringsAsFactors=FALSE, fileEncoding="latin1")
-  names(data.rmr)<-c( "tempAccl","TempAcclDays", "test_category", "tempTest", "fish_ID",  "species", "Common_name" , "BW_g", "RMR", "study_ID", "trial", "trial_ID") 
+  names(data.rmr)<-c( "tempAccl","TempAcclDays", "test_category", "tempTest", "fish_ID",  "species", "Common_name" , "BW_g", "RMR", "study_ID", "trial", "trial_ID","lifestage", "chamber_vol_L", "h_starved", "h_in_respo") 
   
   # 3. import ecology data
   ecology.data<-read.csv(ecology.data)
+
   
+  # ******************************************  
   # curing AMR *****************************
   data.amr$species<-as.character(data.amr$species)
   # Species names that are different between authors specs and what is on fishbase, here:
@@ -38,17 +43,33 @@ get_data_temp <- function(data.amr, data.rmr,
   data.amr[data.amr$species == "Acrossocheilus monticolus" , "species"]<- "Acrossocheilus monticola" # https://www-ncbi-nlm-nih-gov.proxy.library.ucsb.edu:9443/Taxonomy/Browser/wwwtax.cgi?id=356813
   data.amr[data.amr$species == "Archocentrus nigrofasciatus" , "species"]<- "Amatitlania nigrofasciata" #https://www.fishbase.se/summary/Archocentrus-nigrofasciatus.html, https://nas.er.usgs.gov/queries/factsheet.aspx?SpeciesID=447
   # species("Sinibrama taeniatus") # fishbase is finding this 
-  
-  # new additions 2022:
+  # data.amr[data.amr$species == "Aphanius iberus" , "species"]<- "Apricaphanius iberus" # https://www.fishbase.se/summary/Apricaphanius-iberus # dont change because the 
+
+  # new additions 2022: ******
   # shorthorn sculpin 
   # zebrafish 
   # Arctic charr
   # Opaleye
   # mahi mahi
   # California killifish
-
-  # curing AMR *****************************
-  cols.numeric<-c(1,4,8,9,10)
+  # 
+  # new additions 2026: ******
+  # spanish toothcarp
+  # Arc-eye hawkfish
+  # blacktail snapper
+  # convict tang
+  # green sturgeon
+  # golden perch
+  # roman seabream
+  # westslope cutthroat trout
+  # pacific cod
+  # barred surfperch
+  # emerald rockcod
+  # three-striped dwarf cichlid
+  # cardinal tetra
+  
+  # str(data.amr)
+  cols.numeric<-c(1,4,8,9,10, 15, 16, 18)
   data.amr[, cols.numeric]<-sapply(data.amr[, cols.numeric], as.numeric)
   
   data.amr$species<-factor(data.amr$species)
@@ -69,7 +90,9 @@ get_data_temp <- function(data.amr, data.rmr,
   data.amr$test_category<-factor(data.amr$test_category)
   data.amr$trial<-as.factor(data.amr$trial)
   data.amr$species<-factor(data.amr$species)
-  
+  data.amr$MMR_method<-factor(data.amr$MMR_method) 
+  data.amr$lifestage<-factor(data.amr$lifestage) 
+   
   # dummy variable for temp category (k-1 variables so 2) 
   # d1(acute): ecol_relev = 0, acute=1, acclim =0 
   # d2(acclim): ecol_relev = 0, acute=0, acclim =1
@@ -84,6 +107,8 @@ get_data_temp <- function(data.amr, data.rmr,
   data.amr$d1[data.amr$test_category=="acclim"]<-0
   data.amr$d2[data.amr$test_category=="acclim"]<-1
   
+  
+  # ******************************************  
   # curing RMR ******************************
   data.rmr$species<-as.character(data.rmr$species)
   # Species names that are different between authors specs and what is on fishbase, here:
@@ -99,12 +124,13 @@ get_data_temp <- function(data.amr, data.rmr,
   data.rmr[data.rmr$species == "Acrossocheilus monticolus" , "species"]<- "Acrossocheilus monticola" # https://www-ncbi-nlm-nih-gov.proxy.library.ucsb.edu:9443/Taxonomy/Browser/wwwtax.cgi?id=356813
   data.rmr[data.rmr$species == "Archocentrus nigrofasciatus" , "species"]<- "Amatitlania nigrofasciata" #https://www.fishbase.se/summary/Archocentrus-nigrofasciatus.html, https://nas.er.usgs.gov/queries/factsheet.aspx?SpeciesID=447
   # species("Sinibrama taeniatus") # fishbase is finding this 
-  
+  data.rmr[data.rmr$species == "Aphanius iberus" , "species"]<- "Apricaphanius iberus" # https://www.fishbase.se/summary/Apricaphanius-iberus
+    
   # data.rmr[which(is.na(data.rmr[,2])),]
-  cols.numeric<-c(1,2,4,8,9)
+  cols.numeric<-c(1,2,4,8,9, 14, 15, 16)
   
   data.rmr[, cols.numeric]<-sapply(data.rmr[, cols.numeric], as.numeric) 
-  message(" NAs present in days acclimated at temp acclimation, when going 'as.numeric'")
+  message(" NAs present in RMR dataset when numeric variables have NA (days acclimated, h in respo, h starved, respo chamber volume")
   
   data.rmr$log10RMR<-log10(data.rmr$RMR)
   data.rmr$log10BWg<-log10(data.rmr$BW_g)
@@ -118,6 +144,7 @@ get_data_temp <- function(data.amr, data.rmr,
   data.rmr$trial<-as.factor(data.rmr$trial)
   data.rmr$species<-factor(data.rmr$species)
   data.rmr$tempTestK<-celsius.to.kelvin(data.rmr$tempTest, round = 2)
+  data.rmr$lifestage<-factor(data.rmr$lifestage) 
   
   # add dummy variable for temp category (k-1 variables so 2) 
   # d1(acute): ecol_relev = 0, acute=1, acclim =0 
@@ -138,27 +165,50 @@ get_data_temp <- function(data.amr, data.rmr,
   # Wootton, H.F., Morrongiello, J.R., Schmitt, T., Audzijonyte, A., 2022 Smaller adult fish size in warmer water is not explained by elevated metabolism. Ecology Letters. https://doi.org/10.1111/ele.13989
   # Measurements produce FAS > 20; only RMR assumed usable. 
   data.amr<-data.amr[!data.amr$study_ID == 415,]
-  message("EXCLUDING Study # 415 MMR measurements")
+  message("EXCLUDING Study # 415 MMR measurements; Wootton et al 2022; FAS > 20")
   # ********************************************************************
   
   # dont include data that were below optimal temperature range. 
   if(onlyTop.above){
     # take out fish that are acclimated to Top min ranges.
+    # 
+  
+    # RMR *****
     # "Gasterosteus aculeatus" acclimated at 10 for warm Populations: "POPMyvW", "POPGTS", "POPAshnW"
     data.rmr<-data.rmr[!c((data.rmr$test_category=="acclim") & data.rmr$species=="Gasterosteus aculeatus" & (data.rmr$trial_ID == "POPMyvW" | data.rmr$trial_ID == "POPGTS" | data.rmr$trial_ID == "POPAshnW") & !is.na(data.rmr$trial_ID)),]
     
     # salmon O. nerka populations that are below 14 c
     data.rmr<-data.rmr[!c((data.rmr$test_category=="acclim") & data.rmr$species=="Oncorhynchus nerka"  & !is.na(data.rmr$trial_ID) & data.rmr$tempTest < 14),]
     
+    # Bailey et al take out 10 C roman seabream
+    data.rmr<-data.rmr[!c(data.rmr$study_ID=="1019" & data.rmr$tempTest == 10),]
+    # Zillig et al juvenile chinook
+    data.rmr<-data.rmr[!c(data.rmr$study_ID=="1007" & data.rmr$tempAccl < 16 & data.rmr$tempTest < 16),]
+    # Zillig et al  sturgeon 
+    data.rmr<-data.rmr[!c(data.rmr$study_ID=="1013" & data.rmr$tempAccl < 19 & data.rmr$tempTest < 15),]
+    # Kraskura barred surfperch tested at 12C 
+    data.rmr<-data.rmr[!c((data.rmr$species=="Amphistichus argenteus") & data.rmr$tempTest < 16),]
+    
+    # AMR *****
     # "Gasterosteus aculeatus" acclimated at 10 for warm Populations: "POPMyvW", "POPGTS", "POPAshnW"
     data.amr<-data.amr[!c((data.amr$test_category=="acclim") & data.amr$species=="Gasterosteus aculeatus" & (data.amr$trial_ID == "POPMyvW" | data.amr$trial_ID == "POPGTS" | data.amr$trial_ID == "POPAshnW") & !is.na(data.amr$trial_ID)),]
     
     # salmon O. nerka populations that are below 14 c
     data.amr<-data.amr[!c((data.amr$test_category=="acclim") & data.amr$species=="Oncorhynchus nerka"  & !is.na(data.amr$trial_ID) & data.amr$tempTest < 14),]
     
+    # Bailey et al take out 10 C roman seabream
+    data.amr<-data.amr[!c(data.amr$study_ID=="1019" & data.amr$tempTest == 10),]
+    # Zillig et al juvenile chinook
+    data.amr<-data.amr[!c(data.amr$study_ID=="1007" & data.amr$tempAccl < 16 & data.amr$tempTest < 16),]
+    # Zillig et al  sturgeon 
+    data.amr<-data.amr[!c(data.amr$study_ID=="1013" & data.amr$tempAccl < 19 & data.amr$tempTest < 16),]
+    # Kraskura barred surfperch tested at 12C 
+    data.amr<-data.amr[!c((data.amr$species=="Amphistichus argenteus") & data.amr$tempTest < 16),]
+
+    
   }
   
-  # Formatting/organizing/combining AMR and RMR datasets --------------
+  # Formatting/organizing/combining AMR and RMR datasets *************************
   # all(is.numeric(data.amr$AMR))
   # all(!is.na(data.amr$AMR)) # making sure all AMR are numeric values, no NA's
   # 
@@ -174,8 +224,8 @@ get_data_temp <- function(data.amr, data.rmr,
   data.amr.combine$MR_type<-as.numeric(1)
   data.amr.combine$MR_type2<-"AMR"
   
-  nrow(data.amr.combine) # 
-  nrow(data.rmr.combine) # 
+  nrow(data.amr.combine) # 5476 feb 2026
+  nrow(data.rmr.combine) # 7427 feb 2026
   
   dataMR<-rbind(data.amr.combine, data.rmr.combine) # combining RMR and AMR in long format 
   dataMR$lnMR<-log(dataMR$MR)
@@ -186,7 +236,7 @@ get_data_temp <- function(data.amr, data.rmr,
     return(category_names[value])
   }
   
-  
+
   k<-(8.62*10^(-5)) # Boltzmann's constant
   # kBoltz<-1.38 * 10^23 
   E<-0.63 # activation energy MTE
@@ -204,12 +254,12 @@ get_data_temp <- function(data.amr, data.rmr,
   data.amr$tempTestkT<-1/(data.amr$tempTestK*k)
   data.rmr$tempTestkT<-1/(data.rmr$tempTestK*k)
   dataMR$tempTestkT<-1/(dataMR$tempTestK*k)
-  
-  
+
   
   # adding body shape from R FishBase online: 
   if(save.FishBase.species.data){
     
+    require(rfishbase)
     colnames(dataMR)[4]<-"Species"
     mySpecies<-as.character(unique(dataMR$Species))
     mySpecies
@@ -237,11 +287,11 @@ get_data_temp <- function(data.amr, data.rmr,
   data.rmr<-merge(x = data.rmr, y = ecology.data, by = "species", all.x = TRUE)
   
   # cleaning 
-  data.as<-data.amr[!c(is.na(data.amr$AS) | is.infinite(data.amr$lnAS)), ]
-  data.fas<-data.amr[!c(is.na(data.amr$FAS) | is.infinite(data.amr$lnFAS)), ]
+  data.as<-data.amr[!c(is.na(data.amr$AS) | is.infinite(data.amr$lnAS)), ] # no NA for AS
+  data.fas<-data.amr[!c(is.na(data.amr$FAS) | is.infinite(data.amr$lnFAS)), ] # no NA for FAS
   
-  data.as<-data.as[!c(is.na(data.as$AS) | is.infinite(data.as$lnAS)), ]
-  data.fas<-data.fas[!c(is.na(data.fas$FAS)), ]
+  data.as<-data.as[!c(is.na(data.as$AS) | is.infinite(data.as$lnAS)), ] # no NA fod AS 
+  data.fas<-data.fas[!c(is.na(data.fas$FAS)), ] # no NA for FAS 
   
   # caculate mass specific metabolic rates
   if(calc_mass_specific){
@@ -304,7 +354,7 @@ get_data_temp <- function(data.amr, data.rmr,
     data.as$exp_rmr[!c(data.as$test_category == "ecol_relev")]<-NA
     data.as$exp_as[!c(data.as$test_category == "ecol_relev")]<-NA
     
-    message("Mass specific values not calculated")
+    message("Mass specific values not calculated; provide exponents to do that")
 
   }
 
@@ -335,8 +385,8 @@ get_data_temp <- function(data.amr, data.rmr,
   data.fasAM$test_category<-factor(data.fasAM$test_category)
   data.asER$test_category<-factor(data.asER$test_category)
   data.fasER$test_category<-factor(data.fasER$test_category)
-  
-  
+
+
   # return(data.amrMean)
   # return(data.rmrMean)
   data.list<-list(data.amrAC, 

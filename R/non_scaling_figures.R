@@ -13,11 +13,61 @@ set.seed(51423)
 # MMR and AMR used interchangeably throughout 
 library(here)
 source(here("R/get_data_temp.R"))
-source(here("R/colors_themes.R")) # data set, libraries, colors, etc. 
+source(here("R/setup.R")) # data set, libraries, colors, etc. 
 
-# Data for models ------
-#
+data.amr$chambSizeRatio<-data.amr$chamber_vol_L/(data.amr$BW_g/1000)
+data.rmr$chambSizeRatio<-data.rmr$chamber_vol_L/(data.rmr$BW_g/1000)
+
 # Supplemental -----------
+## Experimental checks -------
+### type of MMR ------
+ggplot(data.amr.test, aes(x = lnBWg, y = lnAMR, color = MMR_method, alpha = tempTest))+
+  geom_point(size = 1)+
+  theme_classic()+
+  scale_color_discrete()+
+  ggtitle("AMR warm")
+
+ggplot(data.amrER, aes(x = lnBWg, y = lnAMR, color = MMR_method, alpha = tempTest))+
+  geom_point(size = 1)+
+  theme_classic()+
+  scale_color_discrete()+
+  ggtitle("AMR ecologically relev")
+
+### the size of chamber  -------
+ggplot(data.amr, aes(y = chambSizeRatio, x = BW_g/1000,
+                     color = MMR_method))+
+  geom_point(size = 1)+
+  theme_classic()+
+  ggtitle("AMR all")
+
+ggplot(data.rmr, aes(y = chambSizeRatio, x = BW_g/1000))+
+  geom_point(size = 1)+
+  theme_classic()+
+  ggtitle("RMR all")
+
+ggplot(data.amr, aes(x = chambSizeRatio,
+                     fill = MMR_method))+
+  geom_histogram(bins = 100)+
+  theme_classic()+
+  ggtitle("AMR all")
+
+ggplot(data.rmr, aes(x = chambSizeRatio))+
+  geom_histogram(bins = 100)+
+  theme_classic()+
+  ggtitle("RMR all")
+
+ggplot(data.amr, aes(x = lnBWg, y = lnAMR, color = chambSizeRatio))+
+  geom_point(size = 1, alpha = 0.4)+
+  theme_classic()+
+  scale_color_viridis_c()+
+  ggtitle("AMR all")
+
+ggplot(data.rmr, aes(x = lnBWg, y = lnRMR, color = chambSizeRatio))+
+  geom_point(size = 1, alpha = 0.4)+
+  theme_classic()+
+  scale_color_viridis_c()+
+  ggtitle("RMR all")
+
 ## Histograms of fish at different size suppl ----------
 plot_hist_amr<-ggplot(data.amr, aes(x=BW_g,
                                     fill = test_category, 

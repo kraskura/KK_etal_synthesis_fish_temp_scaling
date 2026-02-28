@@ -1,0 +1,12 @@
+"","Oncorhynchus nerka","Oncorhynchus tshawytscha","Oncorhynchus kisutch","Acanthochromis polyacanthus","Fundulus grandis","Chrysoblephus laticeps","Acanthurus triostegus","Gasterosteus aculeatus","Perca fluviatilis","Centropristis striata","Neogobius melanostomus"
+"Oncorhynchus nerka",1,0.8,0.8,0,0,0,0,0,0,0,0
+"Oncorhynchus tshawytscha",0.8,1,0.9,0,0,0,0,0,0,0,0
+"Oncorhynchus kisutch",0.8,0.9,1,0,0,0,0,0,0,0,0
+"Acanthochromis polyacanthus",0,0,0,1,0.9,0.4,0.4,0.4,0.4,0.4,0.3
+"Fundulus grandis",0,0,0,0.9,1,0.4,0.4,0.4,0.4,0.4,0.3
+"Chrysoblephus laticeps",0,0,0,0.4,0.4,1,0.9,0.6,0.6,0.6,0.3
+"Acanthurus triostegus",0,0,0,0.4,0.4,0.9,1,0.6,0.6,0.6,0.3
+"Gasterosteus aculeatus",0,0,0,0.4,0.4,0.6,0.6,1,0.9,0.8,0.3
+"Perca fluviatilis",0,0,0,0.4,0.4,0.6,0.6,0.9,1,0.8,0.3
+"Centropristis striata",0,0,0,0.4,0.4,0.6,0.6,0.8,0.8,1,0.3
+"Neogobius melanostomus",0,0,0,0.3,0.3,0.3,0.3,0.3,0.3,0.3,1

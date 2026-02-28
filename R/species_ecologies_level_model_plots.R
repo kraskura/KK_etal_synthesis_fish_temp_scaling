@@ -16,7 +16,7 @@
 # 1) for phylo mixed models
 # source(here("R", "phylo_mixed_model.R")) # get final model outputs
 library(here)
-source(here("R/colors_themes.R"))
+source(here("R/setup.R"))
 # 2) for non-phylo mixed models 
 # source("./R/nonPhylo_mixed_models.R")
 # 
@@ -264,35 +264,40 @@ colnames(DemersPelagLM)[colnames(DemersPelagLM) == "DemersPelag"] <- "ecology_su
 
 ecology_data<-rbind(BodyShapeILM, ClimateLM, DemersPelagLM, salintyCombLM)
 ecology_data.AMR<-ecology_data[ecology_data$MR=="AMR", ]
-ecology_data.AMR$ecol_temp_cat<-factor(ecology_data.AMR$ecol_temp_cat, level = c(as.character(ecology_data.AMR$ecol_temp_cat)))
+ecology_data.AMR$ecol_temp_cat<-factor(ecology_data.AMR$ecol_temp_cat,
+                                       level = c(as.character(ecology_data.AMR$ecol_temp_cat)))
 
 ecology_data.RMR<-ecology_data[ecology_data$MR=="RMR", ]
-ecology_data.RMR$ecol_temp_cat<-factor(ecology_data.RMR$ecol_temp_cat, level = c(as.character(ecology_data.RMR$ecol_temp_cat)))
+ecology_data.RMR$ecol_temp_cat<-factor(ecology_data.RMR$ecol_temp_cat,
+                                       level = c(as.character(ecology_data.RMR$ecol_temp_cat)))
 
 ecology_data.FAS<-ecology_data[ecology_data$MR=="FAS", ]
-ecology_data.FAS$ecol_temp_cat<-factor(ecology_data.FAS$ecol_temp_cat, level = c(as.character(ecology_data.FAS$ecol_temp_cat)))
+ecology_data.FAS$ecol_temp_cat<-factor(ecology_data.FAS$ecol_temp_cat,
+                                       level = c(as.character(ecology_data.FAS$ecol_temp_cat)))
 
 # only those that have warm temperatures
-ecology_data.AMRd<-ecology_data.AMR[ ave(1:nrow(ecology_data.AMR), ecology_data.AMR$ecology_subgroup, FUN=length) > 1 , ]
-ecology_data.FASd<-ecology_data.FAS[ ave(1:nrow(ecology_data.FAS), ecology_data.FAS$ecology_subgroup, FUN=length) > 1 , ]
-ecology_data.RMRd<-ecology_data.RMR[ ave(1:nrow(ecology_data.RMR), ecology_data.RMR$ecology_subgroup, FUN=length) > 1 , ]
+ecology_data.AMRd<-ecology_data.AMR[ ave(1:nrow(ecology_data.AMR),
+                                         ecology_data.AMR$ecology_subgroup, FUN=length) > 1 , ]
+ecology_data.FASd<-ecology_data.FAS[ ave(1:nrow(ecology_data.FAS),
+                                         ecology_data.FAS$ecology_subgroup, FUN=length) > 1 , ]
+ecology_data.RMRd<-ecology_data.RMR[ ave(1:nrow(ecology_data.RMR),
+                                         ecology_data.RMR$ecology_subgroup, FUN=length) > 1 , ]
 ecology_data.AMRd$ecol_temp_cat<-factor(ecology_data.AMRd$ecol_temp_cat)
 ecology_data.RMRd$ecol_temp_cat<-factor(ecology_data.RMRd$ecol_temp_cat)
 ecology_data.FASd$ecol_temp_cat<-factor(ecology_data.FASd$ecol_temp_cat)
 
 order.ecology_data.FASd<- ecology_data.FASd 
-order.ecology_data.FASd$ecol_temp_cat<- factor(order.ecology_data.FASd$ecol_temp_cat,
-                                               levels = order.ecology_data.FASd$ecol_temp_cat[order(order.ecology_data.FASd$slope)])
+order.ecology_data.FASd$ecol_temp_cat<- factor(order.ecology_data.FASd$ecol_temp_cat,levels = order.ecology_data.FASd$ecol_temp_cat[order(order.ecology_data.FASd$slope)])
 
 # warm only:
-ecology_data.RMRd_w<-ecology_data.RMRd[grepl("warm", as.character(ecology_data.RMRd$ecol_temp_cat)), ]
-ecology_data.AMRd_w<-ecology_data.AMRd[grepl("warm", as.character(ecology_data.AMRd$ecol_temp_cat)), ]
-ecology_data.FASd_w<-ecology_data.FASd[grepl("warm", as.character(ecology_data.FASd$ecol_temp_cat)), ]
+ecology_data.RMRd_w<-ecology_data.RMRd[ecology_data.RMRd$test_category3 == "warm", ]
+ecology_data.AMRd_w<-ecology_data.AMRd[ecology_data.AMRd$test_category3 == "warm", ]
+ecology_data.FASd_w<-ecology_data.FASd[ecology_data.FASd$test_category3 == "warm", ]
 
 # ecol relev only:
-ecology_data.RMRd_er<-ecology_data.RMRd[grepl("optimal", as.character(ecology_data.RMRd$ecol_temp_cat)), ]
-ecology_data.AMRd_er<-ecology_data.AMRd[grepl("optimal", as.character(ecology_data.AMRd$ecol_temp_cat)), ]
-ecology_data.FASd_er<-ecology_data.FASd[grepl("optimal", as.character(ecology_data.FASd$ecol_temp_cat)), ]
+ecology_data.RMRd_er<-ecology_data.RMRd[ecology_data.RMRd$test_category3 == "ecol_relev", ]
+ecology_data.AMRd_er<-ecology_data.AMRd[ecology_data.AMRd$test_category3 == "ecol_relev", ]
+ecology_data.FASd_er<-ecology_data.FASd[ecology_data.FASd$test_category3 == "ecol_relev", ]
 
 order.ecology_data.FASd.W <- order.ecology_data.FASd[grepl("warm", as.character(order.ecology_data.FASd$ecol_temp_cat)), ]
 order.ecology_data.FASd.ER <- order.ecology_data.FASd[grepl("optimal", as.character(order.ecology_data.FASd$ecol_temp_cat)), ]
@@ -312,35 +317,27 @@ ecology_data.RMRd_w$DIFF_mmr_rmr<-ecology_data.RMRd_w$slope - ecology_data.AMRd_
 # ecology_data.AMRd_er[ecology_data.AMRd_er$Ecol == "salintyComb",]
 
 # g for 'good' for scaling purposes 
-ecology_data.RMRd.g<-ecology_data.RMRd[c(ecology_data.RMRd$ecology_subgroup=="fusiform" | 
-                                           ecology_data.RMRd$ecology_subgroup=="Subtropical"|
-                                           ecology_data.RMRd$ecology_subgroup=="Temperate"|
-                                           ecology_data.RMRd$ecology_subgroup=="Tropical"|
-                                           ecology_data.RMRd$ecology_subgroup=="benthopelagic"|
-                                           ecology_data.RMRd$ecology_subgroup=="demersal"|
-                                           ecology_data.RMRd$ecology_subgroup=="reef-associated"|
-                                           ecology_data.RMRd$ecology_subgroup=="Marine"|
-                                           ecology_data.RMRd$ecology_subgroup=="Marine; freshwater; brackish"),]
 
-ecology_data.AMRd.g<-ecology_data.AMRd[c(ecology_data.AMRd$ecology_subgroup=="fusiform" | 
-                                           ecology_data.AMRd$ecology_subgroup=="Subtropical"|
-                                           ecology_data.AMRd$ecology_subgroup=="Temperate"|
-                                           ecology_data.AMRd$ecology_subgroup=="Tropical"|
-                                           ecology_data.AMRd$ecology_subgroup=="benthopelagic"|
-                                           ecology_data.AMRd$ecology_subgroup=="demersal"|
-                                           ecology_data.AMRd$ecology_subgroup=="reef-associated"|
-                                           ecology_data.AMRd$ecology_subgroup=="Marine"|
-                                           ecology_data.AMRd$ecology_subgroup=="Marine; freshwater; brackish"),]
+ecology_data.RMRd.g<-ecology_data.RMRd[!c(ecology_data.RMRd$ecology_subgroup=="Polar" | 
+                                            ecology_data.RMRd$ecology_subgroup=="Freshwater; brackish" | 
+                                           ecology_data.RMRd$ecology_subgroup=="Marine; brackish" | 
+                                            ecology_data.RMRd$ecology_subgroup=="Freshwater" | 
+                                            ecology_data.RMRd$ecology_subgroup=="pelagic"),]
+# RMR only dont take pelagic, freshwater, fres-brack, and marine brak
 
-ecology_data.FASd.g<-ecology_data.FASd[c(ecology_data.FASd$ecology_subgroup=="fusiform" | 
-                                           ecology_data.FASd$ecology_subgroup=="Subtropical"|
-                                           ecology_data.FASd$ecology_subgroup=="Temperate"|
-                                           ecology_data.FASd$ecology_subgroup=="Tropical"|
-                                           ecology_data.FASd$ecology_subgroup=="benthopelagic"|
-                                           ecology_data.FASd$ecology_subgroup=="demersal"|
-                                           ecology_data.FASd$ecology_subgroup=="reef-associated"|
-                                           ecology_data.FASd$ecology_subgroup=="Marine"|
-                                           ecology_data.FASd$ecology_subgroup=="Marine; freshwater; brackish"),]
+ecology_data.AMRd.g<-ecology_data.AMRd[!c(ecology_data.AMRd$ecology_subgroup=="Polar" | 
+                                          ecology_data.AMRd$ecology_subgroup=="Freshwater; brackish" | 
+                                           ecology_data.AMRd$ecology_subgroup=="Marine; brackish" | 
+                                            ecology_data.AMRd$ecology_subgroup=="Freshwater" | 
+                                            ecology_data.AMRd$ecology_subgroup=="pelagic"),]
+# MMR only dont take pelagic, freshwater, fres-brack, and marine brak, and polar
+
+ecology_data.FASd.g<-ecology_data.FASd[!c(ecology_data.FASd$ecology_subgroup=="Polar" | 
+                                          ecology_data.FASd$ecology_subgroup=="Freshwater; brackish" | 
+                                           ecology_data.FASd$ecology_subgroup=="Marine; brackish" | 
+                                            ecology_data.FASd$ecology_subgroup=="Freshwater" | 
+                                            ecology_data.FASd$ecology_subgroup=="pelagic"),]
+# FAS only dont take pelagic, freshwater, fres-brack, and marine brak, and polar
 
 # saving 
 write.csv(file = "./Data_exports/Ecologies/ecologies_FAS.csv", ecology_data.FAS, row.names=FALSE)
@@ -487,15 +484,17 @@ rmr.WARM.ER.good<-
                              group= ecology_subgroup,
                              size = MR))+
   scale_y_discrete(limits=rev,
-    labels = c("","Any salinity", 
+    labels = c("","Any salinity",
                "", "Marine",
                "","Reef-associated",
               "",  "Demersal",
-              "", "Benthopelagic", 
+              "", "Benthopelagic",
                "","Tropical",
                "","Temperate",
                "","Subtropical",
-               "","Fusiform"))+
+               "","Short/deep",
+               "","Fusiform",
+               "","Elongated"))+
   geom_text(aes(label = slope,  x = 0.25, color=interaction(test_category3, MR)),
             family = "Helvetica",  size=3.5, hjust = 1)+
   geom_text(data = ecology_data.AMRd.g, aes(label = slope,  x = 0.3),
@@ -513,14 +512,14 @@ rmr.WARM.ER.good<-
   geom_text(data = ecology_data.AMRd.g,
             mapping = aes(label =  n_data_n_species, x = 1.55, color=interaction(test_category3, MR)),
             family = "Helvetica", size=3.5, hjust = 0)+
-
-  annotate("text", x = 0.135, y = 19, color = "black", label = expression(italic(b)[RMR]~italic(b)[MMR]),
+  
+  annotate("text", x = 0.135, y = 23, color = "black", label = expression(italic(b)[RMR]~italic(b)[MMR]),
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
-  annotate("text", x = 1.05, y = 19, color = "black", label = expression(samples~sizes~(data*(species))),
+  annotate("text", x = 1.05, y = 23, color = "black", label = expression(samples~sizes~(data*(species))),
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
-  annotate("text", x = 0.45, y = 18, color = "black", label = 'OPTIMAL',
+  annotate("text", x = 0.45, y = 22, color = "black", label = 'OPTIMAL',
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
-  annotate("text", x = 0.45, y = 17, color = "black", label = 'WARM',
+  annotate("text", x = 0.45, y = 21, color = "black", label = 'WARM',
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
   geom_linerange(data = ecology_data.RMRd.g,
                  aes(xmin = as.numeric(slope.ciL),
@@ -557,8 +556,7 @@ rmr.WARM.ER.good<-
         text=element_text(size=12,  family="Helvetica"), 
         plot.margin = margin(2, 1, 1, 1, "cm"))+
   coord_cartesian(clip = "off")
-
-# rmr.WARM.ER.good
+rmr.WARM.ER.good
 
 
 fas.WARM.ER.good<-ggplot(data=ecology_data.FASd.g,
@@ -568,26 +566,28 @@ fas.WARM.ER.good<-ggplot(data=ecology_data.FASd.g,
                              fill=test_category3, 
                              group= ecology_subgroup))+
   scale_y_discrete(limits=rev,
-    labels = c("","Any salinity", 
+    labels = c("","Any salinity",
                "", "Marine",
                "","Reef-associated",
               "",  "Demersal",
-              "", "Benthopelagic", 
+              "", "Benthopelagic",
                "","Tropical",
                "","Temperate",
                "","Subtropical",
-               "","Fusiform"))+
+               "","Short/deep",
+               "","Fusiform",
+               "","Elongated"))+
   geom_text(aes(label = n_data_n_species,  x = 0.2), family = "Helvetica", size=3.5, hjust=0)+
-  geom_text(aes(label = slope, x = -0.2, family = "Helvetica"), size=3.5, hjust=1)+
+  geom_text(aes(label = slope, x = -0.36, family = "Helvetica"), size=3.5, hjust=1)+
   geom_line(arrow = arrow(length=unit(0,"cm"), ends="first", type = "closed"),
             linewidth = 0.7, color = "grey", alpha = 0.7)+
   geom_linerange(data = ecology_data.FASd.g,
                  aes(xmin = as.numeric(slope.ciL) ,
                      xmax = as.numeric(slope.ciH)),
                  alpha = 1)+
-  annotate("text", x = -0.27, y = 19, color = "black", label = expression(italic(b)[FAS]),
+  annotate("text", x = -0.43, y = 23, color = "black", label = expression(italic(b)[FAS]),
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
-  annotate("text", x = 0.023, y = 19, color = "black", label = expression(samples~sizes~(data*(species))),
+  annotate("text", x = 0.023, y = 23, color = "black", label = expression(samples~sizes~(data*(species))),
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
   geom_vline(xintercept = 0, lty = "dotted", color="grey50")+
   geom_linerange(aes(xmin = slope.ciL, xmax = slope.ciH), alpha = 1)+
@@ -595,7 +595,7 @@ fas.WARM.ER.good<-ggplot(data=ecology_data.FASd.g,
   scale_color_manual(values=c("black", cols.fas[1]))+
   scale_fill_manual(values=c("black", cols.fas[2]))+
   xlab(expression(Slope~value~(italic(b))))+
-  scale_x_continuous(limits = c(-0.3,0.4))+
+  scale_x_continuous(limits = c(-0.45,0.4))+
   # scale_y_discrete(limits=rev)+
   theme_classic()+
   theme(
@@ -611,7 +611,7 @@ fas.WARM.ER.good<-ggplot(data=ecology_data.FASd.g,
         text=element_text(size=12,  family="Helvetica"),
         plot.margin = margin(2, 1, 1, 0, "cm"))+
   coord_cartesian(clip = "off")
-# fas.WARM.ER.good
+fas.WARM.ER.good
 
 cowplot::plot_grid(rmr.WARM.ER.good,
                    fas.WARM.ER.good,
