@@ -1,0 +1,58 @@
+============================================================
+      ANOVA RESULTS REPORT — lmer model (car package)
+============================================================
+
+Model formula:
+log(FAS) ~ lnBWg * tempTest + (1 | species) + (0 + tempTest | 
+    species) + (1 | species:trial)
+<environment: 0xa6ae9a3f8>
+
+ANOVA Type selected automatically: Type III
+ **************** ANOVA Table ****************  
+Analysis of Deviance Table (Type III Wald chisquare tests)
+
+Response: log(FAS)
+                 Chisq Df Pr(>Chisq)    
+(Intercept)    62.8753  1  2.202e-15 ***
+lnBWg          16.8288  1  4.091e-05 ***
+tempTest        0.0004  1     0.9838    
+lnBWg:tempTest 16.9797  1  3.778e-05 ***
+---
+Signif. codes:  
+0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+ ****************  Model Summary **************** 
+Linear mixed model fit by maximum likelihood  ['lmerMod']
+Formula: 
+log(FAS) ~ lnBWg * tempTest + (1 | species) + (0 + tempTest |  
+    species) + (1 | species:trial)
+   Data: data.fasER
+
+     AIC      BIC   logLik deviance df.resid 
+  -150.3   -104.6     83.1   -166.3     2235 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-4.6775 -0.5770 -0.0102  0.5503  8.1069 
+
+Random effects:
+ Groups        Name        Variance Std.Dev.
+ species.trial (Intercept) 0.014450 0.12021 
+ species       tempTest    0.001958 0.04425 
+ species.1     (Intercept) 0.192737 0.43902 
+ Residual                  0.047405 0.21773 
+Number of obs: 2243, groups:  
+species:trial, 88; species, 32
+
+Fixed effects:
+                 Estimate Std. Error t value
+(Intercept)     1.3104867  0.1652695   7.929
+lnBWg           0.1482258  0.0361324   4.102
+tempTest       -0.0004484  0.0220572  -0.020
+lnBWg:tempTest -0.0075893  0.0018418  -4.121
+
+Correlation of Fixed Effects:
+            (Intr) lnBWg  tmpTst
+lnBWg       -0.609              
+tempTest    -0.258  0.213       
+lnBWg:tmpTs  0.590 -0.953 -0.224

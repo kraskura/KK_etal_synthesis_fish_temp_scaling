@@ -5,19 +5,510 @@
 #   - analyze data for all lifestages together
 # ********************************************
 # ********************************************
-library(here)
+# library(here)
+
 
 # *************************************************
-# SUPPORTING FUNCTIONS
-# function to order model selection based on the lowest BIC score
+get_data_temp <- function(data.amr.readin,
+                          data.rmr.readin,
+                          ecology.data.readin,
+                          onlyTop.above = TRUE,
+                          save.FishBase.species.data = FALSE, 
+                          calc_mass_specific = FALSE,
+                          exp_rmr=NULL,
+                          exp_amr=NULL,
+                          exp_as=NULL,
+                          exp_rmr_warm=NULL,
+                          exp_amr_warm=NULL,
+                          exp_as_warm=NULL, 
+                          exclude_Wootton = FALSE){
+  
+  if(exclude_Wootton){
+    message("Wootton et al data on zebrafish exculded")
+  }
+  
+  # 1. import the latest AMR file , oct 4 2020 data
+  data.amr<-read.csv(data.amr.readin)
+  names(data.amr)<-c( "tempAccl","TempAcclDays", "test_category", "tempTest", "fish_ID", "species", "Common_name" , "BW_g", "AMR", "RMR","study_ID", "trial", "trial_ID", "lifestage", "chamber_vol_L", "h_starved", "MMR_method", "h_in_respo") 
+  
+  # 2. import the latest RMR file , oct 4 2020 note 
+  data.rmr<-read.csv(data.rmr.readin, header=TRUE, stringsAsFactors=FALSE, fileEncoding="latin1")
+  names(data.rmr)<-c( "tempAccl","TempAcclDays", "test_category", "tempTest", "fish_ID",  "species", "Common_name" , "BW_g", "RMR", "study_ID", "trial", "trial_ID","lifestage", "chamber_vol_L", "h_starved", "h_in_respo") 
+  
+  # 3. import ecology data
+  ecology.data<-read.csv(ecology.data.readin)
+  
+  if(exclude_Wootton){
+    data.amr<-data.amr %>% 
+      filter(study_ID != "415")
+    # view(data.amr)
+    data.rmr<-data.rmr %>% 
+      filter(study_ID != "415")
+  }
+
+  
+  # ******************************************  
+  # curing AMR *****************************
+  data.amr$species<-as.character(data.amr$species)
+  # Species names that are different between authors specs and what is on fishbase, here:
+  data.amr[data.amr$species ==  "Ophiocephalus argus", "species"] <- "Channa argus"  # source: https://nas.er.usgs.gov/queries/factsheet.aspx?speciesid=2265
+  data.amr[data.amr$species ==  "Aristichthys nobilis" , "species"]<- "Hypophthalmichthys nobilis"  # https://nas.er.usgs.gov/queries/FactSheet.aspx?speciesID=551, http://www.iucngisd.org/gisd/species.php?sc=773
+  data.amr[data.amr$species ==  "Ctenopharyngodon idellus" , "species"]<- "Ctenopharyngodon idella" # grass carp fishbase.org.
+  data.amr[data.amr$species ==  "Leiocassis longirostris" , "species"]<- "Tachysurus dumerili" # https://www-ncbi-nlm-nih-gov.proxy.library.ucsb.edu:9443/Taxonomy/Browser/wwwtax.cgi?id=175787, http://www.catalogueoflife.org/col/details/species/id/af3c089360f1c76ee1a6b204ae4315bc
+  data.amr[data.amr$species ==  "Mystus macropterus" , "species"]<- "Hemibagrus macropterus" # https://www.fishbase.se/Nomenclature/SynonymsList.php?ID=52976&SynCode=128451&GenusName=Hemibagrus&SpeciesName=macropterus, https://www-ncbi-nlm-nih-gov.proxy.library.ucsb.edu:9443/Taxonomy/Browser/wwwtax.cgi
+  data.amr[data.amr$species == "Onychostoma sima" , "species"]<- "Onychostoma simum" # https://www.fishbase.se/Nomenclature/SynonymsList.php?ID=54868&SynCode=152530&GenusName=Onychostoma&SpeciesName=simum,https://www-ncbi-nlm-nih-gov.proxy.library.ucsb.edu:9443/Taxonomy/Browser/wwwtax.cgi?id=369674&lvl=0
+  data.amr[data.amr$species == "Pelteobagrus vachelli" , "species"]<- "Pseudobagrus vachellii" # https://www.fishbase.se/Nomenclature/SynonymsList.php?ID=50950&SynCode=165984&GenusName=Pseudobagrus&SpeciesName=vachellii
+  data.amr[data.amr$species == "Sarcocheilichys parvus" , "species"]<- "Sarcocheilichthys parvus" # spelling
+  data.amr[data.amr$species == "Oncorhynchus kisutch " , "species"]<- "Oncorhynchus kisutch" # spelling
+  data.amr[data.amr$species == "Acrossocheilus monticolus" , "species"]<- "Acrossocheilus monticola" # https://www-ncbi-nlm-nih-gov.proxy.library.ucsb.edu:9443/Taxonomy/Browser/wwwtax.cgi?id=356813
+  data.amr[data.amr$species == "Archocentrus nigrofasciatus" , "species"]<- "Amatitlania nigrofasciata" #https://www.fishbase.se/summary/Archocentrus-nigrofasciatus.html, https://nas.er.usgs.gov/queries/factsheet.aspx?SpeciesID=447
+  # species("Sinibrama taeniatus") # fishbase is finding this 
+  # data.amr[data.amr$species == "Aphanius iberus" , "species"]<- "Apricaphanius iberus" # https://www.fishbase.se/summary/Apricaphanius-iberus # dont change because the 
+
+  # new additions 2022: ******
+  # shorthorn sculpin 
+  # zebrafish 
+  # Arctic charr
+  # Opaleye
+  # mahi mahi
+  # California killifish
+  # 
+  # new additions 2026: ******
+  # spanish toothcarp
+  # Arc-eye hawkfish
+  # blacktail snapper
+  # convict tang
+  # green sturgeon
+  # golden perch
+  # roman seabream
+  # westslope cutthroat trout
+  # pacific cod
+  # barred surfperch
+  # emerald rockcod
+  # three-striped dwarf cichlid
+  # cardinal tetra
+  
+  # str(data.amr)
+  cols.numeric<-c(1,4,8,9,10, 15, 16, 18)
+  data.amr[, cols.numeric]<-sapply(data.amr[, cols.numeric], as.numeric)
+  
+  data.amr$species<-factor(data.amr$species)
+  data.amr$lnRMR<-log(data.amr$RMR)
+  data.amr$lnAMR<-log(data.amr$AMR)
+  data.amr$lnBWg<-log(data.amr$BW_g)
+  
+  # adding Factorial Scope and Aerobic scope to ony AMR dataframe
+  data.amr$FAS<-data.amr$AMR/data.amr$RMR
+  data.amr$AS<-data.amr$AMR-data.amr$RMR
+  data.amr$lnAS<-log(data.amr$AS)
+  data.amr$lnFAS<-log(data.amr$FAS)
+  data.amr$tempTestK<-celsius.to.kelvin(data.amr$tempTest, round = 2)
+  
+  data.amr$trial_ID<-as.factor(data.amr$trial_ID)
+  data.amr$study_ID<-as.factor(data.amr$study_ID)
+  data.amr$fish_ID<-as.factor(data.amr$fish_ID)
+  data.amr$test_category<-factor(data.amr$test_category)
+  data.amr$trial<-as.factor(data.amr$trial)
+  data.amr$species<-factor(data.amr$species)
+  data.amr$MMR_method<-factor(data.amr$MMR_method) 
+  data.amr$lifestage<-factor(data.amr$lifestage) 
+   
+  # dummy variable for temp category (k-1 variables so 2) 
+  # d1(acute): ecol_relev = 0, acute=1, acclim =0 
+  # d2(acclim): ecol_relev = 0, acute=0, acclim =1
+  
+  data.amr$d1<-NA
+  data.amr$d2<-NA
+  
+  data.amr$d1[data.amr$test_category=="ecol_relev"]<-0
+  data.amr$d2[data.amr$test_category=="ecol_relev"]<-0
+  data.amr$d1[data.amr$test_category=="acute"]<-1
+  data.amr$d2[data.amr$test_category=="acute"]<-0
+  data.amr$d1[data.amr$test_category=="acclim"]<-0
+  data.amr$d2[data.amr$test_category=="acclim"]<-1
+  
+  
+  # ******************************************  
+  # curing RMR ******************************
+  data.rmr$species<-as.character(data.rmr$species)
+  # Species names that are different between authors specs and what is on fishbase, here:
+  data.rmr[data.rmr$species ==  "Ophiocephalus argus", "species"] <- "Channa argus"  # source: https://nas.er.usgs.gov/queries/factsheet.aspx?speciesid=2265
+  data.rmr[data.rmr$species ==  "Aristichthys nobilis" , "species"]<- "Hypophthalmichthys nobilis"  # https://nas.er.usgs.gov/queries/FactSheet.aspx?speciesID=551, http://www.iucngisd.org/gisd/species.php?sc=773
+  data.rmr[data.rmr$species ==  "Ctenopharyngodon idellus" , "species"]<- "Ctenopharyngodon idella" # grass carp fishbase.org.
+  data.rmr[data.rmr$species ==  "Leiocassis longirostris" , "species"]<- "Tachysurus dumerili" # https://www-ncbi-nlm-nih-gov.proxy.library.ucsb.edu:9443/Taxonomy/Browser/wwwtax.cgi?id=175787, http://www.catalogueoflife.org/col/details/species/id/af3c089360f1c76ee1a6b204ae4315bc
+  data.rmr[data.rmr$species ==  "Mystus macropterus" , "species"]<- "Hemibagrus macropterus" # https://www.fishbase.se/Nomenclature/SynonymsList.php?ID=52976&SynCode=128451&GenusName=Hemibagrus&SpeciesName=macropterus, https://www-ncbi-nlm-nih-gov.proxy.library.ucsb.edu:9443/Taxonomy/Browser/wwwtax.cgi
+  data.rmr[data.rmr$species == "Onychostoma sima" , "species"]<- "Onychostoma simum" # https://www.fishbase.se/Nomenclature/SynonymsList.php?ID=54868&SynCode=152530&GenusName=Onychostoma&SpeciesName=simum,https://www-ncbi-nlm-nih-gov.proxy.library.ucsb.edu:9443/Taxonomy/Browser/wwwtax.cgi?id=369674&lvl=0
+  data.rmr[data.rmr$species == "Pelteobagrus vachelli" , "species"]<- "Pseudobagrus vachellii" # https://www.fishbase.se/Nomenclature/SynonymsList.php?ID=50950&SynCode=165984&GenusName=Pseudobagrus&SpeciesName=vachellii
+  data.rmr[data.rmr$species == "Sarcocheilichys parvus" , "species"]<- "Sarcocheilichthys parvus" # spelling
+  data.rmr[data.rmr$species == "Oncorhynchus kisutch " , "species"]<- "Oncorhynchus kisutch" # spelling
+  data.rmr[data.rmr$species == "Acrossocheilus monticolus" , "species"]<- "Acrossocheilus monticola" # https://www-ncbi-nlm-nih-gov.proxy.library.ucsb.edu:9443/Taxonomy/Browser/wwwtax.cgi?id=356813
+  data.rmr[data.rmr$species == "Archocentrus nigrofasciatus" , "species"]<- "Amatitlania nigrofasciata" #https://www.fishbase.se/summary/Archocentrus-nigrofasciatus.html, https://nas.er.usgs.gov/queries/factsheet.aspx?SpeciesID=447
+  # species("Sinibrama taeniatus") # fishbase is finding this 
+  data.rmr[data.rmr$species == "Aphanius iberus" , "species"]<- "Apricaphanius iberus" # https://www.fishbase.se/summary/Apricaphanius-iberus
+    
+  # data.rmr[which(is.na(data.rmr[,2])),]
+  cols.numeric<-c(1,2,4,8,9, 14, 15, 16)
+  
+  data.rmr[, cols.numeric]<-sapply(data.rmr[, cols.numeric], as.numeric) 
+  message(" NAs present in RMR dataset when numeric variables have NA (days acclimated, h in respo, h starved, respo chamber volume")
+  
+  data.rmr$log10RMR<-log10(data.rmr$RMR)
+  data.rmr$log10BWg<-log10(data.rmr$BW_g)
+  data.rmr$lnRMR<-log(data.rmr$RMR)
+  data.rmr$lnBWg<-log(data.rmr$BW_g)
+  
+  data.rmr$trial_ID<-as.factor(data.rmr$trial_ID)
+  data.rmr$study_ID<-as.factor(data.rmr$study_ID)
+  data.rmr$fish_ID<-as.factor(data.rmr$fish_ID)
+  data.rmr$test_category<-factor(data.rmr$test_category)
+  data.rmr$trial<-as.factor(data.rmr$trial)
+  data.rmr$species<-factor(data.rmr$species)
+  data.rmr$tempTestK<-celsius.to.kelvin(data.rmr$tempTest, round = 2)
+  data.rmr$lifestage<-factor(data.rmr$lifestage) 
+  
+  # add dummy variable for temp category (k-1 variables so 2) 
+  # d1(acute): ecol_relev = 0, acute=1, acclim =0 
+  # d2(acclim): ecol_relev = 0, acute=0, acclim =1
+  
+  data.rmr$d1<-NA
+  data.rmr$d2<-NA
+  
+  data.rmr$d1[data.rmr$test_category=="ecol_relev"]<-0
+  data.rmr$d2[data.rmr$test_category=="ecol_relev"]<-0
+  data.rmr$d1[data.rmr$test_category=="acute"]<-1
+  data.rmr$d2[data.rmr$test_category=="acute"]<-0
+  data.rmr$d1[data.rmr$test_category=="acclim"]<-0
+  data.rmr$d2[data.rmr$test_category=="acclim"]<-1
+  
+  # ********************************************************************
+  # Take out MMR from study # 415:
+  # Wootton, H.F., Morrongiello, J.R., Schmitt, T., Audzijonyte, A., 2022 Smaller adult fish size in warmer water is not explained by elevated metabolism. Ecology Letters. https://doi.org/10.1111/ele.13989
+  # Measurements produce FAS > 20; only RMR assumed usable. 
+  data.amr<-data.amr[!data.amr$study_ID == 415,]
+  message("EXCLUDING Study # 415 MMR measurements; Wootton et al 2022; FAS > 20")
+  # ********************************************************************
+  
+  # dont include data that were below optimal temperature range. 
+  if(onlyTop.above){
+    # take out fish that are acclimated to Top min ranges.
+    # 
+  
+    # RMR *****
+    # "Gasterosteus aculeatus" acclimated at 10 for warm Populations: "POPMyvW", "POPGTS", "POPAshnW"
+    data.rmr<-data.rmr[!c((data.rmr$test_category=="acclim") & data.rmr$species=="Gasterosteus aculeatus" & (data.rmr$trial_ID == "POPMyvW" | data.rmr$trial_ID == "POPGTS" | data.rmr$trial_ID == "POPAshnW") & !is.na(data.rmr$trial_ID)),]
+    
+    # salmon O. nerka populations that are below 14 c
+    data.rmr<-data.rmr[!c((data.rmr$test_category=="acclim") & data.rmr$species=="Oncorhynchus nerka"  & !is.na(data.rmr$trial_ID) & data.rmr$tempTest < 14),]
+    
+    # Bailey et al take out 10 C roman seabream
+    data.rmr<-data.rmr[!c(data.rmr$study_ID=="1019" & data.rmr$tempTest == 10),]
+    # Zillig et al juvenile chinook
+    data.rmr<-data.rmr[!c(data.rmr$study_ID=="1007" & data.rmr$tempAccl < 16 & data.rmr$tempTest < 16),]
+    # Zillig et al  sturgeon 
+    data.rmr<-data.rmr[!c(data.rmr$study_ID=="1013" & data.rmr$tempAccl < 19 & data.rmr$tempTest < 15),]
+    # Kraskura barred surfperch tested at 12C 
+    data.rmr<-data.rmr[!c((data.rmr$species=="Amphistichus argenteus") & data.rmr$tempTest < 16),]
+    
+    # AMR *****
+    # "Gasterosteus aculeatus" acclimated at 10 for warm Populations: "POPMyvW", "POPGTS", "POPAshnW"
+    data.amr<-data.amr[!c((data.amr$test_category=="acclim") & data.amr$species=="Gasterosteus aculeatus" & (data.amr$trial_ID == "POPMyvW" | data.amr$trial_ID == "POPGTS" | data.amr$trial_ID == "POPAshnW") & !is.na(data.amr$trial_ID)),]
+    
+    # salmon O. nerka populations that are below 14 c
+    data.amr<-data.amr[!c((data.amr$test_category=="acclim") & data.amr$species=="Oncorhynchus nerka"  & !is.na(data.amr$trial_ID) & data.amr$tempTest < 14),]
+    
+    # Bailey et al take out 10 C roman seabream
+    data.amr<-data.amr[!c(data.amr$study_ID=="1019" & data.amr$tempTest == 10),]
+    # Zillig et al juvenile chinook
+    data.amr<-data.amr[!c(data.amr$study_ID=="1007" & data.amr$tempAccl < 16 & data.amr$tempTest < 16),]
+    # Zillig et al  sturgeon 
+    data.amr<-data.amr[!c(data.amr$study_ID=="1013" & data.amr$tempAccl < 19 & data.amr$tempTest < 16),]
+    # Kraskura barred surfperch tested at 12C 
+    data.amr<-data.amr[!c((data.amr$species=="Amphistichus argenteus") & data.amr$tempTest < 16),]
+
+    
+  }
+  
+  # Formatting/organizing/combining AMR and RMR datasets *************************
+  # all(is.numeric(data.amr$AMR))
+  # all(!is.na(data.amr$AMR)) # making sure all AMR are numeric values, no NA's
+  # 
+  # getting the needed data from RMR 
+  data.rmr.combine<-data.rmr[, c( "test_category", "tempTest", "fish_ID",  "species", "Common_name" , "BW_g", "RMR","study_ID", "trial", "tempTestK")] 
+  colnames(data.rmr.combine)<-c( "test_category", "tempTest", "fish_ID",  "species", "Common_name" , "BW_g", "MR","study_ID", "trial", "tempTestK")
+  data.rmr.combine$MR_type<-as.numeric(0)
+  data.rmr.combine$MR_type2<-"RMR"
+  
+  # getting the needed data from AMR 
+  data.amr.combine<-data.amr[, c( "test_category", "tempTest", "fish_ID",  "species", "Common_name" , "BW_g", "AMR","study_ID", "trial", "tempTestK")] 
+  colnames(data.amr.combine)<-c( "test_category", "tempTest", "fish_ID",  "species", "Common_name" , "BW_g", "MR","study_ID", "trial", "tempTestK")
+  data.amr.combine$MR_type<-as.numeric(1)
+  data.amr.combine$MR_type2<-"AMR"
+  
+  nrow(data.amr.combine) # 5476 feb 2026
+  nrow(data.rmr.combine) # 7427 feb 2026
+  
+  dataMR<-rbind(data.amr.combine, data.rmr.combine) # combining RMR and AMR in long format 
+  dataMR$lnMR<-log(dataMR$MR)
+  dataMR$lnBWg<-log(dataMR$BW_g)
+  
+  category_names <- list('acclim'="Acclimated", 'acute'="Acute", 'ecol_relev'="Ecologically relevant")
+  category_labeller <- function(variable,value){
+    return(category_names[value])
+  }
+  
+
+  k<-(8.62*10^(-5)) # Boltzmann's constant
+  # kBoltz<-1.38 * 10^23 
+  E<-0.63 # activation energy MTE
+  data.amr$tempTestK1<-1/data.amr$tempTestK
+  data.amr$tempTestK1000<-1000/data.amr$tempTestK
+  
+  data.rmr$tempTestK1<-1/data.rmr$tempTestK
+  data.rmr$tempTestK1000<-1000/data.rmr$tempTestK
+  
+  data.amr$tempTestK1_1000 <- data.amr$tempTestK1*1000
+  data.rmr$tempTestK1_1000 <- data.rmr$tempTestK1*1000
+  dataMR$tempTestK1<-1/dataMR$tempTestK
+  dataMR$tempTestK1_1000 <- dataMR$tempTestK1*1000
+  
+  data.amr$tempTestkT<-1/(data.amr$tempTestK*k)
+  data.rmr$tempTestkT<-1/(data.rmr$tempTestK*k)
+  dataMR$tempTestkT<-1/(dataMR$tempTestK*k)
+
+  
+  # adding body shape from R FishBase online: 
+  if(save.FishBase.species.data){
+    
+    require(rfishbase)
+    colnames(dataMR)[4]<-"Species"
+    mySpecies<-as.character(unique(dataMR$Species))
+    mySpecies
+    species_data<-as.data.frame(species(mySpecies))
+    
+    species_data$BodyShapeI <- as.factor(gsub(' / ', '-', as.character(species_data$BodyShapeI)))
+    
+    names(species_data)[names(species_data) == "Species"] <- "species"
+    names(dataMR)[names(dataMR) == "Species"] <- "species"
+    
+    filename<-paste("./Data_exports/Species/Species_data_FishBase_", Sys.Date(), ".csv", sep="")
+    write.csv(x = species_data, file = filename, row.names = FALSE)
+    
+  }
+
+  
+  # potentially useful variables taken out: i) length female out, ii)  Weight, iii) "WeightFemale, iv) PriceCateg,
+  # ***************************
+  # merging data files
+  # 1. Body shap, demersPelag, Vulnerability Price categories, used for aquaculture
+  names(dataMR)[names(dataMR) == "Species"] <- "species"
+  names(ecology.data)<-c("species", "DemersPelag", "BodyShapeI", "Climate", "salintyComb")
+  dataMR<- merge(x = dataMR, y = ecology.data , by = "species", all.x = TRUE)
+  data.amr<- merge(x = data.amr, y = ecology.data, by = "species", all.x = TRUE)
+  data.rmr<-merge(x = data.rmr, y = ecology.data, by = "species", all.x = TRUE)
+  
+  # cleaning 
+  data.as<-data.amr[!c(is.na(data.amr$AS) | is.infinite(data.amr$lnAS)), ] # no NA for AS
+  data.fas<-data.amr[!c(is.na(data.amr$FAS) | is.infinite(data.amr$lnFAS)), ] # no NA for FAS
+  
+  data.as<-data.as[!c(is.na(data.as$AS) | is.infinite(data.as$lnAS)), ] # no NA fod AS 
+  data.fas<-data.fas[!c(is.na(data.fas$FAS)), ] # no NA for FAS 
+  
+  # caculate mass specific metabolic rates
+  if(calc_mass_specific){
+  
+    # adjust mass specific MMR and RMR; ecol relevant 
+    data.amr$mass_specamr<-(data.amr$AMR/(data.amr$BW_g^exp_amr)) # mass specific; linear  
+    data.rmr$mass_specrmr<-data.rmr$RMR/(data.rmr$BW_g^exp_rmr) # mass specific ; linear
+    # log transformed
+    data.amr$ln_mass_specamr<-log(data.amr$mass_specamr) # 
+    data.rmr$ln_mass_specrmr<-log(data.rmr$mass_specrmr) #
+    
+    # adjust warm: AMR/MMR and RMR
+    data.amr$mass_specamr[!c(data.amr$test_category == "ecol_relev")]<-(data.amr$AMR[!c(data.amr$test_category == "ecol_relev")]/(data.amr$BW_g[!c(data.amr$test_category == "ecol_relev")]^exp_amr_warm)) # 
+    data.rmr$mass_specrmr[!c(data.rmr$test_category == "ecol_relev")]<-data.rmr$RMR[!c(data.rmr$test_category == "ecol_relev")]/(data.rmr$BW_g[!c(data.rmr$test_category == "ecol_relev")]^exp_rmr_warm) # 
+  
+    
+    # aerobic scope dataset; ecolo relevant 
+    data.as$mass_specamr<-(data.as$AMR/(data.as$BW_g^exp_amr)) # 
+    data.as$mass_specrmr<-data.as$RMR/(data.as$BW_g^exp_rmr) # 
+    data.as$mass_specas<-data.as$AS/(data.as$BW_g^exp_as) # 
+    
+    # aerobic scope dataset; warm
+    data.as$mass_specamr[!c(data.as$test_category == "ecol_relev")] <- (data.as$AMR[!c(data.as$test_category == "ecol_relev")]/(data.as$BW_g[!c(data.as$test_category == "ecol_relev")]^exp_amr_warm)) # 
+    data.as$mass_specrmr[!c(data.as$test_category == "ecol_relev")] <- (data.as$RMR[!c(data.as$test_category == "ecol_relev")]/(data.as$BW_g[!c(data.as$test_category == "ecol_relev")]^exp_rmr_warm)) #
+    data.as$mass_specas[!c(data.as$test_category == "ecol_relev")] <- (data.as$AS[!c(data.as$test_category == "ecol_relev")]/(data.as$BW_g[!c(data.as$test_category == "ecol_relev")]^exp_as_warm)) # 
+    
+    
+    # add the exponents to the dataset 
+    data.amr$exp_amr<-exp_amr
+    data.rmr$exp_rmr<-exp_rmr
+    data.as$exp_amr<-exp_amr
+    data.as$exp_rmr<-exp_rmr
+    data.as$exp_as<-exp_as
+    data.amr$exp_amr[!c(data.amr$test_category == "ecol_relev")]<-exp_amr_warm
+    data.rmr$exp_rmr[!c(data.rmr$test_category == "ecol_relev")]<-exp_rmr_warm
+    data.as$exp_amr[!c(data.as$test_category == "ecol_relev")]<-exp_amr_warm
+    data.as$exp_rmr[!c(data.as$test_category == "ecol_relev")]<-exp_rmr_warm
+    data.as$exp_as[!c(data.as$test_category == "ecol_relev")]<-exp_as_warm # poly term
+    
+    message(paste("Mass specific measures: 1) AMR (b = ", exp_amr, "); 2) RMR (b = ",exp_rmr,")", sep = ""))
+    message(paste("Mass specific measures for WARM: 1) AMR (b = ", exp_amr_warm, "); 2) RMR (b = ",exp_rmr_warm,")", sep = ""))
+  
+  }else{
+    data.amr$mass_specamr<-NA
+    data.rmr$mass_specrmr<-NA
+    data.amr$ln_mass_specamr<-NA
+    data.rmr$ln_mass_specrmr<-NA
+    data.as$mass_specamr<-NA
+    data.as$mass_specrmr<-NA
+    data.as$mass_specas<-NA
+   
+    data.amr$exp_amr<-exp_amr
+    data.rmr$exp_rmr<-exp_rmr
+    data.as$exp_amr<-exp_amr
+    data.as$exp_rmr<-exp_rmr
+    data.as$exp_as<-exp_as
+    data.amr$exp_amr[!c(data.amr$test_category == "ecol_relev")]<-NA
+    data.rmr$exp_rmr[!c(data.rmr$test_category == "ecol_relev")]<-NA
+    data.as$exp_amr[!c(data.as$test_category == "ecol_relev")]<-NA
+    data.as$exp_rmr[!c(data.as$test_category == "ecol_relev")]<-NA
+    data.as$exp_as[!c(data.as$test_category == "ecol_relev")]<-NA
+    
+    message("Mass specific values not calculated; provide exponents to do that")
+
+  }
+
+  # ------------- finalising data -----------
+  # create data frames from each group:
+  data.amrAC<-data.amr[data.amr$test_category=="acute",]
+  data.rmrAC<-data.rmr[data.rmr$test_category=="acute",]
+  data.amrAM<-data.amr[data.amr$test_category=="acclim",]
+  data.rmrAM<-data.rmr[data.rmr$test_category=="acclim",]
+  data.amrER<-data.amr[data.amr$test_category=="ecol_relev",]
+  data.rmrER<-data.rmr[data.rmr$test_category=="ecol_relev",]
+  data.asAC<-data.as[data.as$test_category=="acute",]
+  data.fasAC<-data.fas[data.fas$test_category=="acute",]
+  data.asAM<-data.as[data.as$test_category=="acclim",]
+  data.fasAM<-data.fas[data.fas$test_category=="acclim",]
+  data.asER<-data.as[data.as$test_category=="ecol_relev",]
+  data.fasER<-data.fas[data.fas$test_category=="ecol_relev",]
+  
+  data.amrAC$test_category<-factor(data.amrAC$test_category)
+  data.rmrAC$test_category<-factor(data.rmrAC$test_category)
+  data.amrAM$test_category<-factor(data.amrAM$test_category)
+  data.rmrAM$test_category<-factor(data.rmrAM$test_category)
+  data.amrER$test_category<-factor(data.amrER$test_category)
+  data.rmrER$test_category<-factor(data.rmrER$test_category)
+  data.asAC$test_category<-factor(data.asAC$test_category)
+  data.fasAC$test_category<-factor(data.fasAC$test_category)
+  data.asAM$test_category<-factor(data.asAM$test_category)
+  data.fasAM$test_category<-factor(data.fasAM$test_category)
+  data.asER$test_category<-factor(data.asER$test_category)
+  data.fasER$test_category<-factor(data.fasER$test_category)
+
+
+  # return(data.amrMean)
+  # return(data.rmrMean)
+  data.list<-list(data.amrAC, 
+                  data.rmrAC,
+                  data.amrAM,
+                  data.rmrAM,
+                  data.amrER,
+                  data.rmrER,
+                  
+                  data.asAC, 
+                  data.fasAC,
+                  data.asAM,
+                  data.fasAM,
+                  data.asER,
+                  data.fasER,
+                  
+                  data.amr, 
+                  data.rmr, 
+                  dataMR,
+                  data.as,
+                  data.fas
+                  )
+  return(data.list)
+ 
+}
+
+# ***************************************************************
+#  ------------------- SUPPORTING FUNCTIONS ----------------------
+# ***************************************************************
+# function to get phylogenetic relatedness matrix for each data subset
+get_phylo_matrix<-function(species.list,
+                           matrix.name,
+                           dataset.ID,
+                           plot = TRUE){
+  
+  taxon_search <- tnrs_match_names(names=species.list, context_name="Vertebrates") 
+  ott_in_tree <- ott_id(taxon_search)[is_in_tree(ott_id(taxon_search))]
+  tr <- tol_induced_subtree(ott_ids = ott_in_tree)
+  
+  tr$tip.label <- strip_ott_ids(tr$tip.label, remove_underscores = TRUE)
+  labels <- as.data.frame(tr$tip.label)
+
+  # any unmatching tip labels with our data? change those 
+  labels$`tr$tip.label`[which(labels$`tr$tip.label` == "Oncorhynchus mykiss (species in domain Eukaryota)")]<-"Oncorhynchus mykiss"
+  labels$`tr$tip.label`[which(labels$`tr$tip.label` == "Gadus morhua (species in domain Eukaryota)")]<-"Gadus morhua"
+  labels$`tr$tip.label`[which(labels$`tr$tip.label` == "Leiocassis longirostris")]<-"Tachysurus dumerili" 
+  labels$`tr$tip.label`[which(labels$`tr$tip.label` == "Tachysurus vachellii")]<-"Pseudobagrus vachellii" 
+  labels$`tr$tip.label`[which(labels$`tr$tip.label` == "Rhinogobius similis")]<- "Rhinogobius giurinus" 
+  
+  labels$`tr$tip.label`[which(labels$`tr$tip.label` == "Rhinogobius similis")]<- "Rhinogobius giurinus" 
+  
+  # (sort(labels$`tr$tip.label`) == sort(species.list)) "Amphistichus argenteus" is the same too. 
+
+  tr$tip.label <- labels$`tr$tip.label`
+
+  if(all(species.list %in% tr$tip.label)){
+    # message(paste(dataset.ID, ": All species names are identified and mathced with phylo data", sep =""))
+    message(paste(dataset.ID,": All species names are identified and mathced with phylo data \n",  "N species:", length(species.list), sep = ""))
+  }
+  
+  tr2<-compute.brlen(tr)
+
+  A <- ape::vcv.phylo(tr2)
+  tree <- compute.brlen(tr2)
+  cor <- vcv(tree, cor = T)
+  
+  # if((dim(A)[1] * dim(A)[2] == sum(!is.na(A))) && all(colnames(A) == rownames(A))){
+  # 
+  #   message("The phylo matrix has no missing values, and column/row names has matching species IDs") 
+  #   message(paste("Size of the matrix ", dim(A)[1], " X ", dim(A)[2], sep =""))
+  #  # The column names of A must be the species identifier. and the same
+  # }  
+  
+  A <- Matrix::Matrix(ape::vcv(tree), sparse = TRUE)
+  write.csv(as.data.frame.matrix(A), here(paste("Data_exports/Phylo_matrices/", matrix.name,".csv", sep="")))
+
+  if(plot){
+    A.plot<-ggtree(tree) +
+    geom_tiplab(as_ylab=TRUE, color='black', size = 12, align = TRUE)
+    ggsave(plot = A.plot,
+           filename = here(paste("Data_exports/Phylo_plots/",dataset.ID, "_treeplot.png", sep="")),
+           width = 7,
+           height = 15)
+  } 
+
+  assign(matrix.name, value = A, envir = .GlobalEnv)
+  # assign(tree.name, value = tree, envir = .GlobalEnv)
+
+}
+
+# ***************************************************************
+# # function to order model selection based on the lowest BIC score
 BICdelta<-function(BICtable){
   BIC.t <- BICtable [order(BICtable$BIC), ]
   BIC.t$delta <- round(abs(BIC.t$BIC[1] -  BIC.t$BIC), 5)
   return(BIC.t)
 }
 
-# making sure the correct model is extracted
-check_best_model <- function(model, datatable) {
+# **************************************************
+# making sure the correct model is extracted; created with help from Cloude Code 
+check_best_model <- function(model,
+                             datatable) {
   # Extract name from lmer model
   model_name <- deparse(substitute(model))
   # Extract first rowname from datatable
@@ -31,24 +522,356 @@ check_best_model <- function(model, datatable) {
 }
 
 # **************************************************
-# **************************************************
-# **************************************************
+# identifies if the model has interaction; created with help from Cloude Code 
+has_interaction <- function(model) {
+  # Extract only the fixed-effects formula (drops all random effect terms)
+  # lme4::fixef formula is obtained by removing the random parts
+  fixed_formula <- nobars(formula(model))  # nobars() from lme4 strips (|) terms
 
+  # extract term labels — only fixed effects remain
+  fixed_terms <- attr(terms(fixed_formula), "term.labels")
+
+  # print("Fixed-effect terms detected:\n")
+  # print(fixed_terms)
+  # print("\n")
+
+  # Interactions are represented with ":" after formula expansion
+  any(grepl(":", fixed_terms, fixed = TRUE))
+}
+
+# **************************************************
+# run appropriate Anova
+run_anova <- function(model,
+                      save.path) {
+
+  interaction_detected <- has_interaction(model)
+
+  if (interaction_detected) {
+    cat(">>> Interaction term(s) detected — using Type III ANOVA\n\n")
+    anova_result <- car::Anova(model, type = "III")
+    anova_type   <- "III"
+  } else {
+    cat(">>> No interaction terms detected — using Type II ANOVA\n\n")
+    anova_result <- car::Anova(model, type = "II")
+    anova_type   <- "II"
+  }
+
+  # Export formatted text report with Anovas, model summary, etc
+  report_path <- save.path
+    sink(report_path)
+    
+    cat("============================================================\n")
+    cat("      ANOVA RESULTS REPORT — lmer model (car package)\n")
+    cat("============================================================\n\n")
+    
+    cat("Model formula:\n")
+    print(formula(model))
+    
+    cat(paste0("\nANOVA Type selected automatically: Type ", anova_type, "\n"))
+
+    cat(" **************** ANOVA Table ****************  \n")
+    print(anova_result)
+    
+    cat("\n ****************  Model Summary **************** \n")
+    print(summary(model))
+    
+    sink()
+}
+
+# **************************************************
+# if(grepl(pattern = "lnBWg *", formula(best.model.rmr.er)[2])){ 
+# slope predicitons
+est_scaling_param<-function(best_model,
+                            temp_cat,
+                            perform_cat){
+    # estimate slopes
+    est.slopes<-emtrends(best_model,
+                         pairwise ~ tempTest,
+                         var="lnBWg",
+                         at=list(tempTest=seq(5, 35, 1)),
+                         mode = "asymptotic") 
+    # Intercepts (predicted value at 1 gram)
+    message("Estimate slopes to common size 1 g ")
+
+    est.intercepts <- emmeans(best_model, pairwise ~ tempTest,
+                            pbkrtest.limit = 4000,
+                            at = list(lnBWg = log(1), tempTest = seq(5, 35, 1)),
+                            mode = "asymptotic")
+    # Extract summaries
+    slopes.df <- as.data.frame(est.slopes$emtrends)[, c("tempTest", "lnBWg.trend", "SE")]
+    intercepts.df <- as.data.frame(summary(est.intercepts$emmeans))[, c("tempTest", "emmean", "SE")]
+    # Combine in one table
+    est.table <- merge(intercepts.df, slopes.df, by = "tempTest")
+    colnames(est.table) <- c("Temperature", "Intercept", "SE_int", "Slope", "SE_slope")
+    est.table$temp_categ = temp_cat
+    est.table$performance = perform_cat
+    
+    return(est.table)
+  }
+
+# *************************************************
+get_model_outputs<-function(
+                        best.model.rmr.er,
+                        best.model.amr.er,
+                        best.model.as.er,
+                        best.model.fas.er,
+                        best.model.rmr.w,
+                        best.model.amr.w,
+                        best.model.as.w,
+                        best.model.fas.w,
+                        # used to get min max values for datasets
+                        data.rmr.test.modpar,
+                        data.rmrER.modpar, 
+                        data.amr.test.modpar,
+                        data.amrER.modpar,                        
+                        data.as.test.modpar,
+                        data.asER.modpar, 
+                        data.fas.test.modpar,
+                        data.fasER.modpar, 
+                        name_extension){
+  
+  # dir.create(paste("./Data_exports/", name_extension, sep =""), recursive =TRUE)
+
+  # RMR optimal - ecologically relevant grid; plot/predict full range (All data coverage for reference)
+  data.plotRMR_ER<-expand.grid(tempTest = seq(min(data.rmrER.modpar$tempTest),
+                                              max(data.rmrER.modpar$tempTest) , 1),
+                               lnBWg = seq(min(data.rmrER.modpar$lnBWg),
+                                           max(data.rmrER.modpar$lnBWg), 0.5))
+  data.plotRMR_ER$model_predFE <- predict(best.model.rmr.er, re.form = NA, newdata = data.plotRMR_ER)
+
+
+  # FAS optimal - ecologically relevant grid; plot/predict full range (All data coverage for reference)
+  data.plotFAS_ER<-expand.grid(tempTest = seq(min(data.fasER.modpar$tempTest),
+                                              max(data.fasER.modpar$tempTest) , 1),
+                               lnBWg = seq(min(data.fasER.modpar$lnBWg), 
+                                           max(data.fasER.modpar$lnBWg), 0.5))
+  data.plotFAS_ER$model_predFE <- predict(best.model.fas.er, re.form = NA, newdata = data.plotFAS_ER)
+
+
+  # AS optimal - ecologically relevant grid; plot/predict full range (All data coverage for reference)
+  data.plotAS_ER<-expand.grid(tempTest = seq(min(data.asER.modpar$tempTest),
+                                             max(data.asER.modpar$tempTest) , 1),
+                               lnBWg = seq(min(data.asER.modpar$lnBWg),
+                                           max(data.asER.modpar$lnBWg), 0.5))
+  data.plotAS_ER$model_predFE <- predict(best.model.as.er, re.form = NA, newdata = data.plotAS_ER)
+
+
+  # MMR or AMR  optimal - interaction model; plot/predict full range (All data coverage for reference)
+  data.plotAMR_ER <- expand.grid(tempTest = seq(min(data.amrER.modpar$tempTest),
+                                                   max(data.amrER.modpar$tempTest) , 1),
+                               lnBWg = seq(min(data.amrER.modpar$lnBWg),
+                                           max(data.amrER.modpar$lnBWg), 0.5))
+  data.plotAMR_ER$model_predFE <- predict(best.model.amr.er, re.form = NA, newdata = data.plotAMR_ER)
+
+
+  # All temps :
+  # RMR - warm temp grid; plot/predict full range (All data coverage for reference)
+  data.plotRMR_warm<-expand.grid(tempTest = seq(min(data.rmr.test.modpar$tempTest),
+                                                max(data.rmr.test.modpar$tempTest) , 1),
+                               lnBWg = seq(min(data.rmr.test.modpar$lnBWg),
+                                           max(data.rmr.test.modpar$lnBWg), 0.5))
+  data.plotRMR_warm$model_predFE <- predict(best.model.rmr.w, re.form = NA, newdata = data.plotRMR_warm)
+
+  # MMR - warm temp plot grid; plot/predict full range (All data coverage for reference)
+  data.plotAMR_warm<-expand.grid(tempTest = seq(min(data.amr.test.modpar$tempTest),
+                                                max(data.amr.test.modpar$tempTest) , 1),
+                               lnBWg = seq(min(data.amr.test.modpar$lnBWg),
+                                           max(data.amr.test.modpar$lnBWg), 0.5))
+  data.plotAMR_warm$model_predFE <- predict(best.model.amr.w, re.form = NA, newdata = data.plotAMR_warm)
+
+
+  # FAS - warm temp plot grid; plot/predict full range (All data coverage for reference)
+  data.plotFAS_warm <- expand.grid(tempTest = seq(min(data.fas.test.modpar$tempTest),
+                                                  max(data.fas.test.modpar$tempTest) , 1),
+                               lnBWg = seq(min(data.fas.test.modpar$lnBWg),
+                                           max(data.fas.test.modpar$lnBWg), 0.5))
+  data.plotFAS_warm$model_predFE <- predict(best.model.fas.w, re.form = NA, newdata = data.plotFAS_warm)
+
+  # AS - warm temp plot grid; plot/predict full range (All data coverage for reference)
+  data.plotAS_warm <-expand.grid(tempTest = seq(min(data.as.test.modpar$tempTest),
+                                                max(data.as.test.modpar$tempTest) , 1),
+                               lnBWg = seq(min(data.as.test.modpar$lnBWg), 
+                                           max(data.as.test.modpar$lnBWg), 0.5))
+  data.plotAS_warm$model_predFE <- predict(best.model.as.w, re.form = NA, newdata = data.plotAS_warm)
+
+  # CIs for all model parameters ---------
+  CI.amr.ER<-as.data.frame(confint.merMod(best.model.amr.er, level = 0.95, method = "Wald"))
+  CI.amr.ER$var<-rownames(CI.amr.ER)
+  CI.amr.ER$MR<-"MMR"
+  CI.amr.ER$temp_cat<-"ER"
+
+  CI.rmr.ER<-as.data.frame(confint.merMod(best.model.rmr.er, level = 0.95, method = "Wald"))
+  CI.rmr.ER$var<-rownames(CI.rmr.ER)
+  CI.rmr.ER$MR<-"RMR"
+  CI.rmr.ER$temp_cat<-"ER"
+
+  CI.fas.ER<-as.data.frame(confint.merMod(best.model.fas.er, level = 0.95, method = "Wald"))
+  CI.fas.ER$var<-rownames(CI.fas.ER)
+  CI.fas.ER$MR<-"FAS"
+  CI.fas.ER$temp_cat<-"ER"
+
+  CI.as.ER<-as.data.frame(confint.merMod(best.model.as.er, level = 0.95, method = "Wald"))
+  CI.as.ER$var<-rownames(CI.as.ER)
+  CI.as.ER$MR<-"AS"
+  CI.as.ER$temp_cat<-"ER"
+
+  CI.amr.W<-as.data.frame(confint.merMod(best.model.amr.w, level = 0.95, method = "Wald"))
+  CI.amr.W$var<-rownames(CI.amr.W)
+  CI.amr.W$MR<-"MMR"
+  CI.amr.W$temp_cat<-"W"
+
+  CI.rmr.W<-as.data.frame(confint.merMod(best.model.rmr.w, level = 0.95, method = "Wald"))
+  CI.rmr.W$var<-rownames(CI.rmr.W)
+  CI.rmr.W$MR<-"RMR"
+  CI.rmr.W$temp_cat<-"W"
+
+  CI.fas.W<-as.data.frame(confint.merMod(best.model.fas.w, level = 0.95, method = "Wald"))
+  CI.fas.W$var<-rownames(CI.fas.W)
+  CI.fas.W$MR<-"FAS"
+  CI.fas.W$temp_cat<-"W"
+
+  CI.as.W<-as.data.frame(confint.merMod(best.model.as.w, level = 0.95, method = "Wald"))
+  CI.as.W$var<-rownames(CI.as.W)
+  CI.as.W$MR<-"AS"
+  CI.as.W$temp_cat<-"W"
+
+  sum_CItable<-rbind(CI.amr.ER, CI.rmr.ER, CI.fas.ER, CI.as.ER, # ecol relev
+                     CI.amr.W, CI.rmr.W, CI.fas.W, CI.as.W) # warm
+
+  # Saving all confidence interval and predictions data frame  ---------
+  write.csv(file = paste("./Data_exports/", name_extension,"/Table_CIsummary.csv", sep = ""),
+            sum_CItable, row.names=TRUE)
+
+  write.csv(file = paste("./Data_exports/", name_extension,"/dataPred_RMR_er.csv", sep=""),
+            data.plotRMR_ER, row.names = F)
+  write.csv(file = paste("./Data_exports/", name_extension,"/dataPred_AMR_er.csv", sep=""),
+            data.plotAMR_ER, row.names = F)
+  write.csv(file = paste("./Data_exports/", name_extension,"/dataPred_AS_er.csv", sep=""),
+            data.plotAS_ER, row.names = F)
+  write.csv(file = paste("./Data_exports/", name_extension,"/dataPred_FAS_er.csv", sep=""),
+            data.plotFAS_ER, row.names = F)
+
+  write.csv(file = paste("./Data_exports/", name_extension,"/dataPred_RMR_warm.csv", sep=""),
+            data.plotRMR_warm, row.names = F)
+  write.csv(file = paste("./Data_exports/", name_extension,"/dataPred_AMR_warm.csv", sep=""),
+            data.plotAMR_warm, row.names = F)
+  write.csv(file = paste("./Data_exports/", name_extension,"/dataPred_AS_warm.csv", sep=""),
+            data.plotAS_warm, row.names = F)
+  write.csv(file = paste("./Data_exports/", name_extension,"/dataPred_FAS_warm.csv", sep=""),
+            data.plotFAS_warm, row.names = F)
+
+  k<-(8.62*10^(-5)) # Boltzmann's constant
+
+  # Summary and figure parameters: ---- 
+  summarise.dataframes<- function(data.summarise, export.name){
+    dataframe.new <- data.summarise %>%
+      dplyr:::summarise(min_bw = min(BW_g), max_bw = max(BW_g), mean_bw = mean(BW_g),
+                min_bwLOG = min(lnBWg), max_bwLOG = max(lnBWg), mean_bwLOG = mean(lnBWg),
+                min_temp = min(tempTest), max_temp = max(tempTest), mean_temp = mean(tempTest),
+                #min_tempArrh = min(tempTestK1000), max_tempArrh = max(tempTestK1000), mean_tempArrh = mean(tempTestK1000),
+                n = length(BW_g)) %>%
+      as.data.frame()
+
+    assign(export.name, dataframe.new)
+  }
+
+  sum_amr_ER<-summarise.dataframes(data.amrER.modpar, "sum_amr_ER")
+  sum_rmr_ER<-summarise.dataframes(data.rmrER.modpar, "sum_rmr_ER")
+  sum_fas_ER<-summarise.dataframes(data.fasER.modpar, "sum_fas_ER")
+  sum_as_ER<-summarise.dataframes(data.asER.modpar, "sum_as_ER")
+  sum_amr_warm<-summarise.dataframes(data.amr.test.modpar, "sum_amr_warm")
+  sum_rmr_warm<-summarise.dataframes(data.rmr.test.modpar, "sum_rmr_warm")
+  sum_fas_warm<-summarise.dataframes(data.fas.test.modpar, "sum_fas_warm")
+  sum_as_warm<-summarise.dataframes(data.as.test.modpar, "sum_as_warm")
+  
+  # row-bind in one dataframe 
+  sum_data<-rbind(sum_amr_ER, sum_amr_warm, 
+                  sum_rmr_ER, sum_rmr_warm,
+                  sum_as_ER, sum_as_warm,
+                  sum_fas_ER, sum_fas_warm)
+  
+  sum_data$MR<-c("MMR", "MMR", "RMR", "RMR", "AS", "AS", "FAS", "FAS")
+  sum_data$Temp<-c("er", "warm","er", "warm","er", "warm","er", "warm")
+
+  # scaling parameters ------------------
+  
+  # estimate 
+  RMR_er_row<-est_scaling_param(best.model.rmr.er, "ecol_relev", "RMR")
+  MMR_er_row<-est_scaling_param(best.model.amr.er, "ecol_relev", "MMR")
+  AS_er_row<-est_scaling_param(best.model.as.er, "ecol_relev", "AS")
+  FAS_er_row<-est_scaling_param(best.model.fas.er, "ecol_relev", "FAS")
+  
+  RMR_w_row<-est_scaling_param(best.model.rmr.w, "warm", "RMR")
+  MMR_w_row<-est_scaling_param(best.model.amr.w, "warm", "MMR")
+  AS_w_row<-est_scaling_param(best.model.as.w, "warm", "AS")
+  FAS_w_row<-est_scaling_param(best.model.fas.w, "warm", "FAS")
+  
+  scaling_params<-rbind(MMR_er_row, MMR_w_row, 
+                        RMR_er_row, RMR_w_row,
+                        AS_er_row, AS_w_row, 
+                        FAS_er_row, FAS_w_row)
+      
+  # save files -----
+  # save scaling parameters 
+  write.csv(file = paste("./Data_exports/", name_extension,"/scaling_parameters.csv", sep=""),
+              scaling_params, row.names = F)
+  # save summary data for each metric
+  write.csv(file = paste("./Data_exports/", name_extension,"/summary_data_all_metrics.csv", sep=""),
+            sum_data, row.names = F)
+          
+
+  message("Return: 1) sum_CItable, 2) sum_data, 3) scaling parameters")
+  return(list(sum_CItable, sum_data, scaling_params))
+}
+
+
+
+# ***************************************************************
+#  ------------------- DATA ANALYSIS FUNCTIONS ----------------------
+# ***************************************************************
 # lifestage = "juvenile"
-# lifestage = NULL
+# lifestage = "adult" 
 
-get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
+get_phylo_mixed_models<-function(data.rmr.test.modrun,
+                                data.rmrER.modrun, 
+                                data.amr.test.modrun,
+                                data.amrER.modrun,                        
+                                data.as.test.modrun,
+                                data.asER.modrun, 
+                                data.fas.test.modrun,
+                                data.fasER.modrun, 
+                                lifestage = NULL){ #default to all data
+  
 # Phylo models -----------------
+  # get correct data frames
   if (!is.null(lifestage)) {
     #  filter data to only have  specific lifestage
-    data.rmrER<-data.rmrER[data.rmrER$lifestage == lifestage & !is.na(data.rmrER$lifestage == lifestage), ]
-    data.rmr.test<-data.rmr.test[data.rmr.test$lifestage == lifestage & !is.na(data.rmr.test$lifestage == lifestage), ]
-    data.amrER<-data.amrER[data.amrER$lifestage == lifestage & !is.na(data.amrER$lifestage == lifestage), ]
-    data.amr.test<-data.amr.test[data.amr.test$lifestage == lifestage & !is.na(data.amr.test$lifestage == lifestage), ]
-    data.asER<-data.asER[data.asER$lifestage == lifestage & !is.na(data.asER$lifestage == lifestage), ]
-    data.as.test<-data.as.test[data.as.test$lifestage == lifestage & !is.na(data.as.test$lifestage == lifestage), ]
-    data.fasER<-data.fasER[data.fasER$lifestage == lifestage & !is.na(data.fasER$lifestage == lifestage), ]
-    data.fas.test<-data.fas.test[data.fas.test$lifestage == lifestage & !is.na(data.fas.test$lifestage == lifestage), ]
+    data.rmrER<-data.rmrER.modrun[data.rmrER.modrun$lifestage == lifestage &
+                             !is.na(data.rmrER.modrun$lifestage == lifestage), ]
+    data.rmr.test<-data.rmr.test.modrun[data.rmr.test.modrun$lifestage == lifestage &
+                                   !is.na(data.rmr.test.modrun$lifestage == lifestage), ]
+    data.amrER<-data.amrER.modrun[data.amrER.modrun$lifestage == lifestage &
+                             !is.na(data.amrER.modrun$lifestage == lifestage), ]
+    data.amr.test<-data.amr.test.modrun[data.amr.test.modrun$lifestage == lifestage &
+                                   !is.na(data.amr.test.modrun$lifestage == lifestage), ]
+    data.asER<-data.asER.modrun[data.asER.modrun$lifestage == lifestage &
+                           !is.na(data.asER.modrun$lifestage == lifestage), ]
+    data.as.test<-data.as.test.modrun[data.as.test.modrun$lifestage == lifestage &
+                                 !is.na(data.as.test.modrun$lifestage == lifestage), ]
+    data.fasER<-data.fasER.modrun[data.fasER.modrun$lifestage == lifestage &
+                             !is.na(data.fasER.modrun$lifestage == lifestage), ]
+    data.fas.test<-data.fas.test.modrun[data.fas.test.modrun$lifestage == lifestage &
+                                   !is.na(data.fas.test.modrun$lifestage == lifestage), ]
+    
+  }else{
+    data.rmrER<-data.rmrER.modrun
+    data.rmr.test<-data.rmr.test.modrun
+    data.amrER<-data.amrER.modrun
+    data.amr.test<-data.amr.test.modrun
+    data.asER<-data.asER.modrun
+    data.as.test<-data.as.test.modrun
+    data.fasER<-data.fasER.modrun
+    data.fas.test<-data.fas.test.modrun
   }
 
   # get phylo trees make sure data is clean:
@@ -62,7 +885,7 @@ get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
   data.fas.test<-droplevels(data.fas.test)
 
 
-  # this calls custom in function in 'get_data_phylo_matrix.R'. 
+  # this calls custom function 'get_data_phylo_matrix.R'. 
   # IMPORTANT: ensure to receive a message: "All species names are identified and mathced with phylo data N species" that marks that all species have been matched with original dataset. 
   if(!is.null(lifestage)){
     if (lifestage == "adult") {
@@ -102,7 +925,7 @@ get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
     Phylo_RMR_model2int <- Almer(lnRMR ~ lnBWg * tempTest  + (1|species) +(0 + tempTest|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A.adult))
     
     Phylo_RMR_model4 <- Almer(lnRMR ~ lnBWg + tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A.adult))
-    Phylo_RMR_model4int <- Almer(lnRMR ~ lnBWg * tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A.adult))
+    Phylo_RMR_model4int <- Almer(lnRMR ~ lnBWg * tempTest + (1|species) +(0 + lnBWg|species) + (1|species:trial), data=data.rmrER,, REML=FALSE, A = list(species = A.adult))
     
     Phylo_RMR_model5 <- Almer(lnRMR ~ lnBWg + tempTest  + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A.adult))
     Phylo_RMR_model5int <- Almer(lnRMR ~ lnBWg * tempTest + (1|species) +(0 + lnBWg|species:trial) + (1|species:trial), data=data.rmrER, REML=FALSE, A = list(species = A.adult))
@@ -470,7 +1293,8 @@ get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
     
     
     ## BIC results ------
-    # RMR_BIC # 
+    # RMR_BIC#
+    # print(any(data.amr$study_ID == 415))
     # MMR_BIC #
     # AS_BIC  # 
     # FAS_BIC # 
@@ -479,7 +1303,6 @@ get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
     # MMR_W_BIC # 
     # AS_W_BIC  # 
     # FAS_W_BIC #
-    check_best_model(Phylo_RMR_model5, RMR_BIC)
     check_best_model(Phylo_MMR_model4int, MMR_BIC)
     check_best_model(Phylo_AS_model2int, AS_BIC)
     check_best_model(Phylo_FAS_model2int, FAS_BIC)
@@ -490,7 +1313,14 @@ get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
     check_best_model(Phylo_FAS_W_model2, FAS_W_BIC)
     # jan 2026 best
     # ecol relevant
-    rmr_mod_ER<- Phylo_RMR_model5
+    if(any(data.amrER$study_ID == 415)){
+      rmr_mod_ER<- Phylo_RMR_model5 # this is when including wootton data!! 
+      check_best_model(Phylo_RMR_model5, RMR_BIC)
+    }else{
+      rmr_mod_ER<- Phylo_RMR_model4 # this is when NOT including wootton data!! 
+      check_best_model(Phylo_RMR_model4, RMR_BIC)
+
+    }
     amr_mod_ER<-Phylo_MMR_model4int
     as_mod_ER<-Phylo_AS_model2int
     fas_mod_ER<-Phylo_FAS_model2int
@@ -743,19 +1573,6 @@ get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
 
   # *****************************************************************
   # *****************************************************************
-  # un-comment to see best model summaries or view output from R markdown
-  # # Ecol relev
-  # summary(rmr_mod_ER) # one scaling 0.823, temp 0.063
-  # summary(amr_mod_ER) # (poly) temp dependent scaling (poly)
-  # summary(fas_mod_ER) # (linear) temp dependent scaling
-  # summary(as_mod_ER) # (poly) temp dependent scaling
-  # 
-  # # # warm
-  # summary(rmr_mod_W)# one scaling 0.89, poly temp 
-  # summary(amr_mod_W) # one scaling 0.78, poly temp 
-  # summary(fas_mod_W) # one scaling -0.07, poly temp 
-  # summary(as_mod_W) # one scaling 0.79, poly temp 
-  
   # # # Ecol relev
   # plot(rmr_mod_ER) # residuals
   # plot(amr_mod_ER) # residuals
@@ -775,19 +1592,20 @@ get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
   # hist(resid(amr_mod_W), breaks = 50) # residuals
   # hist(resid(rmr_mod_W), breaks = 50) # residuals
   # hist(resid(fas_mod_W), breaks = 50) # residuals
-  
-  print(car::Anova(rmr_mod_ER))
-  print(car::Anova(amr_mod_ER))
-  print(car::Anova(as_mod_ER))
-  print(car::Anova(fas_mod_ER))
-
-  print(car::Anova(rmr_mod_W))
-  print(car::Anova(amr_mod_W))
-  print(car::Anova(as_mod_W))
-  print(car::Anova(fas_mod_W))
-  
   # hist(resid(as_mod_W), breaks = 50) # little skew not too bad, only 5 measurements, all reasonable biologically
-
+  
+  # warm models
+  run_anova(rmr_mod_ER, save.path = here(paste("Data_exports/", lifestage, "models/RMR_ER_anova_summary_report.txt", sep = "")))
+  run_anova(amr_mod_ER, save.path = here(paste("Data_exports/", lifestage, "models/MMR_ER_anova_summary_report.txt", sep = "")))
+  run_anova(as_mod_ER, save.path = here(paste("Data_exports/", lifestage, "models/AS_ER_anova_summary_report.txt", sep = "")))
+  run_anova(fas_mod_ER, save.path = here(paste("Data_exports/", lifestage, "models/FAS_ER_anova_summary_report.txt", sep = "")))
+  
+  # ER models
+  run_anova(rmr_mod_W, save.path = here(paste("Data_exports/", lifestage, "models/RMR_W_anova_summary_report.txt", sep = "")))
+  run_anova(amr_mod_W, save.path = here(paste("Data_exports/", lifestage, "models/MMR_W_anova_summary_report.txt", sep = "")))
+  run_anova(as_mod_W, save.path = here(paste("Data_exports/", lifestage, "models/AS_W_anova_summary_report.txt", sep = "")))
+  run_anova(fas_mod_W, save.path = here(paste("Data_exports/", lifestage, "models/FAS_W_anova_summary_report.txt", sep = "")))
+  
   # *****************************************************************************
   # *****************************************************************************
   # Model scaling parameters and CIs ----------
@@ -804,15 +1622,15 @@ get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
                 best.model.amr.w = amr_mod_W,
                 best.model.as.w = as_mod_W,
                 best.model.fas.w = fas_mod_W,
-                data.rmr.test = data.rmr.test,
-                data.rmrER = data.rmrER,
-                data.amr.test = data.amr.test,
-                data.amrER = data.amrER,                        
-                data.as.test = data.as.test,
-                data.asER = data.asER, 
-                data.fas.test = data.fas.test,
-                data.fasER = data.fasER, 
-                name_extension = paste(lifestage,"models", sep="")) #
+                data.rmr.test.modpar = data.rmr.test,
+                data.rmrER.modpar = data.rmrER,
+                data.amr.test.modpar = data.amr.test,
+                data.amrER.modpar = data.amrER,                        
+                data.as.test.modpar = data.as.test,
+                data.asER.modpar = data.asER, 
+                data.fas.test.modpar = data.fas.test,
+                data.fasER.modpar = data.fasER, 
+                name_extension = paste(lifestage, "models", sep="")) #
   # toc()
 
   sum_CItable<-data.frame(model_out[[1]])
@@ -841,20 +1659,30 @@ get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
     geom_point(data=data.amr.test, aes(x=lnBWg, y=lnAMR),
                alpha=0.9,  size=1, pch=21, show.legend = FALSE, stroke =0.2,
                fill = cols.amr[3], color = cols.amr[3])+
-    geom_segment(aes(x = 0, xend = 9,
-                   y = scaling_params_amr_w$Intercept + scaling_params_amr_w$Slope * 0,
-                   yend = scaling_params_amr_w$Intercept + scaling_params_amr_w$Slope * 9),
+    geom_segment(aes(x = min(data.amr.test$lnBWg),
+                     xend = max(data.amr.test$lnBWg),
+                   y = scaling_params_amr_w$Intercept +
+                     scaling_params_amr_w$Slope *
+                     min(data.amr.test$lnBWg),
+                   yend = scaling_params_amr_w$Intercept +
+                     scaling_params_amr_w$Slope *
+                     max(data.amr.test$lnBWg)),
                 color = cols.amr[1])+
-    geom_segment(aes(x = -2.5, xend = 9,
-                   y = scaling_params_amr_er$Intercept + scaling_params_amr_er$Slope * -2.5,
-                   yend = scaling_params_amr_er$Intercept + scaling_params_amr_er$Slope * 9),
+    geom_segment(aes(x = min(data.amrER$lnBWg),
+                     xend = max(data.amrER$lnBWg),
+                   y = scaling_params_amr_er$Intercept +
+                     scaling_params_amr_er$Slope *
+                     min(data.amrER$lnBWg),
+                   yend = scaling_params_amr_er$Intercept +
+                     scaling_params_amr_er$Slope *
+                     max(data.amrER$lnBWg)),
                 color = "black")+
     annotate("text",  x = -5.2, y = 11.5,
-             label = bquote(Optimal:~italic(b)[MMR] == .(round(scaling_params_amr_er$Slope,2))), 
+             label = bquote(Optimal:~italic(b)[MMR] == .(round(scaling_params_amr_er$Slope,3))), 
                             # "\u00b1" ~ .(round(scaling_params_amr_er$SE_slope,2))),
              size=4, hjust=0, family="Helvetica", color = "black")+
     annotate("text",  x = -5.2, y = 9.8,
-             label = bquote(Warm:~italic(b)[MMR] == .(round(scaling_params_amr_w$Slope,2))),
+             label = bquote(Warm:~italic(b)[MMR] == .(round(scaling_params_amr_w$Slope,3))),
              size=4, hjust=0, family="Helvetica", color = cols.amr[1])+
     scale_color_gradient( low = "grey", high = "black")+
     ylim(x = -6.3, 12)+
@@ -902,19 +1730,29 @@ get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
     geom_point(data=data.rmr.test, aes(x=lnBWg, y=lnRMR),
                alpha=0.9,  size=1, pch=21, show.legend = FALSE, stroke =0.2,
                fill = cols.rmr[2], color = cols.rmr[2])+
-    geom_segment(aes(x = 0, xend = 9,
-                   y = scaling_params_rmr_w$Intercept + scaling_params_rmr_w$Slope * 0,
-                   yend = scaling_params_rmr_w$Intercept + scaling_params_rmr_w$Slope * 9),
+    geom_segment(aes(x = min(data.rmr.test$lnBWg),
+                     xend = max(data.rmr.test$lnBWg),
+                   y = scaling_params_rmr_w$Intercept +
+                     scaling_params_rmr_w$Slope *
+                     min(data.rmr.test$lnBWg),
+                   yend = scaling_params_rmr_w$Intercept +
+                     scaling_params_rmr_w$Slope *
+                     max(data.rmr.test$lnBWg)),
                 color = cols.rmr[1])+
-    geom_segment(aes(x = -2.5, xend = 9,
-                   y = scaling_params_rmr_er$Intercept + scaling_params_rmr_er$Slope * -2.5,
-                   yend = scaling_params_rmr_er$Intercept + scaling_params_rmr_er$Slope * 9),
+    geom_segment(aes(x = min(data.rmrER$lnBWg),
+                     xend = max(data.rmrER$lnBWg),
+                   y = scaling_params_rmr_er$Intercept +
+                     scaling_params_rmr_er$Slope *
+                     min(data.rmrER$lnBWg),
+                   yend = scaling_params_rmr_er$Intercept +
+                     scaling_params_rmr_er$Slope *
+                     max(data.rmrER$lnBWg)),
                 color = "black")+
     annotate("text",  x = -5.2, y = 11.5,
-             label = bquote(Optimal:~italic(b)[RMR] == .(round(scaling_params_rmr_er$Slope,2))),
+             label = bquote(Optimal:~italic(b)[RMR] == .(round(scaling_params_rmr_er$Slope,3))),
              size=4, hjust=0, family="Helvetica", color = "black")+
     annotate("text",  x = -5.2, y = 9.8,
-             label = bquote(Warm:~italic(b)[RMR] == .(round(scaling_params_rmr_w$Slope,2))),
+             label = bquote(Warm:~italic(b)[RMR] == .(round(scaling_params_rmr_w$Slope,3))),
              size=4, hjust=0, family="Helvetica", color = cols.rmr[1])+
     scale_color_gradient( low = "grey", high = "black")+
     ylim(x = -6.3, 12)+
@@ -952,19 +1790,29 @@ get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
     geom_point(data=data.as.test, aes(x=lnBWg, y=lnAS),
                alpha=0.9,  size=1, pch=21, show.legend = FALSE, stroke =0.2,
                fill = cols.as[3], color = cols.as[3])+
-    geom_segment(aes(x = 0, xend = 9,
-                   y = scaling_params_as_w$Intercept + scaling_params_as_w$Slope * 0,
-                   yend = scaling_params_as_w$Intercept + scaling_params_as_w$Slope * 9),
+    geom_segment(aes(x = min(data.as.test$lnBWg),
+                     xend = max(data.as.test$lnBWg),
+                   y = scaling_params_as_w$Intercept +
+                     scaling_params_as_w$Slope *
+                     min(data.as.test$lnBWg),
+                   yend = scaling_params_as_w$Intercept +
+                     scaling_params_as_w$Slope *
+                     max(data.as.test$lnBWg)),
                 color = cols.as[1])+
-    geom_segment(aes(x = -2.5, xend = 9,
-                   y = scaling_params_as_er$Intercept + scaling_params_as_er$Slope * -2.5,
-                   yend = scaling_params_as_er$Intercept + scaling_params_as_er$Slope * 9),
+    geom_segment(aes(x = min(data.asER$lnBWg),
+                     xend = max(data.asER$lnBWg),
+                   y = scaling_params_as_er$Intercept +
+                     scaling_params_as_er$Slope *
+                     min(data.asER$lnBWg),
+                   yend = scaling_params_as_er$Intercept +
+                     scaling_params_as_er$Slope *
+                     max(data.asER$lnBWg)),
                 color = "black")+
     annotate("text",  x = -5.2, y = 11.5,
-             label = bquote(Optimal:~italic(b)[AS] == .(round(scaling_params_as_er$Slope,2))),
+             label = bquote(Optimal:~italic(b)[AS] == .(round(scaling_params_as_er$Slope,3))),
              size=4, hjust=0, family="Helvetica", color = "black")+
     annotate("text",  x = -5.2, y = 9.8,
-             label = bquote(Warm:~italic(b)[AS] == .(round(scaling_params_as_w$Slope,2))),
+             label = bquote(Warm:~italic(b)[AS] == .(round(scaling_params_as_w$Slope,3))),
              size=4, hjust=0, family="Helvetica", color = cols.as[1])+
     scale_color_gradient( low = "grey", high = "black")+
     ylim(x = -6.3, 12)+
@@ -982,9 +1830,9 @@ get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
              size=4, hjust=0,  color = cols.as[1])
     }else{
       if(lifestage == "juvenile"){
-        ASmodel_plot1<-ASmodel_plot1+ annotate("text",  x = 7, y = 9.8,
+        ASmodel_plot1<-ASmodel_plot1+ annotate("text",  x = 7, y = 11.5,
              label = bquote("\u2193" ~ "with" ~ degree*C),
-             size=4, hjust=0,  color = cols.as[1])
+             size=4, hjust=0,  color = "black")
       }
       if(lifestage == "adult"){
         ASmodel_plot1<-ASmodel_plot1+ annotate("text",  x = 7, y = 9.8,
@@ -1013,19 +1861,29 @@ get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
     geom_point(data=data.fas.test, aes(x=lnBWg, y=lnFAS),
                alpha=0.9,  size=1, pch=21, show.legend = FALSE, stroke =0.2,
                fill = cols.fas[3], color = cols.fas[3])+
-    geom_segment(aes(x = 0, xend = 9,
-                   y = scaling_params_fas_w$Intercept + scaling_params_fas_w$Slope * 0,
-                   yend = scaling_params_fas_w$Intercept + scaling_params_fas_w$Slope * 9),
+    geom_segment(aes(x = min(data.fas.test$lnBWg),
+                     xend = max(data.fas.test$lnBWg),
+                   y = scaling_params_fas_w$Intercept +
+                     scaling_params_fas_w$Slope *
+                     min(data.fas.test$lnBWg),
+                   yend = scaling_params_fas_w$Intercept +
+                     scaling_params_fas_w$Slope *
+                     max(data.fas.test$lnBWg)),
                 color = cols.fas[1])+
-    geom_segment(aes(x = -2.5, xend = 9,
-                   y = scaling_params_fas_er$Intercept + scaling_params_fas_er$Slope * -2.5,
-                   yend = scaling_params_fas_er$Intercept + scaling_params_fas_er$Slope * 9),
+    geom_segment(aes(x = min(data.fasER$lnBWg),
+                     xend = max(data.fasER$lnBWg),
+                   y = scaling_params_fas_er$Intercept +
+                     scaling_params_fas_er$Slope *
+                     min(data.fasER$lnBWg),
+                   yend = scaling_params_fas_er$Intercept +
+                     scaling_params_fas_er$Slope *
+                     max(data.fasER$lnBWg)),
                 color = "black")+
     annotate("text",  x = -5.2, y = 11.5,
-             label = bquote(Optimal:~italic(b)[FAS] == .(round(scaling_params_fas_er$Slope,2))),
+             label = bquote(Optimal:~italic(b)[FAS] == .(round(scaling_params_fas_er$Slope,3))),
              size=4, hjust=0, family="Helvetica", color = "black")+
     annotate("text",  x = -5.2, y = 9.8,
-             label = bquote(Warm:~italic(b)[FAS] == .(round(scaling_params_fas_w$Slope,2))),
+             label = bquote(Warm:~italic(b)[FAS] == .(round(scaling_params_fas_w$Slope,3))),
              size=4, hjust=0, family="Helvetica", color = cols.fas[1])+
     scale_color_gradient( low = "grey", high = "black")+
     ylim(x = -6.3, 12)+
@@ -1289,8 +2147,10 @@ get_phylo_mixed_models<-function(lifestage = NULL){ #default to all data
   ))
 }
 
+# **************************************************
 # Function to update global models with ecology groupings
 # standardized metric for contrasts
+
 ecol_model_update<-function(ecol.model.null, 
                             ecol.data.subset, 
                             temp.test.category, 
@@ -1312,6 +2172,7 @@ ecol_model_update<-function(ecol.model.null,
 
       # print(ecol.model)# ecol.model<-Almer(lnRMR ~ lnBWg + tempTestK1000 + DemersPelag + (1 | species) + (1 | species:trial), data=data.rmr.test, REML = F)
       
+      # setup BIC table with all data/model specific factors as columns 
       BIC.table<-BICdelta(BIC(ecol.model.null, ecol.model))
       BIC.table$models<-rownames(BIC.table)
       BIC.table$var<-mr.type
@@ -1328,6 +2189,7 @@ ecol_model_update<-function(ecol.model.null,
       params.table$test.categ<-temp.test.category
       params.table$ecol<-ecol.predictor[i]
       
+      # start new data frames if not already there
       if(is.null(data.BIC)){
         data.BIC<-as.data.frame(BIC.table)
       }else{
@@ -1340,18 +2202,28 @@ ecol_model_update<-function(ecol.model.null,
         data.PARAMS<-rbind(data.PARAMS, params.table)
       }
      
-      anova.comp<-as.data.frame(car::Anova(ecol.model), )
+      # for interaction model run type III anova, for non-interaction models type II 
+      if(has_interaction(ecol.model)){
+        anova.comp<-as.data.frame(car::Anova(ecol.model, type = "III"), )
+        anova.comp$anova_type<-"III, car package"
+      }else{
+        anova.comp<-as.data.frame(car::Anova(ecol.model, type = "II"), )
+        anova.comp$anova_type<-"II, car package"
+      }
+   
       anova.comp$predictor<-rownames(anova.comp)
       anova.comp$var<-mr.type
       anova.comp$test.categ<-temp.test.category
       anova.comp$ecol<-ecol.predictor[i]
       
+      # if not already start a new data frame
       if(is.null(data.ANOVA)){
         data.ANOVA<-as.data.frame(anova.comp)
       }else{
         data.ANOVA<-rbind(data.ANOVA, anova.comp)
       }
-        
+      
+      # Get marginal estimated means and post-hoc pairwise comparisons
       if(ecol.predictor[i] == "DemersPelag"){
           ecol.ref.grid<-(ref_grid(ecol.model,
                                    at = list(tempTest = ref.tempTest, lnBWg = ref.lnBWg),
@@ -1398,6 +2270,7 @@ ecol_model_update<-function(ecol.model.null,
        emm.cont$test.categ<-temp.test.category
        emm.cont$ecol<-ecol.predictor[i]
         
+      # if not alread existant, start new dataframes
       if(is.null(data.EMMEANS)){
         data.EMMEANS<-as.data.frame(emm.emm)
       }else{

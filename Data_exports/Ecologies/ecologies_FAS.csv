@@ -1,33 +1,33 @@
 "ecol_temp_cat","intercept","slope","temp","intercept.ciL","slope.ciL","temp.ciL","intercept.ciH","slope.ciH","temp.ciH","ecology_subgroup","test_category3","size_min","size_max","n","temp_min","temp_max","species_n","MR","Ecol","n_data_n_species","scalingGood"
-"elongated_ecol_relev",0.69,0.05,0.02,0.48,0.01,0.02,0.89,0.09,0.03,"elongated","ecol_relev",0.45,48.6,335,0,27,18,"FAS","BodyShapeI","335 (18)",1
+"elongated_optimal",0.69,0.05,0.02,0.48,0.01,0.02,0.89,0.09,0.03,"elongated","optimal",0.45,48.6,335,0,27,18,"FAS","BodyShapeI","335 (18)",1
 "elongated_warm",1.75,-0.25,-0.01,1.51,-0.3,-0.02,1.98,-0.2,0,"elongated","warm",0.38,31.01,152,8,32,5,"FAS","BodyShapeI","152 (5)",1
-"fusiform_ecol_relev",1.74,-0.01,-0.01,1.67,-0.02,-0.02,1.81,0,-0.01,"fusiform","ecol_relev",0.09,3450,2755,5,31,38,"FAS","BodyShapeI","2755 (38)",1
+"fusiform_optimal",1.74,-0.01,-0.01,1.67,-0.02,-0.02,1.81,0,-0.01,"fusiform","optimal",0.09,3450,2755,5,31,38,"FAS","BodyShapeI","2755 (38)",1
 "fusiform_warm",1.52,-0.01,-0.01,1.39,-0.03,-0.01,1.65,0.01,-0.01,"fusiform","warm",0.33,3190,845,8,35,15,"FAS","BodyShapeI","845 (15)",1
-"short/deep_ecol_relev",2.71,-0.04,-0.06,2.43,-0.06,-0.07,2.98,-0.02,-0.05,"short/deep","ecol_relev",0.04,1672,204,12,30,8,"FAS","BodyShapeI","204 (8)",1
+"short/deep_optimal",2.71,-0.04,-0.06,2.43,-0.06,-0.07,2.98,-0.02,-0.05,"short/deep","optimal",0.04,1672,204,12,30,8,"FAS","BodyShapeI","204 (8)",1
 "short/deep_warm",5.85,-0.31,-0.12,5.07,-0.36,-0.15,6.63,-0.26,-0.1,"short/deep","warm",1.6,1672,118,21,35,4,"FAS","BodyShapeI","118 (4)",1
-"Polar_ecol_relev",0.06,0.15,0.03,-1.93,-0.47,-0.03,2.06,0.78,0.1,"Polar","ecol_relev",16.1,48.6,13,0,6,1,"FAS","Climate","13 (1)",0
+"Polar_optimal",0.06,0.15,0.03,-1.93,-0.47,-0.03,2.06,0.78,0.1,"Polar","optimal",16.1,48.6,13,0,6,1,"FAS","Climate","13 (1)",0
 "Polar_warm",0.29,0.05,NA,-2.36,-0.86,NA,2.94,0.96,NA,"Polar","warm",11.4,24.9,5,8,8,1,"FAS","Climate","5 (1)",0
-"Subtropical_ecol_relev",1.97,0.02,-0.03,1.87,0,-0.04,2.07,0.03,-0.03,"Subtropical","ecol_relev",0.46,3011,1509,5,30,30,"FAS","Climate","1509 (30)",1
+"Subtropical_optimal",1.97,0.02,-0.03,1.87,0,-0.04,2.07,0.03,-0.03,"Subtropical","optimal",0.46,3011,1509,5,30,30,"FAS","Climate","1509 (30)",1
 "Subtropical_warm",1.99,0.01,-0.04,1.85,-0.02,-0.05,2.12,0.03,-0.04,"Subtropical","warm",0.38,2595,377,8,31,6,"FAS","Climate","377 (6)",1
-"Temperate_ecol_relev",1.83,0,-0.02,1.74,-0.01,-0.03,1.91,0.01,-0.02,"Temperate","ecol_relev",0.45,3450,930,10,30,19,"FAS","Climate","930 (19)",1
+"Temperate_optimal",1.83,0,-0.02,1.74,-0.01,-0.03,1.91,0.01,-0.02,"Temperate","optimal",0.45,3450,930,10,30,19,"FAS","Climate","930 (19)",1
 "Temperate_warm",1.79,-0.01,-0.03,1.46,-0.04,-0.04,2.12,0.01,-0.02,"Temperate","warm",7.1,3190,214,11,31,5,"FAS","Climate","214 (5)",1
-"Tropical_ecol_relev",2.26,-0.01,-0.03,1.86,-0.03,-0.04,2.65,0.01,-0.02,"Tropical","ecol_relev",0.04,1672,842,16,31,14,"FAS","Climate","842 (14)",1
+"Tropical_optimal",2.26,-0.01,-0.03,1.86,-0.03,-0.04,2.65,0.01,-0.02,"Tropical","optimal",0.04,1672,842,16,31,14,"FAS","Climate","842 (14)",1
 "Tropical_warm",1.96,-0.06,-0.02,1.45,-0.09,-0.03,2.47,-0.03,0,"Tropical","warm",0.33,1672,519,21,35,12,"FAS","Climate","519 (12)",1
-"benthopelagic_ecol_relev",1.71,-0.04,-0.01,1.61,-0.05,-0.02,1.82,-0.02,-0.01,"benthopelagic","ecol_relev",0.09,610,1053,5,30,27,"FAS","DemersPelag","1053 (27)",1
+"benthopelagic_optimal",1.71,-0.04,-0.01,1.61,-0.05,-0.02,1.82,-0.02,-0.01,"benthopelagic","optimal",0.09,610,1053,5,30,27,"FAS","DemersPelag","1053 (27)",1
 "benthopelagic_warm",1.85,0,-0.03,1.71,-0.03,-0.04,1.99,0.03,-0.03,"benthopelagic","warm",0.38,40.9,349,8,32,4,"FAS","DemersPelag","349 (4)",1
-"demersal_ecol_relev",1.44,-0.02,0,1.34,-0.04,-0.01,1.54,0,0,"demersal","ecol_relev",0.45,1672,1080,0,31,22,"FAS","DemersPelag","1080 (22)",1
+"demersal_optimal",1.44,-0.02,0,1.34,-0.04,-0.01,1.54,0,0,"demersal","optimal",0.45,1672,1080,0,31,22,"FAS","DemersPelag","1080 (22)",1
 "demersal_warm",0.44,0.05,0.01,0.27,0.03,0.01,0.61,0.08,0.02,"demersal","warm",4.62,1672,435,8,35,8,"FAS","DemersPelag","435 (8)",1
-"pelagic_ecol_relev",1.83,0.01,0,1.7,0,-0.01,1.96,0.02,0.01,"pelagic","ecol_relev",5.37,3450,502,9,20,3,"FAS","DemersPelag","502 (3)",1
+"pelagic_optimal",1.83,0.01,0,1.7,0,-0.01,1.96,0.02,0.01,"pelagic","optimal",5.37,3450,502,9,20,3,"FAS","DemersPelag","502 (3)",1
 "pelagic_warm",4.8,-0.06,-0.15,-0.32,-0.74,-0.2,9.91,0.63,-0.11,"pelagic","warm",1433,3190,48,18,26,2,"FAS","DemersPelag","48 (2)",0
-"reef-associated_ecol_relev",1.17,0.05,0.01,1,0.03,0.01,1.34,0.08,0.02,"reef-associated","ecol_relev",0.04,602.3,659,13,30,12,"FAS","DemersPelag","659 (12)",1
+"reef-associated_optimal",1.17,0.05,0.01,1,0.03,0.01,1.34,0.08,0.02,"reef-associated","optimal",0.04,602.3,659,13,30,12,"FAS","DemersPelag","659 (12)",1
 "reef-associated_warm",1.3,-0.05,0,-0.47,-0.1,-0.05,3.07,0,0.06,"reef-associated","warm",0.33,700.4,283,26.5,35,10,"FAS","DemersPelag","283 (10)",1
-"Freshwater_ecol_relev",3.39,0.02,-0.08,2.89,-0.02,-0.1,3.88,0.05,-0.06,"Freshwater","ecol_relev",0.45,81.04,256,25,31,21,"FAS","salintyComb","256 (21)",1
+"Freshwater_optimal",3.39,0.02,-0.08,2.89,-0.02,-0.1,3.88,0.05,-0.06,"Freshwater","optimal",0.45,81.04,256,25,31,21,"FAS","salintyComb","256 (21)",1
 "Freshwater_warm",1.33,-0.05,0,0.01,-0.14,-0.04,2.65,0.03,0.03,"Freshwater","warm",4.62,50.08,47,31,35,1,"FAS","salintyComb","47 (1)",0
-"Freshwater; brackish_ecol_relev",1.78,-0.04,-0.01,1.66,-0.05,-0.02,1.9,-0.02,-0.01,"Freshwater; brackish","ecol_relev",0.09,882,723,10,30,15,"FAS","salintyComb","723 (15)",1
+"Freshwater; brackish_optimal",1.78,-0.04,-0.01,1.66,-0.05,-0.02,1.9,-0.02,-0.01,"Freshwater; brackish","optimal",0.09,882,723,10,30,15,"FAS","salintyComb","723 (15)",1
 "Freshwater; brackish_warm",1.57,-0.07,-0.01,0.3,-0.12,-0.05,2.84,-0.01,0.03,"Freshwater; brackish","warm",2.42,591,76,28,32,2,"FAS","salintyComb","76 (2)",0
-"Marine_ecol_relev",1.24,-0.01,0.01,1.08,-0.03,0,1.4,0.01,0.01,"Marine","ecol_relev",0.04,1672,881,12,30,15,"FAS","salintyComb","881 (15)",1
+"Marine_optimal",1.24,-0.01,0.01,1.08,-0.03,0,1.4,0.01,0.01,"Marine","optimal",0.04,1672,881,12,30,15,"FAS","salintyComb","881 (15)",1
 "Marine_warm",0.39,-0.03,0.03,-0.39,-0.07,0.01,1.17,0.01,0.05,"Marine","warm",0.33,1672,328,21,35,11,"FAS","salintyComb","328 (11)",1
-"Marine; brackish_ecol_relev",0.06,0.15,0.03,-1.93,-0.47,-0.03,2.06,0.78,0.1,"Marine; brackish","ecol_relev",16.1,48.6,13,0,6,1,"FAS","salintyComb","13 (1)",0
+"Marine; brackish_optimal",0.06,0.15,0.03,-1.93,-0.47,-0.03,2.06,0.78,0.1,"Marine; brackish","optimal",16.1,48.6,13,0,6,1,"FAS","salintyComb","13 (1)",0
 "Marine; brackish_warm",2.96,-0.65,-0.08,-0.28,-1.24,-0.27,6.2,-0.05,0.1,"Marine; brackish","warm",0.38,24.9,18,8,19,2,"FAS","salintyComb","18 (2)",0
-"Marine; freshwater; brackish_ecol_relev",1.87,0.02,-0.02,1.79,0.01,-0.02,1.95,0.04,-0.02,"Marine; freshwater; brackish","ecol_relev",0.46,3450,1421,5,29,12,"FAS","salintyComb","1421 (12)",1
+"Marine; freshwater; brackish_optimal",1.87,0.02,-0.02,1.79,0.01,-0.02,1.95,0.04,-0.02,"Marine; freshwater; brackish","optimal",0.46,3450,1421,5,29,12,"FAS","salintyComb","1421 (12)",1
 "Marine; freshwater; brackish_warm",1.48,0.04,-0.02,1.38,0.02,-0.02,1.59,0.06,-0.01,"Marine; freshwater; brackish","warm",0.66,3190,646,8,35,8,"FAS","salintyComb","646 (8)",1

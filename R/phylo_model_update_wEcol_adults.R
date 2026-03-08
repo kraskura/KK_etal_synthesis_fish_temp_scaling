@@ -12,15 +12,53 @@
 
 
 # *************************************************
-library(here)
-    
-## Source the data and functions------------
-source(here("R", "get_data_temp.R")) # dataset warngling (gets the right species names from fishbase, calculates AS, FAS, and seperates everything in temperature categories) this is called in inside setup.R script
-source(here("R", "get_mixed_model_outputs.R")) # function for extracting 90% CI and making prediction dataframes, get predicted slopes 
-source(here("R", "get_data_phylo_matrix.R")) # phylogenetics work, extracts phylo matrix, saves it, makes plots and saves them, 
-source(here("R", "setup.R")) # get data, common color schemes and import libraries
 
-source(here("R", "get_phylo_mixed_model.R")) # run all models, select best, plot data, run updated model with ecological grouping updates. several function within a file.
+# colors 
+# if neccessary : 
+# if (!require("BiocManager", quietly = TRUE))
+#     install.packages("BiocManager")
+# 
+# BiocManager::install("ggtree")
+
+# install.packages("lme4", type = "source")
+# install.packages("evolvability", type = "source")
+# 
+library(tictoc) # timing 
+library(ggh4x)
+library(tidyverse)
+library(dplyr)
+library(colorBlindness)
+library(patchwork)
+library(weathermetrics)
+library(lme4)
+library(emmeans)
+library(car)
+library(evolvability) # Almer function
+library(ape)
+library(rotl)
+library(ggtree)
+library(Matrix)
+# library(kableExtra)
+library(pryr)
+library(viridisLite)
+library(TDbook)
+library(ggimage)
+library(ggformat2) # from github curstom built to format figures. 
+library(weathermetrics)
+library(ggplot2)
+library(ggpubr)
+library(cowplot)
+library(forcats)
+library(patchwork)
+library(reshape2)
+library(emmeans)
+library(systemfonts)
+library(flextable)
+library(here)
+
+## Source file with all functions------------
+source(here("R", "get_phylo_mixed_model.R")) 
+# run all models, select best, plot data, run updated model with ecological grouping updates. several function within a file.
 
 # *********************************************************************************
 # set global setting for model tests
@@ -31,11 +69,139 @@ emm_options(pbkrtest.limit = 7000)
 emm_options(lmerTest.limit = 7000)
 
 # ************************************************************************************
+cols.amr<-c(colorBlindness::SteppedSequential5Steps[c(21, 22, 23, 24,  25)]) 
+cols.rmr<-c(colorBlindness::SteppedSequential5Steps[c(11, 12, 13,14,  15)]) # "#6B990F" "#A3CC51" "#E5FFB2"
+cols.fas<-c(colorBlindness::SteppedSequential5Steps[c(1,2, 3,4, 5)])  # "#990F0F" "#CC5151" "#FFB2B2"
+cols.as<-c(colorBlindness::SteppedSequential5Steps[c(16,17,  18, 19, 20)]) 
 
-ontogeny_models<-get_phylo_mixed_models()
-juvenile_models<-get_phylo_mixed_models(lifestage = "juvenile")
-adul_models<-get_phylo_mixed_models(lifestage = "adult")
 
+cols<-c(cols.amr[1],cols.rmr[1],cols.amr[3],cols.rmr[3], cols.amr[5],cols.rmr[5], cols.as[2], cols.fas[2])
+        # AMR -rmr- AMR dark - rmr dark - light - as - fas
+
+# create needed directories for organization:
+dir.create("./Data_exports/Phylo_matrices/", recursive =TRUE) # compile all Phylo relatedness matrices
+dir.create("./Data_exports/Phylo_plots/", recursive =TRUE) # compile all Phylo trees
+dir.create("./Data_exports/BICs/", recursive =TRUE) # compile all BIC scores
+dir.create("./Data_exports/models/", recursive =TRUE) # compile all BIC scores
+dir.create("./Data_exports/adultmodels/", recursive =TRUE) # compile all BIC scores
+dir.create("./Data_exports/juvenilemodels/", recursive =TRUE) # compile all BIC scores
+dir.create("./Data_exports/Ecologies/", recursive =TRUE) # compile all BIC scores
+dir.create("./Data_exports/Species/", recursive =TRUE) # compile all BIC scores
+
+# DATA SETS -------------------
+message("import datasets")
+
+data.list<-get_data_temp(
+  data.amr.readin = here("Data", "Fish_AMR_temp_dataset_jan2026.csv"),
+  data.rmr.readin = here("Data","Fish_RMR_temp_dataset_jan2026.csv"),
+  ecology.data.readin = here("Data", "Kraskura_species_ecologies_jan2026.csv"),
+  onlyTop.above = TRUE,
+  save.FishBase.species.data = F,
+  calc_mass_specific = FALSE,
+  exclude_Wootton = TRUE)
+
+exists("data.amr") # saninty check to makes sure dataframes are not assigned to global env. 
+
+# ecol relev tamps
+data.amrER0<-data.frame(data.list[5])
+data.rmrER0<-data.frame(data.list[6])
+data.asER0<-data.frame(data.list[11])
+data.fasER0<-data.frame(data.list[12])
+
+# warm temps; AC = acute, AM = acclimated
+data.amrAC<-data.frame(data.list[1])
+data.rmrAC<-data.frame(data.list[2])
+data.amrAM<-data.frame(data.list[3])
+data.rmrAM<-data.frame(data.list[4])
+data.asAC<-data.frame(data.list[7])
+data.fasAC<-data.frame(data.list[8])
+data.asAM<-data.frame(data.list[9])
+data.fasAM<-data.frame(data.list[10])
+
+# all data together
+data.amr0<-data.frame(data.list[13])
+data.rmr0<-data.frame(data.list[14])
+dataMR0<-data.frame(data.list[15])
+data.as0<-data.frame(data.list[16])
+data.fas0<-data.frame(data.list[17])
+
+# the warm ones; callin datasets zero because the names are used inside physo miixed model function
+data.amr.test0<-rbind(data.amrAC, data.amrAM)
+data.rmr.test0<-rbind(data.rmrAC, data.rmrAM)
+data.fas.test0<-rbind(data.fasAC, data.fasAM)
+data.as.test0<-rbind(data.asAC, data.asAM)
+data.fas.test0<-data.fas.test0[c(!is.na(data.fas.test0$FAS) & is.finite(data.fas.test0$FAS)) , ]
+data.as.test0<-data.as.test0[c(!is.na(data.as.test0$lnAS) & is.finite(data.as.test0$lnAS)) , ]
+
+# Get model data set specific phylogentics model matrixes
+data.rmrER0<-droplevels(data.rmrER0)
+data.rmr.test0<-droplevels(data.rmr.test0)
+data.amrER0<-droplevels(data.amrER0)
+data.amr.test0<-droplevels(data.amr.test0)
+data.asER0<-droplevels(data.asER0)
+data.as.test0<-droplevels(data.as.test0)
+data.fasER0<-droplevels(data.fasER0)
+data.fas.test0<-droplevels(data.fas.test0)
+
+# test categories
+data.fas0$test_category3 <- "warm"
+data.fas0[data.fas0$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.as0$test_category3 <- "warm"
+data.as0[data.as0$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.amr0$test_category3 <- "warm"
+data.amr0[data.amr0$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.rmr0$test_category3 <- "warm"
+data.rmr0[data.rmr0$test_category == "ecol_relev", "test_category3"] <- "optimal"
+
+cat(">>> Datasets witha all data are ready, all lifestages included")
+
+# **********************
+# run the models - must get message that best model selection matches selection. or best model is not properly identified. 
+
+# IMPORTANT MESSAGES TO LOOK FOR: 
+# 1. Phylo matching for all data frames (ecol relev or 'optimal' and 'warm)
+# RMR-optimal: All species names are identified and mathced with phylo data 
+#   N species:92
+# 2. Correct best model identification message: 
+#  Correct best models identified: Phylo_RMR_model4int (for all models n =8)
+# 3. Estimate slopes for 1 g fish (n =8 times one for each model; performance temp combo)
+#   Estimate slopes to common size 1 g 
+# 4. ANOVA estimation for wach model 
+#   >>> Interaction term(s) detected — using Type III ANOVA
+
+# Explanation of warnings:  herehere
+#  - 
+
+ontogeny_models<-get_phylo_mixed_models(data.rmr.test.modrun = data.rmr.test0,
+                                        data.rmrER.modrun = data.rmrER0, 
+                                        data.amr.test.modrun = data.amr.test0,
+                                        data.amrER.modrun = data.amrER0,
+                                        data.as.test.modrun = data.as.test0,
+                                        data.asER.modrun = data.asER0, 
+                                        data.fas.test.modrun = data.fas.test0,
+                                        data.fasER.modrun = data.fasER0)
+# juvenile models
+juvenile_models<-get_phylo_mixed_models(data.rmr.test.modrun = data.rmr.test0,
+                                        data.rmrER.modrun = data.rmrER0, 
+                                        data.amr.test.modrun = data.amr.test0,
+                                        data.amrER.modrun = data.amrER0,                        
+                                        data.as.test.modrun = data.as.test0,
+                                        data.asER.modrun = data.asER0, 
+                                        data.fas.test.modrun = data.fas.test0,
+                                        data.fasER.modrun = data.fasER0,
+                                        lifestage = "juvenile")
+# adult models
+adult_models<-get_phylo_mixed_models(data.rmr.test.modrun = data.rmr.test0,
+                                        data.rmrER.modrun = data.rmrER0, 
+                                        data.amr.test.modrun = data.amr.test0,
+                                        data.amrER.modrun = data.amrER0,                        
+                                        data.as.test.modrun = data.as.test0,
+                                        data.asER.modrun = data.asER0, 
+                                        data.fas.test.modrun = data.fas.test0,
+                                        data.fasER.modrun = data.fasER0,
+                                        lifestage = "adult")
+
+# the rest of the analysis is only in ontogeny models
 rmr_mod_ER<-ontogeny_models[[1]]
 amr_mod_ER<-ontogeny_models[[2]]
 as_mod_ER<-ontogeny_models[[3]]
@@ -50,6 +216,8 @@ fas_mod_W<-ontogeny_models[[8]]
 # **************************************************************
 # and prep mass-specific values; use exported data
 scaling.params<-read.csv(here("./Data_exports/models/scaling_parameters.csv")) # main model
+scaling.params.j<-read.csv(here("./Data_exports/juvenilemodels/scaling_parameters.csv")) # main model
+
 
 # slopes available from  function call or saved new vars
 RMR_slope<-round(as.numeric(scaling.params[scaling.params$performance == "RMR" & 
@@ -80,6 +248,7 @@ AMR_slope_w<-round(as.numeric(scaling.params[scaling.params$performance == "MMR"
 
 # ************************************************************************************
 # ************************************************************************************
+exists("data.rmrER")
 # Reassign the data frames with scaling parameters ----
 # # reset datasets with mass specific values using scaling coefficients from the models.
 data.list<-get_data_temp(
@@ -94,7 +263,8 @@ data.list<-get_data_temp(
                          exp_as = AS_slope,
                          exp_rmr_warm = RMR_slope_w,
                          exp_amr_warm = AMR_slope_w,
-                         exp_as_warm = AS_slope_w)
+                         exp_as_warm = AS_slope_w,
+                        exclude_Wootton = TRUE)
 
 data.amrAC<-data.frame(data.list[1]) 
 data.rmrAC<-data.frame(data.list[2])
@@ -145,7 +315,6 @@ data.as.test<-data.amr.test[c(!is.na(data.amr.test$lnAS) & is.finite(data.amr.te
 
 # ************************************************************************************
 # ************************************************************************************
-# 
 
 # depending on local R setting this may give some errors about displaying all the data. 
 output.RMR.ER <- ecol_model_update(###########
@@ -177,7 +346,7 @@ output.RMR.W <- ecol_model_update(
                     ref.tempTest = 20, 
                     ref.lnBWg = c(log(1)))
   
-output.MMR.ER <- ecol_model_update(############
+output.MMR.ER <- ecol_model_update(
                     data.BIC = NULL,
                     data.ANOVA = NULL,
                     data.EMMEANS = NULL, 
@@ -205,7 +374,7 @@ output.MMR.W <- ecol_model_update(
                     ref.tempTest = 20, 
                     ref.lnBWg = c(log(1)))
   
-output.FAS.ER <- ecol_model_update(###################
+output.FAS.ER <- ecol_model_update(
                     data.BIC = NULL,
                     data.ANOVA = NULL,
                     data.EMMEANS = NULL, 
@@ -262,7 +431,7 @@ output.AS.W <- ecol_model_update(
                     ref.lnBWg = c(log(1)))
   
 # best models -----
-ecol.bic<<-rbind(output.AS.ER[[1]], output.AS.W[[1]],
+ecol.bic<-rbind(output.AS.ER[[1]], output.AS.W[[1]],
       output.FAS.ER[[1]], output.FAS.W[[1]],
       output.RMR.ER[[1]], output.RMR.W[[1]],
       output.MMR.ER[[1]], output.MMR.W[[1]])
@@ -288,7 +457,7 @@ ecol.posthoc.comp<-rbind(output.AS.ER[[4]], output.AS.W[[4]],
 ecol.model.params<-rbind(output.AS.ER[[5]], output.AS.W[[5]],
       output.FAS.ER[[5]], output.FAS.W[[5]],
       output.RMR.ER[[5]], output.RMR.W[[5]],
-      output.MMR.ER[[5]], output.MMR.W[[5]])
+      output.MMR.ER[[5]], output.MMR.W[[5]]) # fix this output need estimate names
   
 # save stats tables for supplement ------------
 write.csv(file = here("./Data_exports/Ecologies/ecologies_data_emmeans.csv"),
@@ -393,8 +562,8 @@ ecolAS1<-ggplot(data=data.as, aes(y=mass_specas, fill=DemersPelag_plot,
   annotate(geom = "text", y = 3.25, x = 3.21, label = "MMR", size = 3, hjust = 0)+
   annotate(geom = "text", y = 2.05, x = 3.21, label = "AS", size = 3, hjust = 0)+
   annotate(geom = "text", y = 1.5, x = 3.31, label = "RMR", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 7.9, x = 1, label = "(AS, MMR) BIC ***", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 7.9, x = 5.0, label = "(all) BIC ns", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 7.9, x = 1, label = "AS,MMR,RMR***", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 7.9, x = 5.0, label = "", size = 3, hjust = 0)+
   annotate(geom = "text", y = 7.55, x = 4.3, label = "OPTIMAL\n TEMPERATURES",
            hjust = 1, fontface = "bold", size = 3)+
   annotate(geom = "text", y = 7.9, x = 8.2, label = "WARM",size = 3, hjust = 1, fontface = "bold")+
@@ -474,8 +643,8 @@ ecolAS2<-ggplot(data=data.as, aes(y=mass_specas, fill=BodyShapeI_plot,
                             "fusiform-warm" = "Fusiform",
                             "short/deep-warm" = "Short/Deep"))+
   ylim(0,8)+
-  annotate(geom = "text", y = 7.9, x = 1, label = "(MMR) BIC ***", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7.9, x = 5, label = "(RMR, AS) BIC *", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7.9, x = 1, label = "MMR,RMR***", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7.9, x = 5, label = "AS*", size = 3, hjust =0)+
   geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
 ggformat(ecolAS2, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=F, size_text = 11)
 ecolAS2 <- ecolAS2 + theme(
@@ -572,8 +741,8 @@ ecolAS3<-ggplot(data=data.as, aes(y=mass_specas, fill=salintyComb_plot, x=salint
       "Marine; brackish-warm" = "Marine/ \n brackish",
       "Marine; freshwater; brackish-warm" = "All \n salinities"))+
   ylim(0,8)+
-  annotate(geom = "text", y = 7.9, x = 1, label = "(MMR) BIC *", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7.9, x = 6.05, label = "(all) BIC ns", size = 3, hjust= 0)+
+  annotate(geom = "text", y = 7.9, x = 1, label = "MMR,RMR*", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7.9, x = 6.05, label = "", size = 3, hjust= 0)+
   geom_vline(xintercept = 5.5, color = "grey", linetype = "dashed")
 ggformat(ecolAS3, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=F, size_text = 11)
 ecolAS3 <- ecolAS3 + theme(
@@ -655,8 +824,8 @@ ecolAS4<-ggplot(data=data.as, aes(y=mass_specas, fill=Climate_plot, x=Climate_pl
                                 "Subtropical-warm" = "Subtropical",
                                 "Tropical-warm" = "Tropical"))+
   ylim(0,8)+
-  annotate(geom = "text", y = 7.9, x = 1, label = "(RMR, MMR) BIC *", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7.9, x = 5.0, label = "(all) BIC ns", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 7.9, x = 1, label = "RMR*** MMR*", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7.9, x = 5.0, label = "", size = 3, hjust = 0)+
   geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
 ggformat(ecolAS4, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=F, size_text = 11)
 ecolAS4 <- ecolAS4 + theme(
@@ -693,8 +862,8 @@ ecolFAS1<-ggplot(data=data.fas, aes(y=FAS, fill=DemersPelag_plot, x=DemersPelag_
                                   "reef-associated-warm" = "Reef- \n associac."
                                   ))+
   ylim(0,20)+
-  annotate(geom = "text", y = 19.5, x = 1, label = "BIC *", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 19.5, x = 5.0, label = "BIC ns", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 19.5, x = 1, label = "*", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 19.5, x = 5.0, label = "", size = 3, hjust = 0)+
   geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
 ggformat(ecolFAS1, y_title = bquote("FAS"), x_title = element_blank() , print=T, size_text = 11)
 ecolFAS1 <- ecolFAS1 + theme(
@@ -734,8 +903,8 @@ ecolFAS2<-ggplot(data=data.fas, aes(FAS, fill=BodyShapeI_plot, x=BodyShapeI_plot
                             "short/deep-warm" = "Short/Deep"), drop = FALSE)+
                    # expand = expansion(mult = c(0.5, 0)))+
   ylim(0,20)+
-  annotate(geom = "text", y = 19.5, x = 1, label = "BIC *", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 19.5, x = 4.05, label = "BIC ns", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 19.5, x = 1, label = "*", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 19.5, x = 4.05, label = "", size = 3, hjust = 0)+
   geom_vline(xintercept =3.5, color = "grey", linetype = "dashed")
 ggformat(ecolFAS2, y_title = bquote("FAS"), x_title = element_blank() , print=F, size_text = 11)
 ecolFAS2 <- ecolFAS2 + theme( 
@@ -772,8 +941,8 @@ ecolFAS3<-ggplot(data=data.fas, aes(FAS, fill=salintyComb_plot, x=salintyComb_pl
       "Marine; brackish-warm" = "Marine/ \n brackish",
       "Marine; freshwater; brackish-warm" = "All \n salinities"))+
   ylim(0,20)+
-  annotate(geom = "text", y = 19.5, x = 1, label = "BIC ns", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 19.5, x = 6.05, label = "BIC ns", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 19.5, x = 1, label = "", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 19.5, x = 6.05, label = "", size = 3, hjust = 0)+
   geom_vline(xintercept = 5.5, color = "grey", linetype = "dashed")
 ggformat(ecolFAS3, y_title = bquote("FAS"), x_title = element_blank() , print=F, size_text = 11)
 ecolFAS3 <- ecolFAS3 + theme(
@@ -805,8 +974,8 @@ ecolFAS4<-ggplot(data=data.fas, aes(FAS, fill=Climate_plot, x=Climate_plot))+
                                 "Subtropical-warm" = "Subtropical",
                                 "Tropical-warm" = "Tropical"))+
   ylim(0,20)+
-  annotate(geom = "text", y = 19.5, x = 1, label = "BIC *", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 19.5, x = 5, label = "BIC ns", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 19.5, x = 1, label = "*", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 19.5, x = 5, label = "", size = 3, hjust = 0)+
   geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
 ggformat(ecolFAS4, y_title = bquote("FAS"), x_title = element_blank() , print=F, size_text = 11)
 ecolFAS4 <- ecolFAS4 + theme(

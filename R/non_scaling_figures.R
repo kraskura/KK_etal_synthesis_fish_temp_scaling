@@ -10,17 +10,139 @@
 # source("./R/phylo_mixed_model.R") # need for scaling slopes 
 # source("./R/nonPhylo_mixed_models.R") # for comparison supplemental 
 set.seed(51423)
-# MMR and AMR used interchangeably throughout 
-library(here)
-source(here("R/get_data_temp.R"))
-source(here("R/setup.R")) # data set, libraries, colors, etc. 
 
+
+# GLOBAL DATA (with mass specific values) ---------
+library(tictoc) # timing 
+library(ggh4x)
+library(tidyverse)
+library(dplyr)
+library(colorBlindness)
+library(patchwork)
+library(weathermetrics)
+library(lme4)
+library(emmeans)
+library(car)
+library(evolvability) # Almer function
+library(ape)
+library(rotl)
+library(ggtree)
+library(Matrix)
+# library(kableExtra)
+library(pryr)
+library(viridisLite)
+library(TDbook)
+library(ggimage)
+library(ggformat2) # from github curstom built to format figures. 
+library(weathermetrics)
+library(ggplot2)
+library(ggpubr)
+library(cowplot)
+library(forcats)
+library(patchwork)
+library(reshape2)
+library(emmeans)
+library(systemfonts)
+library(flextable)
+library(here)
+
+## Source file with all functions------------
+source(here("R", "get_phylo_mixed_model.R")) 
+# run all models, select best, plot data, run updated model with ecological grouping updates. several function within a file.
+
+# *********************************************************************************
+# set global setting for model tests
+options(dplyr.summarise.inform = FALSE)
+# for emmeans library
+# Ecologically Relevant conditions: 
+emm_options(pbkrtest.limit = 7000)
+emm_options(lmerTest.limit = 7000)
+
+# ************************************************************************************
+cols.amr<-c(colorBlindness::SteppedSequential5Steps[c(21, 22, 23, 24,  25)]) 
+cols.rmr<-c(colorBlindness::SteppedSequential5Steps[c(11, 12, 13,14,  15)]) # "#6B990F" "#A3CC51" "#E5FFB2"
+cols.fas<-c(colorBlindness::SteppedSequential5Steps[c(1,2, 3,4, 5)])  # "#990F0F" "#CC5151" "#FFB2B2"
+cols.as<-c(colorBlindness::SteppedSequential5Steps[c(16,17,  18, 19, 20)]) 
+
+cols<-c(cols.amr[1],cols.rmr[1],cols.amr[3],cols.rmr[3], cols.amr[5],cols.rmr[5], cols.as[2], cols.fas[2])
+        # AMR -rmr- AMR dark - rmr dark - light - as - fas
+
+# DATA SETS -------------------
+message("import datasets")
+
+data.list<-get_data_temp(
+  data.amr.readin = here("Data", "Fish_AMR_temp_dataset_jan2026.csv"),
+  data.rmr.readin = here("Data","Fish_RMR_temp_dataset_jan2026.csv"),
+  ecology.data.readin = here("Data", "Kraskura_species_ecologies_jan2026.csv"),
+  onlyTop.above = TRUE,
+  save.FishBase.species.data = F,
+  calc_mass_specific = FALSE,
+  exclude_Wootton = TRUE)
+
+exists("data.amr") # saninty check to makes sure dataframes are not assigned to global env. 
+
+# ecol relev tamps
+data.amrER<-data.frame(data.list[5])
+data.rmrER<-data.frame(data.list[6])
+data.asER<-data.frame(data.list[11])
+data.fasER<-data.frame(data.list[12])
+
+# warm temps; AC = acute, AM = acclimated
+data.amrAC<-data.frame(data.list[1])
+data.rmrAC<-data.frame(data.list[2])
+data.amrAM<-data.frame(data.list[3])
+data.rmrAM<-data.frame(data.list[4])
+data.asAC<-data.frame(data.list[7])
+data.fasAC<-data.frame(data.list[8])
+data.asAM<-data.frame(data.list[9])
+data.fasAM<-data.frame(data.list[10])
+
+# all data together
+data.amr<-data.frame(data.list[13])
+data.rmr<-data.frame(data.list[14])
+dataMR<-data.frame(data.list[15])
+data.as<-data.frame(data.list[16])
+data.fas<-data.frame(data.list[17])
+
+# the warm ones; callin datasets zero because the names are used inside physo miixed model function
+data.amr.test<-rbind(data.amrAC, data.amrAM)
+data.rmr.test<-rbind(data.rmrAC, data.rmrAM)
+data.fas.test<-rbind(data.fasAC, data.fasAM)
+data.as.test<-rbind(data.asAC, data.asAM)
+data.fas.test<-data.fas.test[c(!is.na(data.fas.test$FAS) & is.finite(data.fas.test$FAS)) , ]
+data.as.test<-data.as.test[c(!is.na(data.as.test$lnAS) & is.finite(data.as.test$lnAS)) , ]
+
+# Get model data set specific phylogentics model matrixes
+data.rmrER<-droplevels(data.rmrER)
+data.rmr.test<-droplevels(data.rmr.test)
+data.amrER<-droplevels(data.amrER)
+data.amr.test<-droplevels(data.amr.test)
+data.asER<-droplevels(data.asER)
+data.as.test<-droplevels(data.as.test)
+data.fasER<-droplevels(data.fasER)
+data.fas.test<-droplevels(data.fas.test)
+
+# test categories
+data.fas$test_category3 <- "warm"
+data.fas[data.fas$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.as$test_category3 <- "warm"
+data.as[data.as$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.amr$test_category3 <- "warm"
+data.amr[data.amr$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.rmr$test_category3 <- "warm"
+data.rmr[data.rmr$test_category == "ecol_relev", "test_category3"] <- "optimal"
+
+cat(">>> Datasets witha all data are ready, all lifestages included")
+
+# 
 data.amr$chambSizeRatio<-data.amr$chamber_vol_L/(data.amr$BW_g/1000)
 data.rmr$chambSizeRatio<-data.rmr$chamber_vol_L/(data.rmr$BW_g/1000)
 
+summary(data.rmr$chambSizeRatio)
+summary(data.amr$chambSizeRatio)
 # Supplemental -----------
-## Experimental checks -------
-### type of MMR ------
+## Experimental checks
+### type of MMR 
 ggplot(data.amr.test, aes(x = lnBWg, y = lnAMR, color = MMR_method, alpha = tempTest))+
   geom_point(size = 1)+
   theme_classic()+

@@ -12,19 +12,126 @@
 # ********************************************
 
 # GLOBAL DATA (with mass specific values) ---------
-
-# 1) for phylo mixed models
-# source(here("R", "phylo_mixed_model.R")) # get final model outputs
+library(tictoc) # timing 
+library(ggh4x)
+library(tidyverse)
+library(dplyr)
+library(colorBlindness)
+library(patchwork)
+library(weathermetrics)
+library(lme4)
+library(emmeans)
+library(car)
+library(evolvability) # Almer function
+library(ape)
+library(rotl)
+library(ggtree)
+library(Matrix)
+# library(kableExtra)
+library(pryr)
+library(viridisLite)
+library(TDbook)
+library(ggimage)
+library(ggformat2) # from github curstom built to format figures. 
+library(weathermetrics)
+library(ggplot2)
+library(ggpubr)
+library(cowplot)
+library(forcats)
+library(patchwork)
+library(reshape2)
+library(emmeans)
+library(systemfonts)
+library(flextable)
 library(here)
-source(here("R/setup.R"))
-# 2) for non-phylo mixed models 
-# source("./R/nonPhylo_mixed_models.R")
-# 
+
+## Source file with all functions------------
+source(here("R", "get_phylo_mixed_model.R")) 
+# run all models, select best, plot data, run updated model with ecological grouping updates. several function within a file.
+
+# *********************************************************************************
+# set global setting for model tests
 options(dplyr.summarise.inform = FALSE)
-# *****************************************************************************
-# for emmeans library settings
+# for emmeans library
+# Ecologically Relevant conditions: 
 emm_options(pbkrtest.limit = 7000)
 emm_options(lmerTest.limit = 7000)
+
+# ************************************************************************************
+cols.amr<-c(colorBlindness::SteppedSequential5Steps[c(21, 22, 23, 24,  25)]) 
+cols.rmr<-c(colorBlindness::SteppedSequential5Steps[c(11, 12, 13,14,  15)]) # "#6B990F" "#A3CC51" "#E5FFB2"
+cols.fas<-c(colorBlindness::SteppedSequential5Steps[c(1,2, 3,4, 5)])  # "#990F0F" "#CC5151" "#FFB2B2"
+cols.as<-c(colorBlindness::SteppedSequential5Steps[c(16,17,  18, 19, 20)]) 
+
+cols<-c(cols.amr[1],cols.rmr[1],cols.amr[3],cols.rmr[3], cols.amr[5],cols.rmr[5], cols.as[2], cols.fas[2])
+        # AMR -rmr- AMR dark - rmr dark - light - as - fas
+
+# DATA SETS -------------------
+message("import datasets")
+
+data.list<-get_data_temp(
+  data.amr.readin = here("Data", "Fish_AMR_temp_dataset_jan2026.csv"),
+  data.rmr.readin = here("Data","Fish_RMR_temp_dataset_jan2026.csv"),
+  ecology.data.readin = here("Data", "Kraskura_species_ecologies_jan2026.csv"),
+  onlyTop.above = TRUE,
+  save.FishBase.species.data = F,
+  calc_mass_specific = FALSE,
+  exclude_Wootton = TRUE)
+
+exists("data.amr") # saninty check to makes sure dataframes are not assigned to global env. 
+
+# ecol relev tamps
+data.amrER<-data.frame(data.list[5])
+data.rmrER<-data.frame(data.list[6])
+data.asER<-data.frame(data.list[11])
+data.fasER<-data.frame(data.list[12])
+
+# warm temps; AC = acute, AM = acclimated
+data.amrAC<-data.frame(data.list[1])
+data.rmrAC<-data.frame(data.list[2])
+data.amrAM<-data.frame(data.list[3])
+data.rmrAM<-data.frame(data.list[4])
+data.asAC<-data.frame(data.list[7])
+data.fasAC<-data.frame(data.list[8])
+data.asAM<-data.frame(data.list[9])
+data.fasAM<-data.frame(data.list[10])
+
+# all data together
+data.amr<-data.frame(data.list[13])
+data.rmr<-data.frame(data.list[14])
+dataMR<-data.frame(data.list[15])
+data.as<-data.frame(data.list[16])
+data.fas<-data.frame(data.list[17])
+
+# the warm ones; callin datasets zero because the names are used inside physo miixed model function
+data.amr.test<-rbind(data.amrAC, data.amrAM)
+data.rmr.test<-rbind(data.rmrAC, data.rmrAM)
+data.fas.test<-rbind(data.fasAC, data.fasAM)
+data.as.test<-rbind(data.asAC, data.asAM)
+data.fas.test<-data.fas.test[c(!is.na(data.fas.test$FAS) & is.finite(data.fas.test$FAS)) , ]
+data.as.test<-data.as.test[c(!is.na(data.as.test$lnAS) & is.finite(data.as.test$lnAS)) , ]
+
+# Get model data set specific phylogentics model matrixes
+data.rmrER<-droplevels(data.rmrER)
+data.rmr.test<-droplevels(data.rmr.test)
+data.amrER<-droplevels(data.amrER)
+data.amr.test<-droplevels(data.amr.test)
+data.asER<-droplevels(data.asER)
+data.as.test<-droplevels(data.as.test)
+data.fasER<-droplevels(data.fasER)
+data.fas.test<-droplevels(data.fas.test)
+
+# test categories
+data.fas$test_category3 <- "warm"
+data.fas[data.fas$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.as$test_category3 <- "warm"
+data.as[data.as$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.amr$test_category3 <- "warm"
+data.amr[data.amr$test_category == "ecol_relev", "test_category3"] <- "optimal"
+data.rmr$test_category3 <- "warm"
+data.rmr[data.rmr$test_category == "ecol_relev", "test_category3"] <- "optimal"
+
+cat(">>> Datasets witha all data are ready, all lifestages included")
 
 
 # *********************************************************************************
@@ -295,9 +402,9 @@ ecology_data.AMRd_w<-ecology_data.AMRd[ecology_data.AMRd$test_category3 == "warm
 ecology_data.FASd_w<-ecology_data.FASd[ecology_data.FASd$test_category3 == "warm", ]
 
 # ecol relev only:
-ecology_data.RMRd_er<-ecology_data.RMRd[ecology_data.RMRd$test_category3 == "ecol_relev", ]
-ecology_data.AMRd_er<-ecology_data.AMRd[ecology_data.AMRd$test_category3 == "ecol_relev", ]
-ecology_data.FASd_er<-ecology_data.FASd[ecology_data.FASd$test_category3 == "ecol_relev", ]
+ecology_data.RMRd_er<-ecology_data.RMRd[ecology_data.RMRd$test_category3 == "optimal", ]
+ecology_data.AMRd_er<-ecology_data.AMRd[ecology_data.AMRd$test_category3 == "optimal", ]
+ecology_data.FASd_er<-ecology_data.FASd[ecology_data.FASd$test_category3 == "optimal", ]
 
 order.ecology_data.FASd.W <- order.ecology_data.FASd[grepl("warm", as.character(order.ecology_data.FASd$ecol_temp_cat)), ]
 order.ecology_data.FASd.ER <- order.ecology_data.FASd[grepl("optimal", as.character(order.ecology_data.FASd$ecol_temp_cat)), ]
@@ -419,7 +526,6 @@ summarise_speciesLM.FAS<-function(lmdata.FAS, summarylm.FAS){
   return(FAS_sum)
 }
 
-
 lmdata.FAS <- data.fas %>%
   dplyr:::group_by(species, test_category3) %>%
   group_modify(~ broom::tidy(lm(lnFAS ~ lnBWg , data = .x), conf.int = TRUE))%>% 
@@ -515,7 +621,7 @@ rmr.WARM.ER.good<-
   
   annotate("text", x = 0.135, y = 23, color = "black", label = expression(italic(b)[RMR]~italic(b)[MMR]),
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
-  annotate("text", x = 1.05, y = 23, color = "black", label = expression(samples~sizes~(data*(species))),
+  annotate("text", x = 1.05, y = 23, color = "black", label = expression(n~(data*(species))),
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
   annotate("text", x = 0.45, y = 22, color = "black", label = 'OPTIMAL',
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
@@ -549,14 +655,14 @@ rmr.WARM.ER.good<-
         axis.text.x = element_text(family="Helvetica",  color = "black", size = 12),
         axis.title.y = element_blank(),
         legend.position = "none",
-        axis.line.y=element_line(colour = 'black',size=0.5),
-        axis.line.x=element_line(colour = 'black',size=0.5),
-        axis.ticks.y=element_line(size=0.5),
-        axis.ticks.x=element_line(size=0),
+        axis.line.y=element_line(colour = 'black',linewidth=0.5),
+        axis.line.x=element_line(colour = 'black',linewidth=0.5),
+        axis.ticks.y=element_line(linewidth=0.5),
+        axis.ticks.x=element_line(linewidth=0),
         text=element_text(size=12,  family="Helvetica"), 
         plot.margin = margin(2, 1, 1, 1, "cm"))+
   coord_cartesian(clip = "off")
-rmr.WARM.ER.good
+# rmr.WARM.ER.good
 
 
 fas.WARM.ER.good<-ggplot(data=ecology_data.FASd.g,
@@ -587,7 +693,7 @@ fas.WARM.ER.good<-ggplot(data=ecology_data.FASd.g,
                  alpha = 1)+
   annotate("text", x = -0.43, y = 23, color = "black", label = expression(italic(b)[FAS]),
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
-  annotate("text", x = 0.023, y = 23, color = "black", label = expression(samples~sizes~(data*(species))),
+  annotate("text", x = 0.023, y = 23, color = "black", label = expression(n~(data*(species))),
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
   geom_vline(xintercept = 0, lty = "dotted", color="grey50")+
   geom_linerange(aes(xmin = slope.ciL, xmax = slope.ciH), alpha = 1)+
@@ -611,7 +717,7 @@ fas.WARM.ER.good<-ggplot(data=ecology_data.FASd.g,
         text=element_text(size=12,  family="Helvetica"),
         plot.margin = margin(2, 1, 1, 0, "cm"))+
   coord_cartesian(clip = "off")
-fas.WARM.ER.good
+# fas.WARM.ER.good
 
 cowplot::plot_grid(rmr.WARM.ER.good,
                    fas.WARM.ER.good,

@@ -6,6 +6,8 @@ date: "`r Sys.Date()`"
 output: 
   officedown::rdocx_document:
     number_sections: false
+    toc: true
+    toc_depth: 4
 editor_options:
   chunk_output_type: console
 ---
@@ -15,6 +17,38 @@ library(knitr)
 library(here)
 library(officedown)
 library(officer)
+library(tidyverse)
+library(tictoc) # timing 
+library(ggh4x)
+library(tidyverse)
+library(dplyr)
+library(colorBlindness)
+library(patchwork)
+library(weathermetrics)
+library(lme4)
+library(emmeans)
+library(car)
+library(evolvability) # Almer function
+library(ape)
+library(rotl)
+library(ggtree)
+library(Matrix)
+library(pryr)
+library(viridisLite)
+library(TDbook)
+library(ggimage)
+library(ggformat2) # from github curstom built to format figures. 
+library(weathermetrics)
+library(ggplot2)
+library(ggpubr)
+library(cowplot)
+library(forcats)
+library(patchwork)
+library(reshape2)
+library(emmeans)
+library(systemfonts)
+library(flextable)
+library(here)
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE,
                       error = FALSE, message = FALSE)
 # here()
@@ -22,61 +56,72 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE,
 
 
 ```{r Prep runs, include = F, warning=FALSE}
-# source(here("R", "phylo_mixed_model.R")) # phylo models, make sure the in this code 'run' is set to 'FALSE'. if TRUE all analyssis will be rerun which takes a few hours 
-# source(here("R", "species_ecologies_level_model_plots.R")) # speices specific analysis and runs 
-# source(here("R", "phylo_model_update_wEcol.R")) # common color schemes
-sys.source(here("R", "get_data_temp.R"), envir = knitr::knit_global()) # common color schemes
-sys.source(here("R", "colors_themes.R"), envir = knitr::knit_global())
+## Source file with all functions
+source(here("R", "get_phylo_mixed_model.R")) 
+# run all models, select best, plot data, run updated model with ecological grouping updates. several function within a file.
+# ************************************************************************************
+cols.amr<-c(colorBlindness::SteppedSequential5Steps[c(21, 22, 23, 24,  25)]) 
+cols.rmr<-c(colorBlindness::SteppedSequential5Steps[c(11, 12, 13,14,  15)]) # "#6B990F" "#A3CC51" "#E5FFB2"
+cols.fas<-c(colorBlindness::SteppedSequential5Steps[c(1,2, 3,4, 5)])  # "#990F0F" "#CC5151" "#FFB2B2"
+cols.as<-c(colorBlindness::SteppedSequential5Steps[c(16,17,  18, 19, 20)]) 
 
-print(cols.amr)
+cols<-c(cols.amr[1],cols.rmr[1],cols.amr[3],cols.rmr[3], cols.amr[5],cols.rmr[5], cols.as[2], cols.fas[2])
+        # AMR -rmr- AMR dark - rmr dark - light - as - fas
 
-# function to order model selection based on the lowest BIC score
-BICdelta<-function(BICtable){
-  BIC.t <- BICtable [order(BICtable$BIC), ]
-  BIC.t$delta <- round(abs(BIC.t$BIC[1] -  BIC.t$BIC), 5)
-  return(BIC.t)
-}
+# DATA SETS -------------------
+message("import datasets")
 
-# Data for models ------
-data.list<-get_data_temp(data.amr = here("Data", "Fish_AMR_temp_dataset_mar2022.csv"),
-                         data.rmr = here("Data","Fish_RMR_temp_dataset_mar2022.csv"),
-                         ecology.data = here("Data", "Kraskura_species_ecologies_mar2022.csv"),
-                         onlyTop.above = TRUE, save.FishBase.species.data = F,
-                         calc_mass_specific = FALSE)
+data.list<-get_data_temp(
+  data.amr.readin = here("Data", "Fish_AMR_temp_dataset_jan2026.csv"),
+  data.rmr.readin = here("Data","Fish_RMR_temp_dataset_jan2026.csv"),
+  ecology.data.readin = here("Data", "Kraskura_species_ecologies_jan2026.csv"),
+  onlyTop.above = TRUE,
+  save.FishBase.species.data = F,
+  calc_mass_specific = FALSE,
+  exclude_Wootton = TRUE)
 
-# data.list.NO.SALMON<-get_data_temp(data.amr = here("Data", "Fish_AMR_temp_dataset_mar2022.csv"),
-#                                  data.rmr = here("Data","Fish_RMR_temp_dataset_mar2022.csv"),
-#                                  ecology.data = here("Data", "Kraskura_species_ecologies_mar2022.csv"),
-#                                  onlyTop.above = TRUE, save.FishBase.species.data = F,
-#                                  calc_mass_specific = FALSE)
+exists("data.amr") # saninty check to makes sure dataframes are not assigned to global env. 
 
+# ecol relev tamps
+data.amrER<-data.frame(data.list[5])
+data.rmrER<-data.frame(data.list[6])
+data.asER<-data.frame(data.list[11])
+data.fasER<-data.frame(data.list[12])
+
+# warm temps; AC = acute, AM = acclimated
 data.amrAC<-data.frame(data.list[1])
 data.rmrAC<-data.frame(data.list[2])
 data.amrAM<-data.frame(data.list[3])
 data.rmrAM<-data.frame(data.list[4])
-data.amrER<-data.frame(data.list[5])
-data.rmrER<-data.frame(data.list[6])
-
 data.asAC<-data.frame(data.list[7])
 data.fasAC<-data.frame(data.list[8])
 data.asAM<-data.frame(data.list[9])
 data.fasAM<-data.frame(data.list[10])
-data.asER<-data.frame(data.list[11])
-data.fasER<-data.frame(data.list[12])
 
+# all data together
 data.amr<-data.frame(data.list[13])
 data.rmr<-data.frame(data.list[14])
 dataMR<-data.frame(data.list[15])
 data.as<-data.frame(data.list[16])
 data.fas<-data.frame(data.list[17])
 
-# the warm ones
+# the warm ones; callin datasets zero because the names are used inside physo miixed model function
 data.amr.test<-rbind(data.amrAC, data.amrAM)
 data.rmr.test<-rbind(data.rmrAC, data.rmrAM)
 data.fas.test<-rbind(data.fasAC, data.fasAM)
 data.as.test<-rbind(data.asAC, data.asAM)
 data.fas.test<-data.fas.test[c(!is.na(data.fas.test$FAS) & is.finite(data.fas.test$FAS)) , ]
 data.as.test<-data.as.test[c(!is.na(data.as.test$lnAS) & is.finite(data.as.test$lnAS)) , ]
+
+# Get model data set specific phylogentics model matrixes
+data.rmrER<-droplevels(data.rmrER)
+data.rmr.test<-droplevels(data.rmr.test)
+data.amrER<-droplevels(data.amrER)
+data.amr.test<-droplevels(data.amr.test)
+data.asER<-droplevels(data.asER)
+data.as.test<-droplevels(data.as.test)
+data.fasER<-droplevels(data.fasER)
+data.fas.test<-droplevels(data.fas.test)
 
 # test categories
 data.fas$test_category3 <- "warm"
@@ -87,19 +132,8 @@ data.amr$test_category3 <- "warm"
 data.amr[data.amr$test_category == "ecol_relev", "test_category3"] <- "optimal"
 data.rmr$test_category3 <- "warm"
 data.rmr[data.rmr$test_category == "ecol_relev", "test_category3"] <- "optimal"
- 
-# Phylo models -----------------
-# get phylo trees:
-data.rmrER<-droplevels(data.rmrER)
-data.rmr.test<-droplevels(data.rmr.test)
-data.amrER<-droplevels(data.amrER)
-data.amr.test<-droplevels(data.amr.test)
-data.asER<-droplevels(data.asER)
-data.as.test<-droplevels(data.as.test)
-data.fasER<-droplevels(data.fasER)
-data.fas.test<-droplevels(data.fas.test)
 
-
+cat(">>> Datasets witha all data are ready, all lifestages included")
 
 ```
 # General summary statistics
@@ -141,19 +175,13 @@ message(paste("The percent of polar fish that had FAS below 3:",
 
 - model sets: Different random effects 
 
-  * set 0: `(1|species)` = species intercept only
-  * set 1: `(1|species) + (1|species:trial)` = species, and nested trial under species intercepts
   * set 2: `(1|species) +(0 + tempTest|species) + (1|species:trial)` = species intercept, nested trial under species intercept, species-specific response to temperature (i.e. different size individuals of the same species, would have different sensitivity to temperature). 
-  * set 3: _(models lead to singular fits, these were no longer considered)_
   * set 4: `(1|species) +(0 + lnBWg|species) + (1|species:trial)` = species intercept, nested trial under species intercept, species-specific mass scaling slopes 
   * set 5: `(1|species) +(0 + lnBWg|species:trial) + (1|species:trial)` = species intercept, nested trial under species intercept, nested species:trial mass scaling slopes
   
 - model types: 
-
   + mass and temperature affect metabolism independently 
   + (`int`) mass and temperature affect metabolism in interaction 
-  + (`.POLY`) nonlinear polynomial temperature response 
-  + (`intPOLY`) nonlinear polynomial temperature response that changes with body mass (interaction nonlinear temp X mass)
 
 # Abbreviations:
 
@@ -192,10 +220,12 @@ set_flextable_defaults(
 
 ## BIC model selection tables 
 
+### Ontogenic scaling (adults and juveniles together) (TABLES 1 - 8)
+
 #### Table S1. Selection of best fit scaling relationship of RMR in optimal temperatures using BIC comparison. 
 ```{r, echo = FALSE}
 
-read.csv(here("Data_exports", "RMR_BIC.csv")) %>%
+read.csv(here("Data_exports", "BICs", "RMR_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
@@ -206,7 +236,7 @@ read.csv(here("Data_exports", "RMR_BIC.csv")) %>%
 #### Table S2. Selection of best fit scaling relationship of RMR in warm temperatures using BIC comparison.
 ```{r, echo = FALSE}
 
-read.csv(here("Data_exports", "RMR_W_BIC.csv")) %>%
+read.csv(here("Data_exports", "BICs", "RMR_W_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
@@ -217,7 +247,7 @@ read.csv(here("Data_exports", "RMR_W_BIC.csv")) %>%
 
 #### Table S3. Selection of best fit scaling relationship of MMR in optimal temperatures using BIC comparison.
 ```{r, echo = FALSE}
-read.csv(here("Data_exports", "MMR_BIC.csv")) %>%
+read.csv(here("Data_exports", "BICs", "MMR_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
@@ -228,7 +258,7 @@ read.csv(here("Data_exports", "MMR_BIC.csv")) %>%
 
 #### Table S4. Selection of best fit scaling relationship of MMR in warm temperatures using BIC comparison.
 ```{r, echo = FALSE}
-read.csv(here("Data_exports", "MMR_W_BIC.csv")) %>%
+read.csv(here("Data_exports", "BICs", "MMR_W_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
@@ -240,7 +270,7 @@ read.csv(here("Data_exports", "MMR_W_BIC.csv")) %>%
 
 #### Table S5. Selection of best fit scaling relationship of AS in optimal temperatures using BIC comparison.
 ```{r, echo = FALSE}
-read.csv(here("Data_exports", "AS_BIC.csv")) %>%
+read.csv(here("Data_exports", "BICs", "AS_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
@@ -251,7 +281,7 @@ read.csv(here("Data_exports", "AS_BIC.csv")) %>%
 
 #### Table S6. Selection of best fit scaling relationship of AS in warm temperatures using BIC comparison.
 ```{r, echo = FALSE}
-read.csv(here("Data_exports", "AS_W_BIC.csv")) %>%
+read.csv(here("Data_exports", "BICs", "AS_W_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
@@ -263,7 +293,7 @@ read.csv(here("Data_exports", "AS_W_BIC.csv")) %>%
 #### Table S7. Selection of best fit scaling relationship of FAS in optimal temperatures using BIC comparison.
 ```{r, echo = FALSE}
 
-read.csv(here("Data_exports", "FAS_BIC.csv")) %>%
+read.csv(here("Data_exports", "BICs", "FAS_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
@@ -273,7 +303,7 @@ read.csv(here("Data_exports", "FAS_BIC.csv")) %>%
 
 #### Table S8. Selection of best fit scaling relationship of FAS in warm temperatures using BIC comparison.
 ```{r, echo = FALSE}
-read.csv(here("Data_exports", "FAS_W_BIC.csv")) %>%
+read.csv(here("Data_exports", "BICs", "FAS_W_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
@@ -282,8 +312,201 @@ read.csv(here("Data_exports", "FAS_W_BIC.csv")) %>%
 
 ```
 
-## Summary of the data 
 
+## Static scaling: juveniles only  (TABLES 1.j - 8.j)
+#### Table S1.j. Selection of best fit scaling relationship of RMR in optimal temperatures using BIC comparison. 
+```{r, echo = FALSE}
+
+read.csv(here("Data_exports", "BICs", "RMR_BIC_juvenile.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines( "All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+```
+
+#### Table S2.j. Selection of best fit scaling relationship of RMR in warm temperatures using BIC comparison.
+```{r, echo = FALSE}
+
+read.csv(here("Data_exports", "BICs", "RMR_W_BIC_juvenile.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines( "All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+
+```
+
+#### Table S3.j. Selection of best fit scaling relationship of MMR in optimal temperatures using BIC comparison.
+```{r, echo = FALSE}
+read.csv(here("Data_exports", "BICs", "MMR_BIC_juvenile.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+
+```
+
+#### Table S4.j. Selection of best fit scaling relationship of MMR in warm temperatures using BIC comparison.
+```{r, echo = FALSE}
+read.csv(here("Data_exports", "BICs", "MMR_W_BIC_juvenile.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+
+
+```
+
+#### Table S5.j. Selection of best fit scaling relationship of AS in optimal temperatures using BIC comparison.
+```{r, echo = FALSE}
+read.csv(here("Data_exports", "BICs", "AS_BIC_juvenile.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+
+```
+
+#### Table S6.j. Selection of best fit scaling relationship of AS in warm temperatures using BIC comparison.
+```{r, echo = FALSE}
+read.csv(here("Data_exports", "BICs", "AS_W_BIC_juvenile.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+
+```
+
+#### Table S7.j. Selection of best fit scaling relationship of FAS in optimal temperatures using BIC comparison.
+```{r, echo = FALSE}
+
+read.csv(here("Data_exports", "BICs", "FAS_BIC_juvenile.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+```
+
+#### Table S8.j. Selection of best fit scaling relationship of FAS in warm temperatures using BIC comparison.
+```{r, echo = FALSE}
+read.csv(here("Data_exports", "BICs", "FAS_W_BIC_juvenile.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+
+```
+
+
+## Static scaling: adults only  (TABLES 1.a - 8.a)
+#### Table S1.a. Selection of best fit scaling relationship of RMR in optimal temperatures using BIC comparison. 
+```{r, echo = FALSE}
+
+read.csv(here("Data_exports", "BICs", "RMR_BIC_adult.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines( "All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+```
+
+#### Table S2.a. Selection of best fit scaling relationship of RMR in warm temperatures using BIC comparison.
+```{r, echo = FALSE}
+
+read.csv(here("Data_exports", "BICs", "RMR_W_BIC_adult.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines( "All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+
+```
+
+#### Table S3.a. Selection of best fit scaling relationship of MMR in optimal temperatures using BIC comparison.
+```{r, echo = FALSE}
+read.csv(here("Data_exports", "BICs", "MMR_BIC_adult.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+
+```
+
+#### Table S4.a. Selection of best fit scaling relationship of MMR in warm temperatures using BIC comparison.
+```{r, echo = FALSE}
+read.csv(here("Data_exports", "BICs", "MMR_W_BIC_adult.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+
+
+```
+
+#### Table S5.a. Selection of best fit scaling relationship of AS in optimal temperatures using BIC comparison.
+```{r, echo = FALSE}
+read.csv(here("Data_exports", "BICs", "AS_BIC_adult.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+
+```
+
+#### Table S6.a. Selection of best fit scaling relationship of AS in warm temperatures using BIC comparison.
+```{r, echo = FALSE}
+read.csv(here("Data_exports", "BICs", "AS_W_BIC_adult.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+
+```
+
+#### Table S7.a. Selection of best fit scaling relationship of FAS in optimal temperatures using BIC comparison.
+```{r, echo = FALSE}
+
+read.csv(here("Data_exports", "BICs", "FAS_BIC_adult.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+```
+
+#### Table S8.a. Selection of best fit scaling relationship of FAS in warm temperatures using BIC comparison.
+```{r, echo = FALSE}
+read.csv(here("Data_exports", "BICs", "FAS_W_BIC_adult.csv")) %>%
+  dplyr::rename("Model ID" = X) %>%
+  dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
+  flextable() %>% 
+  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  color(part = "footer", color = "#666666")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+## Summary of the data 
 #### Table S9. Summary of sample sizes, body mass, and temperature ranges in all collated data. 
 ```{r min max data, echo = F}
 
@@ -359,6 +582,7 @@ flextable()
 
 #### Table S10. Factorial aerobic scopes in fish with different ecologies and morphologies. 
 ```{r}
+# herehere
 # table10<-data.fas %>% 
 #   group_by(test_category3) %>% 
 #   summarise(min_fas = min(FAS), max_fas = max(FAS), mean_fas = mean(FAS), n = length(FAS)) %>% 
@@ -380,11 +604,11 @@ data.fas %>%
          "FAS (max)" = max_fas,
          "FAS (mean)" = mean_fas) %>% 
   flextable() %>% 
-  bg(i = c(3,4,
+  bg(i = c(1,2,  3,4,  5,6,  
            9,10,  11,12,  13,14,
-           15,16, 17,18, 21, 22,
-           27,28,  31,32), bg = "#D3D3D3") %>% 
-  add_footer_lines("Colored grey are subcategories of fish which had > 100 datapoints and the body size ranges spanned at least one order of magnitude in both optimal and warm temperatures. These were used for scaling slope comparisons.") %>% 
+           15,16, 17,18, 19,  21, 22, 23, 25,
+           27,28,  31,32), bg = "#D3D3D3") %>%
+  add_footer_lines("Colored grey are subcategories of fish which had > 100 datapoints and the body size ranges spanned at least one order of magnitude in both optimal and warm temperatures.") %>% 
   color(part = "footer", color = "#666666")
   
 
@@ -419,11 +643,11 @@ data.rmr %>%
           `Temperature (ºC; mean (min, max))`) %>% 
   rename("Temperature category" = test_category3) %>% 
   flextable()%>% 
-  bg(i = c(5,6,
-           11,12,  13,14,  15,16,
-           17,18, 19,20,  23,24,
-           29,30,  33,34), bg = "#D3D3D3") %>% 
-  add_footer_lines("Data were not available for dorsoventrally flattened and eel-like fish in warm temperatures. Colored grey are subcategories of fish which had > 100 datapoints and the body size ranges spanned at least one order of magnitude in both optimal and warm temperatures. These were used for scaling slope comparisons.") %>% 
+  bg(i = c( 2,  3,4,  5, 6, 7, 8, 
+           9,10,  11,12,  13,14, 
+           15,16, 17,18,  19,20,  22, 23, 24,  26,  
+           28,29, 30,  32,33), bg = "#D3D3D3")%>%
+  add_footer_lines("Colored grey are subcategories of fish which had > 100 datapoints and the body size ranges spanned at least one order of magnitude in both optimal and warm temperatures.") %>% 
   color( part = "footer", color = "#666666")
 
 
@@ -458,11 +682,11 @@ data.amr %>%
           `Temperature (ºC; mean (min, max))`) %>% 
   rename("Temperature category" = test_category3) %>% 
   flextable()%>% 
-  bg(i = c(3,4,
-           9,10,  11,12,  13,14,
-           15,16, 17,18, 21, 22,
-           27,28,  31,32), bg = "#D3D3D3")%>% 
-  add_footer_lines("Colored grey are subcategories of fish which had > 100 datapoints and the body size ranges spanned at least one order of magnitude in both optimal and warm temperatures. These were used for scaling slope comparisons.") %>% 
+  bg(i = c(1,2,  3,4,  5, 6, 
+           9,10,  11,12,  13,14, 
+           15,16, 17,18,  19,  21, 22,  23,  25,  
+           27,28,  31,32), bg = "#D3D3D3")%>%
+  add_footer_lines("Colored grey are subcategories of fish which had > 100 datapoints and the body size ranges spanned at least one order of magnitude in both optimal and warm temperatures.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
@@ -496,54 +720,205 @@ data.fas %>%
           `Temperature (ºC; mean (min, max))`) %>% 
   rename("Temperature category" = test_category3) %>% 
   flextable()%>% 
-  bg(i = c(3,4,
+  bg(i = c(1,2,  3,4,  5,6,  
            9,10,  11,12,  13,14,
-           15,16, 17,18, 21, 22,
-           27,28,  31,32), bg = "#D3D3D3")%>% 
-  add_footer_lines("Colored grey are subcategories of fish which had > 100 datapoints and the body size ranges spanned at least one order of magnitude in both optimal and warm temperatures. These were used for scaling slope comparisons.") %>% 
+           15,16, 17,18, 19,  21, 22, 23, 25,
+           27,28,  31,32), bg = "#D3D3D3") %>%
+  add_footer_lines("Colored grey are subcategories of fish which had > 100 datapoints and the body size ranges spanned at least one order of magnitude in both optimal and warm temperatures. ") %>% 
   color(part = "footer", color = "#666666")
 
 ```
 
 
-## Scaling parameters 
+## Best model outputs and ANOVA results for statistical significance
 
 <!-- ### Global models -->
-#### Table S14. Parameters of global scaling relationships in fish.
+### Ontogenic scaling 
+#### MMR optimal temperatures
+```{r}
+report_lines <- readLines(here("Data_exports","models", "MMR_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### RMR optimal temperatures
+```{r}
+report_lines <- readLines(here("Data_exports","models", "RMR_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### AS optimal temperatures
+```{r}
+report_lines <- readLines(here("Data_exports","models", "AS_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### FAS optimal temperatures
+```{r}
+report_lines <- readLines(here("Data_exports","models", "FAS_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### MMR warm temperatures
+```{r}
+report_lines <- readLines(here("Data_exports","models", "MMR_W_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### RMR warm temperatures
+```{r}
+report_lines <- readLines(here("Data_exports","models", "RMR_W_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### AS warm temperatures
+```{r}
+report_lines <- readLines(here("Data_exports","models", "AS_W_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### FAS warm temperatures
+```{r}
+report_lines <- readLines(here("Data_exports","models", "FAS_W_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+<br>
+### Static scaling - juveniles only
+#### MMR optimal temperatures, juveniles
+```{r}
+report_lines <- readLines(here("Data_exports","juvenilemodels", "MMR_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### RMR optimal temperatures, juveniles
+```{r}
+report_lines <- readLines(here("Data_exports","juvenilemodels", "RMR_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### AS optimal temperatures, juveniles
+```{r}
+report_lines <- readLines(here("Data_exports","juvenilemodels", "AS_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### FAS optimal temperatures, juveniles
+```{r}
+report_lines <- readLines(here("Data_exports","juvenilemodels", "FAS_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### MMR warm temperatures, juveniles
+```{r}
+report_lines <- readLines(here("Data_exports","juvenilemodels", "MMR_W_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### RMR warm temperatures, juveniles
+```{r}
+report_lines <- readLines(here("Data_exports","juvenilemodels", "RMR_W_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### AS warm temperatures, juveniles
+```{r}
+report_lines <- readLines(here("Data_exports","juvenilemodels", "AS_W_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### FAS warm temperatures, juveniles
+```{r}
+report_lines <- readLines(here("Data_exports","juvenilemodels", "FAS_W_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+
+<br>
+### Static scaling - adults only
+#### MMR optimal temperatures, adults
+```{r}
+report_lines <- readLines(here("Data_exports","adultmodels", "MMR_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### RMR optimal temperatures, adults
+```{r}
+report_lines <- readLines(here("Data_exports","adultmodels", "RMR_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### AS optimal temperatures, adults
+```{r}
+report_lines <- readLines(here("Data_exports","adultmodels", "AS_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### FAS optimal temperatures, adults
+```{r}
+report_lines <- readLines(here("Data_exports","adultmodels", "FAS_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### MMR warm temperatures, adults
+```{r}
+report_lines <- readLines(here("Data_exports","adultmodels", "MMR_W_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### RMR warm temperatures, adults
+```{r}
+report_lines <- readLines(here("Data_exports","adultmodels", "RMR_W_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### AS warm temperatures, adults
+```{r}
+report_lines <- readLines(here("Data_exports","adultmodels", "AS_W_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+#### FAS warm temperatures, adults
+```{r}
+report_lines <- readLines(here("Data_exports","adultmodels", "FAS_W_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+```
+
+<!-- #### Table S14. Parameters of global scaling relationships in fish.  -->
 ```{r scaling parameters, echo = F}
 
-read.csv(here("./Data_exports/Phylo/scaling_parameters.csv")) %>% 
-  dplyr::mutate(lnBWg = round(lnBWg, 3)) %>%
-  rename("MR metric" = performance,
-         "Temperature Category" = temp_categ, 
-         "Scaling slope" = lnBWg, 
-         "Scaling intercept" = X.Intercept.,
-         "Temperature" = tempTest) %>% 
-  dplyr::mutate(`Temperature Category`= str_replace(`Temperature Category`,
-                                                    "er", "optimal")) %>% 
-
-  flextable()
+# read.csv(here("./Data_exports/models/scaling_parameters.csv")) %>% 
+#   dplyr::mutate(lnBWg = round(lnBWg, 3)) %>%
+#   rename("MR metric" = performance,
+#          "Temperature Category" = temp_categ, 
+#          "Scaling slope" = lnBWg, 
+#          "Scaling intercept" = X.Intercept.,
+#          "Temperature" = tempTest) %>% 
+#   dplyr::mutate(`Temperature Category`= str_replace(`Temperature Category`,
+#                                                     "er", "optimal")) %>% 
+# 
+#   flextable()
 
 
 ```
+### Static scaling 
 
 #### Table S15. Confidence intervals for each model parameter.
 ```{r confidence intervals1}
-
-read.csv(here("./Data_exports/Phylo/Table_CIsummary.csv")) %>% 
-  select(MR, temp_cat, var, X5.., X95..) %>% 
-  dplyr::mutate(across(X5..:X95.., ~ round(.x, 3))) %>% 
-  rename("CI 5%" = X5..,
-         "CI 95%" = X95..,
-         "Parameter" = var,
-         "MR metric" = MR,
-         "Temperature category" = temp_cat) %>% 
-  filter(!grepl(pattern = ".sig", Parameter)) %>%
-  dplyr::mutate(`Temperature category`= str_replace(`Temperature category`,
-                                                    "ER", "optimal"),
-                `Temperature category`= str_replace(`Temperature category`,
-                                                    "W", "warm")) %>% 
-  flextable()
+# herehere
+# read.csv(here("./Data_exports/Ecologies/Table_CIsummary.csv")) %>% 
+#   select(MR, temp_cat, var, X25.., X95..) %>% 
+#   dplyr::mutate(across(X5..:X95.., ~ round(.x, 3))) %>% 
+#   rename("CI 5%" = X5..,
+#          "CI 95%" = X95..,
+#          "Parameter" = var,
+#          "MR metric" = MR,
+#          "Temperature category" = temp_cat) %>% 
+#   filter(!grepl(pattern = ".sig", Parameter)) %>%
+#   dplyr::mutate(`Temperature category`= str_replace(`Temperature category`,
+#                                                     "ER", "optimal"),
+#                 `Temperature category`= str_replace(`Temperature category`,
+#                                                     "W", "warm")) %>% 
+#   flextable()
 
 
 ```
@@ -560,13 +935,14 @@ read.csv(here("Data_exports/Ecologies/ecologies_MMR.csv")) %>%
          "Slope CI 2.5%" = slope.ciL,
          "Slope CI 97.5%" = slope.ciH,
          "Intercept (a)" = intercept) %>% 
-  flextable()%>% 
-  bg(i = c(3,4,
-           9,10,  11,12,  13,14,
-           15,16, 17,18, 21, 22,
-           27,28,  31,32), bg = "#D3D3D3")%>% 
-  add_footer_lines("Colored grey are subcategories of fish which had > 100 datapoints and the body size ranges spanned at least one order of magnitude in both optimal and warm temperatures. These were used for scaling slope comparisons.") %>% 
-  color(part = "footer", color = "#666666")
+  flextable()
+
+#   bg(i = c(3,4,
+#            9,10,  11,12,  13,14,
+#            15,16, 17,18, 21, 22,
+#            27,28,  31,32), bg = "#D3D3D3")%>%
+#   add_footer_lines("Colored grey are subcategories of fish which had > 100 datapoints and the body size ranges spanned at least one order of magnitude in both optimal and warm temperatures. These were used for scaling slope comparisons.") %>% 
+#   color(part = "footer", color = "#666666")
 ```
 
 #### Table S17. RMR scaling relationship estimates and 95% confidence interval in fish sharing similar ecologies and morphologies. The temperature and body mass ranges, and n-values for each category are in Table S11.
@@ -580,13 +956,13 @@ table.rmr2 <- read.csv(here("Data_exports/Ecologies/ecologies_RMR.csv")) %>%
          "Slope CI 2.5%" = slope.ciL,
          "Slope CI 97.5%" = slope.ciH,
          "Intercept (a)" = intercept) %>% 
-  flextable()%>% 
-  bg(i = c(5,6,
-           11,12,  13,14,  15,16,
-           17,18, 19,20,  23,24,
-           29,30,  33,34), bg = "#D3D3D3")%>% 
-  add_footer_lines("Colored grey are subcategories of fish which had > 100 datapoints and the body size ranges spanned at least one order of magnitude in both optimal and warm temperatures. These were used for scaling slope comparisons.") %>% 
-  color(part = "footer", color = "#666666")
+  flextable()
+  # bg(i = c(5,6,
+  #          11,12,  13,14,  15,16,
+  #          17,18, 19,20,  23,24,
+  #          29,30,  33,34), bg = "#D3D3D3")%>% 
+  # add_footer_lines("Colored grey are subcategories of fish which had > 100 datapoints and the body size ranges spanned at least one order of magnitude in both optimal and warm temperatures. These were used for scaling slope comparisons.") %>% 
+  # color(part = "footer", color = "#666666")
 
 # table1 <- theme_booktabs(table1)
 table.rmr2 <- add_footer_lines(table.rmr2, "Data were not available for dorsoventrally flattened and eel-like fish in warm temperatures")
@@ -626,10 +1002,10 @@ read.csv(here("Data_exports/Ecologies/ecologies_FAS.csv")) %>%
          "Slope CI 97.5%" = slope.ciH,
          "Intercept (a)" = intercept) %>% 
   flextable()%>% 
-  bg(i = c(3,4,
-           9,10,  11,12,  13,14,
-           15,16, 17,18, 21, 22,
-           27,28,  31,32), bg = "#D3D3D3")%>% 
+  # bg(i = c(3,4,
+  #          9,10,  11,12,  13,14,
+  #          15,16, 17,18, 21, 22,
+  #          27,28,  31,32), bg = "#D3D3D3")%>% 
   add_footer_lines("Colored grey are subcategories of fish which had > 100 datapoints and the body size ranges spanned at least one order of magnitude in both optimal and warm temperatures. These were used for scaling slope comparisons.") %>% 
   color(part = "footer", color = "#666666")
 
@@ -678,10 +1054,6 @@ sum4<-data.as %>%
 
 <br>
 
-# Statistics tables 
-
-<br>
-
 # Figures 
 
 ## Data coverage and patterns
@@ -713,81 +1085,77 @@ knitr::include_graphics((here("Figures/suppl_MMRvsAS.png") ))
 ```
 #### Figure S5. Correlation between maximum metabolic rate (MMR) and aerobic scope (AS). The panels are divided by fish body size to improve visual quality. The dots on in diamond are _Somniosus microcephalus_, the largest species in the dataset.
 
-```{r, out.width  = 0.9, out.height = 1}
-knitr::include_graphics((here("Figures", "Suppl_Figure_t.png") ))
-```
-#### Figure S6. Metabolic rate measurements (log scale) in response to temperature. (A) Maximum metabolic rates (MMR), (B) Resting metabolic rates (RMR), (C) Aerobic scopes, and (D) Factorial aerobic scopes (FAS). The predictions are from the best fit metabolic scaling models. Each dot is an individual fish, the large red dots show adult salmon in warm temperatures (one of the largest fish in our dataset). The colored dots and lines are fosh in 'warm' temperatures, and grey dots are fish in 'optimal' temperatures. AS and FAS best models include second order polynomial terms for temperature leading to non-linear temperature effects. All temperature predicted lines are for fish at 119 grams (RMR, AS, FAS), and lines in MMR are for fish at 0.078 g, 11.7 g, 86.48 g, and 1053.6 g. 
 
 ## Species-specific scaling slopes
 
 ```{r, out.width  = 0.7, out.height = 1}
 knitr::include_graphics(here("Figures/suppl_speciesSlopesRMR.png"))
 ```
-#### Figure S7.Species-specific scaling slope values (dots) of resting metabolic rates with its 95% confidence interval (CI, the error bar). All slopes were developed using simple linear models. The number in the panel is sample size and all species are ordered by the width of the confidence interval (top, smallest CI range; bottom = largest CI range). 
+#### Figure S6.Species-specific scaling slope values (dots) of resting metabolic rates with its 95% confidence interval (CI, the error bar). All slopes were developed using simple linear models. The number in the panel is sample size and all species are ordered by the width of the confidence interval (top, smallest CI range; bottom = largest CI range). 
 
 ```{r, out.width  = 0.7, out.height = 1}
 knitr::include_graphics(here("Figures/suppl_speciesSlopesMMR.png"))
 ```
-#### Figure S8. Species-specific scaling slope values (dots) of maximum metabolic rates with its 95% confidence interval (CI, the error bar). All slopes were developed using simple linear models. The number in the panel is sample size and all species are ordered by the width of the confidence interval (top, smallest CI range; bottom = largest CI range). 
+#### Figure S7. Species-specific scaling slope values (dots) of maximum metabolic rates with its 95% confidence interval (CI, the error bar). All slopes were developed using simple linear models. The number in the panel is sample size and all species are ordered by the width of the confidence interval (top, smallest CI range; bottom = largest CI range). 
 
 ```{r, out.width  = 0.7, out.height = 1}
 knitr::include_graphics(here("Figures/suppl_speciesSlopesFAS.png"))
 
 ```
-#### Figure S9. Species-specific scaling slope values (dots) of factorial aerobic scopes with its 95% confidence interval (CI, the error bar). All slopes were developed using simple linear models. The number in the panel is sample size and all species are ordered by the width of the confidence interval (top, smallest CI range; bottom = largest CI range). 
+#### Figure S8. Species-specific scaling slope values (dots) of factorial aerobic scopes with its 95% confidence interval (CI, the error bar). All slopes were developed using simple linear models. The number in the panel is sample size and all species are ordered by the width of the confidence interval (top, smallest CI range; bottom = largest CI range). 
 
 ## Histograms of all scaling slopes
 
 ```{r, out.width  = 1,  out.height = 1}
 knitr::include_graphics(here("Figures/Suppl_ecol_hist.png"))
 ```
-#### Figure S10. The histogram of all scaling slopes for fish grouped by their ecological and morphological characteristics.(A) Maximum metabolic rates, (B) resting metabolic rates, (C) factorial aerobic scopes. The vertical lines are the mean of all slopes for each temperature condition (optimal = grey-scale, and warm = colored). 
+#### Figure S9. The histogram of all scaling slopes for fish grouped by their ecological and morphological characteristics.(A) Maximum metabolic rates, (B) resting metabolic rates, (C) factorial aerobic scopes. The vertical lines are the mean of all slopes for each temperature condition (optimal = grey-scale, and warm = colored). 
 
 ```{r, out.width  = 1,  out.height = 1}
 knitr::include_graphics(here("Figures/Suppl_species_hist.png"))
 ```
-#### Figure S11. The histogram of all scaling slopes for all fish species included in the dataset. (A) Maximum metabolic rates, (B) resting metabolic rates, (C) factorial aerobic scopes. The vertical lines are the mean of all slopes for each temperature condition (optimal = grey-scale, and warm = colored).
+#### Figure S10. The histogram of all scaling slopes for all fish species included in the dataset. (A) Maximum metabolic rates, (B) resting metabolic rates, (C) factorial aerobic scopes. The vertical lines are the mean of all slopes for each temperature condition (optimal = grey-scale, and warm = colored).
 
 
-## Phylogenetic trees. 
+## Phylogenetic trees (ontogenic scaling models only)
 
 ```{r,  out.width  = 0.45,  out.height = 1}
-knitr::include_graphics(here("Data_exports/FAS warm_treeplot.png"))
+knitr::include_graphics(here("Data_exports/Phylo_plots/FAS-warm_treeplot.png"))
 ```
 #### Figure S12.The phylogenetic tree representing species included in the dataset to analyze scaling relationships of factorial aerobic scopes (FAS) in warm temperatures. 
 
 ```{r,  out.width  = 0.45,  out.height = 1}
-knitr::include_graphics(here("Data_exports/FAS optimal_treeplot.png"))
+knitr::include_graphics(here("Data_exports/Phylo_plots/FAS-optimal_treeplot.png"))
 ```
 #### Figure S13. The phylogenetic tree representing species included in the dataset to analyze scaling relationships of factorial aerobic scopes (FAS) in optimal temperatures. 
 
 ```{r,  out.width  = 0.45,  out.height = 1}
-knitr::include_graphics(here("Data_exports/AAS warm_treeplot.png"))
+knitr::include_graphics(here("Data_exports/Phylo_plots/AAS-warm_treeplot.png"))
 ```
 #### Figure S14. The phylogenetic tree representing species included in the dataset to analyze scaling relationships of aerobic scopes (AS) in warm temperatures. 
 
 ```{r,  out.width  = 0.45,  out.height = 1}
-knitr::include_graphics(here("Data_exports/AAS optimal_treeplot.png"))
+knitr::include_graphics(here("Data_exports/Phylo_plots/AAS-optimal_treeplot.png"))
 ```
 #### Figure S15. The phylogenetic tree representing species included in the dataset to analyze scaling relationships of aerobic scopes (AS) in optimal temperatures. 
 
 ```{r,  out.width  = 0.45,  out.height = 1}
-knitr::include_graphics(here("Data_exports/MMR warm_treeplot.png"))
+knitr::include_graphics(here("Data_exports/Phylo_plots/MMR-warm_treeplot.png"))
 ```
 #### Figure S16. The phylogenetic tree representing species included in the dataset to analyze scaling relationships of maximum metabolic rates (MMR) in warm temperatures. 
 
 ```{r,  out.width  = 0.45,  out.height = 1}
-knitr::include_graphics(here("Data_exports/MMR optimal_treeplot.png"))
+knitr::include_graphics(here("Data_exports/Phylo_plots/MMR-optimal_treeplot.png"))
 ```
 #### Figure S17. The phylogenetic tree representing species included in the dataset to analyze scaling relationships of maximum metabolic rates (MMR) in optimal temperatures. 
 
 ```{r,  out.width  = 0.45,  out.height = 1}
-knitr::include_graphics(here("Data_exports/RMR warm_treeplot.png"))
+knitr::include_graphics(here("Data_exports/Phylo_plots/RMR-warm_treeplot.png"))
 ```
 #### Figure S18. The phylogenetic tree representing species included in the dataset to analyze scaling relationships of resting metabolic rates (RMR) in warm temperatures. 
 
 ```{r,  out.width  = 0.45,  out.height = 1}
-knitr::include_graphics(here("Data_exports/RMR optimal_treeplot.png"))
+knitr::include_graphics(here("Data_exports/Phylo_plots/RMR-optimal_treeplot.png"))
 ```
 #### Figure S19. The phylogenetic tree representing species included in the dataset to analyze scaling relationships of resting metabolic rates (RMR) in optimal temperatures. 
 
