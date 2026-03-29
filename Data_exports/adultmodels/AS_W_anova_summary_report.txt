@@ -3,56 +3,54 @@
 ============================================================
 
 Model formula:
-lnAS ~ lnBWg * tempTest + (1 | species) + (0 + lnBWg | species:trial) + 
+lnAS ~ lnBWg * tempTest + (1 | species) + (0 + tempTest | species) + 
     (1 | species:trial)
-<environment: 0xa6c6ae740>
+<environment: 0x75e1972d8>
 
 ANOVA Type selected automatically: Type III
  **************** ANOVA Table ****************  
 Analysis of Deviance Table (Type III Wald chisquare tests)
 
 Response: lnAS
-                 Chisq Df Pr(>Chisq)    
-(Intercept)     2.1954  1     0.1384    
-lnBWg          67.4696  1  < 2.2e-16 ***
-tempTest        1.1576  1     0.2820    
-lnBWg:tempTest 16.6583  1  4.475e-05 ***
+                  Chisq Df Pr(>Chisq)    
+(Intercept)      8.3040  1   0.003956 ** 
+lnBWg          186.7464  1  < 2.2e-16 ***
+tempTest         0.0337  1   0.854329    
+lnBWg:tempTest  20.7054  1  5.356e-06 ***
 ---
-Signif. codes:  
-0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
  ****************  Model Summary **************** 
 Linear mixed model fit by maximum likelihood  ['lmerMod']
 Formula: 
-lnAS ~ lnBWg * tempTest + (1 | species) + (0 + lnBWg | species:trial) +  
+lnAS ~ lnBWg * tempTest + (1 | species) + (0 + tempTest | species) +  
     (1 | species:trial)
    Data: data.as.test
 
      AIC      BIC   logLik deviance df.resid 
-   309.3    337.9   -146.7    293.3      254 
+   940.2    980.4   -462.1    924.2     1105 
 
 Scaled residuals: 
-    Min      1Q  Median      3Q     Max 
--5.4560 -0.3772  0.1038  0.5561  2.1431 
+     Min       1Q   Median       3Q      Max 
+-10.2386  -0.3600   0.0774   0.5572   2.6726 
 
 Random effects:
- Groups          Name        Variance Std.Dev.
- species.trial   (Intercept) 0.000000 0.0000  
- species.trial.1 lnBWg       0.001672 0.0409  
- species         (Intercept) 0.000000 0.0000  
- Residual                    0.163937 0.4049  
-Number of obs: 262, groups:  
-species:trial, 15; species, 9
+ Groups        Name        Variance Std.Dev.
+ species.trial (Intercept) 0.01693  0.13013 
+ species       tempTest    0.00387  0.06221 
+ species.1     (Intercept) 0.39634  0.62956 
+ Residual                  0.11326  0.33655 
+Number of obs: 1113, groups:  species:trial, 56; species, 24
 
 Fixed effects:
                 Estimate Std. Error t value
-(Intercept)    -1.758599   1.186889  -1.482
-lnBWg           1.564057   0.190414   8.214
-tempTest        0.040690   0.037819   1.076
-lnBWg:tempTest -0.026235   0.006428  -4.081
+(Intercept)    -1.011947   0.351168  -2.882
+lnBWg           1.177429   0.086161  13.666
+tempTest        0.005731   0.031213   0.184
+lnBWg:tempTest -0.013981   0.003073  -4.550
 
 Correlation of Fixed Effects:
             (Intr) lnBWg  tmpTst
-lnBWg       -0.931              
-tempTest    -0.996  0.941       
-lnBWg:tmpTs  0.878 -0.985 -0.901
+lnBWg       -0.766              
+tempTest    -0.314  0.273       
+lnBWg:tmpTs  0.717 -0.959 -0.280

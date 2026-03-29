@@ -523,24 +523,24 @@
 13,NA,ecol_relev,13,6_YYRG,Phoxinus phoxinus,common minnow,2.676,1.853,0.378,6,6_Phoxinus phoxinus_NA,NA,adult,0.096,36,chase,20
 13,NA,ecol_relev,13,6_YYRR,Phoxinus phoxinus,common minnow,2.403,1.87,0.119,6,6_Phoxinus phoxinus_NA,NA,adult,0.096,36,chase,20
 13,NA,ecol_relev,13,6_YYYR,Phoxinus phoxinus,common minnow,6.381,3.346,1.218,6,6_Phoxinus phoxinus_NA,NA,adult,0.096,36,chase,20
-0,116,ecol_relev,0,8_1,Boreogadus saida,polar cod,26.4,5.727744,2.635776,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-0,116,ecol_relev,0,8_3,Boreogadus saida,polar cod,18.5,2.41536,1.896768,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-0,116,ecol_relev,0,8_4,Boreogadus saida,polar cod,19.2,3.796992,2.2560768,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-0,116,ecol_relev,0,8_5,Boreogadus saida,polar cod,27.4,5.78688,3.0828288,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-0,116,ecol_relev,0,8_6,Boreogadus saida,polar cod,25.3,4.37184,2.1956352,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-3,115,ecol_relev,3,8_13,Boreogadus saida,polar cod,16.1,2.380224,1.7063424,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-3,102,ecol_relev,3,8_14,Boreogadus saida,polar cod,28.8,8.681472,2.737152,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-3,115,ecol_relev,3,8_15,Boreogadus saida,polar cod,23.1,4.169088,2.261952,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-3,115,ecol_relev,3,8_16,Boreogadus saida,polar cod,48.6,6.53184,4.5816192,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-6,118,ecol_relev,6,8_25,Boreogadus saida,polar cod,24.6,6.234624,2.2813056,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-6,118,ecol_relev,6,8_26,Boreogadus saida,polar cod,30.8,6.859776,3.4358016,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-6,118,ecol_relev,6,8_28,Boreogadus saida,polar cod,22.7,5.404416,2.8852608,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-6,118,ecol_relev,6,8_30,Boreogadus saida,polar cod,23.9,5.460672,2.5054848,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-8,117,acclim,8,8_37,Boreogadus saida,polar cod,22.6,6.94272,3.992064,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-8,115,acclim,8,8_39,Boreogadus saida,polar cod,20.1,5.7888,3.1568256,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-8,112,acclim,8,8_40,Boreogadus saida,polar cod,11.4,2.210688,1.4577408,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-8,117,acclim,8,8_41,Boreogadus saida,polar cod,24.9,6.167232,4.852512,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
-8,117,acclim,8,8_42,Boreogadus saida,polar cod,14.9,3.604608,2.703456,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,NA,48
+0,116,ecol_relev,0,8_1,Boreogadus saida,polar cod,26.4,5.727744,2.635776,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+0,116,ecol_relev,0,8_3,Boreogadus saida,polar cod,18.5,2.41536,1.896768,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+0,116,ecol_relev,0,8_4,Boreogadus saida,polar cod,19.2,3.796992,2.2560768,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+0,116,ecol_relev,0,8_5,Boreogadus saida,polar cod,27.4,5.78688,3.0828288,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+0,116,ecol_relev,0,8_6,Boreogadus saida,polar cod,25.3,4.37184,2.1956352,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+3,115,ecol_relev,3,8_13,Boreogadus saida,polar cod,16.1,2.380224,1.7063424,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+3,102,ecol_relev,3,8_14,Boreogadus saida,polar cod,28.8,8.681472,2.737152,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+3,115,ecol_relev,3,8_15,Boreogadus saida,polar cod,23.1,4.169088,2.261952,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+3,115,ecol_relev,3,8_16,Boreogadus saida,polar cod,48.6,6.53184,4.5816192,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+6,118,ecol_relev,6,8_25,Boreogadus saida,polar cod,24.6,6.234624,2.2813056,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+6,118,ecol_relev,6,8_26,Boreogadus saida,polar cod,30.8,6.859776,3.4358016,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+6,118,ecol_relev,6,8_28,Boreogadus saida,polar cod,22.7,5.404416,2.8852608,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+6,118,ecol_relev,6,8_30,Boreogadus saida,polar cod,23.9,5.460672,2.5054848,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+8,117,acclim,8,8_37,Boreogadus saida,polar cod,22.6,6.94272,3.992064,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+8,115,acclim,8,8_39,Boreogadus saida,polar cod,20.1,5.7888,3.1568256,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+8,112,acclim,8,8_40,Boreogadus saida,polar cod,11.4,2.210688,1.4577408,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+8,117,acclim,8,8_41,Boreogadus saida,polar cod,24.9,6.167232,4.852512,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
+8,117,acclim,8,8_42,Boreogadus saida,polar cod,14.9,3.604608,2.703456,8,8_Boreogadus saida_NA,NA,juvenile,1.8,48,swim,48
 29,NA,ecol_relev,29,9_1,Lates calcarifer,barramundi,31.95,18.12898545,3.29,9,9_Lates calcarifer_REPEAT1,REPEAT1,juvenile,1.42,48,chase,16
 29,NA,ecol_relev,29,9_2,Lates calcarifer,barramundi,28.6,17.71903662,3.48,9,9_Lates calcarifer_REPEAT1,REPEAT1,juvenile,1.42,48,chase,16
 29,NA,ecol_relev,29,9_3,Lates calcarifer,barramundi,34.4,15.20559347,4.25,9,9_Lates calcarifer_REPEAT1,REPEAT1,juvenile,1.42,48,chase,16
@@ -3173,16 +3173,16 @@ NA,0.083333333,acute,24,62_CHSH119,Oncorhynchus tshawytscha,Chinook salmon ,5438
 18.5,150,ecol_relev,18.5,204_10(yel-yel),Perca fluviatilis,European perch,32.19,8.145907909,3.745860276,204,204_Perca fluviatilis_SETC,SETC,juvenile,NA,23,chase,18
 18.5,150,ecol_relev,18.5,204_11(oj-oj),Perca fluviatilis,European perch,23.36,10.55358102,2.508650335,204,204_Perca fluviatilis_SETA,SETA,juvenile,NA,23,chase,18
 18.5,150,ecol_relev,18.5,204_12(yel-gre),Perca fluviatilis,European perch,41.49,9.156604762,3.535038003,204,204_Perca fluviatilis_NA,NA,juvenile,NA,23,chase,18
-30,14,ecol_relev,30,26_PBS1,Gambusia holbrooki,mosquitofish,0.92,1.269053935,0.466272619,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,NA,0.75
-30,14,ecol_relev,30,26_PBS10,Gambusia holbrooki,mosquitofish,0.67,1.240032608,0.440836253,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,NA,0.75
-30,14,ecol_relev,30,26_PBS2,Gambusia holbrooki,mosquitofish,0.62,0.957631015,0.294250398,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,NA,0.75
-30,14,ecol_relev,30,26_PBS3,Gambusia holbrooki,mosquitofish,1.02,1.932592431,0.214298862,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,NA,0.75
-30,14,ecol_relev,30,26_PBS4,Gambusia holbrooki,mosquitofish,1.11,1.500934527,0.328123561,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,NA,0.75
-30,14,ecol_relev,30,26_PBS5,Gambusia holbrooki,mosquitofish,1.15,1.809356459,0.54051659,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,NA,0.75
-30,14,ecol_relev,30,26_PBS6,Gambusia holbrooki,mosquitofish,1.02,1.287873969,0.161330314,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,NA,0.75
-30,14,ecol_relev,30,26_PBS7,Gambusia holbrooki,mosquitofish,0.65,1.251867158,0.293690526,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,NA,0.75
-30,14,ecol_relev,30,26_PBS8,Gambusia holbrooki,mosquitofish,0.59,0.87375989,0.222985821,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,NA,0.75
-30,14,ecol_relev,30,26_PBS9,Gambusia holbrooki,mosquitofish,1.22,1.550687539,0.394605389,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,NA,0.75
+30,14,ecol_relev,30,26_PBS1,Gambusia holbrooki,mosquitofish,0.92,1.269053935,0.466272619,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,stirbar-swim,0.75
+30,14,ecol_relev,30,26_PBS10,Gambusia holbrooki,mosquitofish,0.67,1.240032608,0.440836253,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,stirbar-swim,0.75
+30,14,ecol_relev,30,26_PBS2,Gambusia holbrooki,mosquitofish,0.62,0.957631015,0.294250398,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,stirbar-swim,0.75
+30,14,ecol_relev,30,26_PBS3,Gambusia holbrooki,mosquitofish,1.02,1.932592431,0.214298862,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,stirbar-swim,0.75
+30,14,ecol_relev,30,26_PBS4,Gambusia holbrooki,mosquitofish,1.11,1.500934527,0.328123561,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,stirbar-swim,0.75
+30,14,ecol_relev,30,26_PBS5,Gambusia holbrooki,mosquitofish,1.15,1.809356459,0.54051659,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,stirbar-swim,0.75
+30,14,ecol_relev,30,26_PBS6,Gambusia holbrooki,mosquitofish,1.02,1.287873969,0.161330314,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,stirbar-swim,0.75
+30,14,ecol_relev,30,26_PBS7,Gambusia holbrooki,mosquitofish,0.65,1.251867158,0.293690526,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,stirbar-swim,0.75
+30,14,ecol_relev,30,26_PBS8,Gambusia holbrooki,mosquitofish,0.59,0.87375989,0.222985821,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,stirbar-swim,0.75
+30,14,ecol_relev,30,26_PBS9,Gambusia holbrooki,mosquitofish,1.22,1.550687539,0.394605389,26,26_Gambusia holbrooki_NA,NA,adult,0.245,24,stirbar-swim,0.75
 NA,NA,ecol_relev,26,301_1,Acanthochromis polyacanthus,spiny chromis damselfish,19.7,8.84,NA,301,301_Acanthochromis polyacanthus_SET4,SET4,juvenile,4.8,24,swim,NA
 NA,NA,ecol_relev,26,301_2,Acanthochromis polyacanthus,spiny chromis damselfish,21.3,9.71,NA,301,301_Acanthochromis polyacanthus_SET3,SET3,juvenile,4.8,24,swim,NA
 NA,NA,ecol_relev,26,301_3,Acanthochromis polyacanthus,spiny chromis damselfish,19.4,11.23,NA,301,301_Acanthochromis polyacanthus_SET4,SET4,juvenile,4.8,24,swim,NA

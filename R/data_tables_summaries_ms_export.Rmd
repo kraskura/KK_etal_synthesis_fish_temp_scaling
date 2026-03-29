@@ -133,51 +133,122 @@ data.amr[data.amr$test_category == "ecol_relev", "test_category3"] <- "optimal"
 data.rmr$test_category3 <- "warm"
 data.rmr[data.rmr$test_category == "ecol_relev", "test_category3"] <- "optimal"
 
-cat(">>> Datasets witha all data are ready, all lifestages included")
+# cat("Datasets with all data are ready, all lifestages included")
 
 ```
+
+```{r table defaults}
+# set_flextable_defaults()
+set_flextable_defaults(
+  big.mark = "",
+  table_align = "center",
+  text.align = "left",
+  font.family = "Helvetica",
+  font.size = 10,
+  digits = 2,
+  decimal.mark = ".",
+  na_str = "-",
+  padding = 1,
+  border.color = "#CCCCCC",
+  line_spacing = 1
+)
+
+```
+
 # General summary statistics
 
-```{r, message  = TRUE}
-message(paste("The number of datapoints total:", nrow(dataMR)))
-message(paste("The number of trials total:", length(levels(dataMR$trial))))
-message(paste("The number of studies total:", length(levels(dataMR$study_ID))))
-message(paste("The number of species total:", length(levels(dataMR$species))))
-message(paste("The number of individual fish:",length(unique(dataMR$fish_ID))))
-message(paste("The number of individual fish below 1000 g:", nrow(dataMR[c(!duplicated(dataMR$fish_ID)) & dataMR$BW_g<1000,])))
+```{r, message  = FALSE}
+cat(paste("The number of datapoints total:", nrow(dataMR)))
+
+cat(paste("The number of trials total:", length(levels(dataMR$trial))))
+cat(paste("The number of studies total:", length(levels(dataMR$study_ID))))
+cat(paste("The number of species total:", length(levels(dataMR$species))))
+cat(paste("The number of individual fish:",length(unique(dataMR$fish_ID))))
+cat(paste("The number of individual fish below 1000 g:", nrow(dataMR[c(!duplicated(dataMR$fish_ID)) & dataMR$BW_g<1000,])))
 
 
-message(paste("The number of datapoints in AS data subset:", nrow(data.as)))
-message(paste("The number of trials in AS data subset:", length(levels(data.as$trial))))
-message(paste("The number of studies in AS data subset:", length(levels(data.as$study_ID))))
-message(paste("The number of species in AS data subset:", length(levels(data.as$species))))
+cat(paste("The number of datapoints in AS data subset:", nrow(data.as)))
+cat(paste("The number of trials in AS data subset:", length(levels(data.as$trial))))
+cat(paste("The number of studies in AS data subset:", length(levels(data.as$study_ID))))
+cat(paste("The number of species in AS data subset:", length(levels(data.as$species))))
 
-message(paste("The percent of tropical fish that had FAS below 3:", 
-              round(nrow(data.fas[(data.fas$Climate == "Tropical" & data.fas$FAS<3 & data.fas$test_category3 == "optimal"),]) /
-                nrow(data.fas[(data.fas$Climate == "Tropical" & data.fas$test_category3 == "optimal"),]), 4) * 100), "%")
+cat(paste("The percent of tropical fish that had FAS below 3:", 
+              round(nrow(data.fas[(data.fas$Climate == "Tropical" &
+                                     data.fas$FAS<3 &
+                                     data.fas$test_category3 == "optimal"),]) /
+                nrow(data.fas[(data.fas$Climate == "Tropical" &
+                                 data.fas$test_category3 == "optimal"),]), 4) * 100), "%")
 
-message(paste("The percent of subtropical fish that had FAS below 3:",
-              round(nrow(data.fas[(data.fas$Climate == "Subtropical" & data.fas$FAS<3 & data.fas$test_category3 == "optimal"),]) /
-                nrow(data.fas[(data.fas$Climate == "Subtropical" & data.fas$test_category3 == "optimal"),]), 4) * 100), "%")
+cat(paste("The percent of subtropical fish that had FAS below 3:",
+              round(nrow(data.fas[(data.fas$Climate == "Subtropical" &
+                                     data.fas$FAS<3 & data.fas$test_category3 == "optimal"),]) /
+                nrow(data.fas[(data.fas$Climate == "Subtropical" &
+                                 data.fas$test_category3 == "optimal"),]), 4) * 100), "%")
 
-message(paste("The percent of temperate fish that had FAS below 3:",
-              round(nrow(data.fas[(data.fas$Climate == "Temperate" & data.fas$FAS<3 & data.fas$test_category3 == "optimal"),]) /
-                nrow(data.fas[(data.fas$Climate == "Temperate" & data.fas$test_category3 == "optimal"),]), 4) * 100), "%")
+cat(paste("The percent of temperate fish that had FAS below 3:",
+              round(nrow(data.fas[(data.fas$Climate == "Temperate" &
+                                     data.fas$FAS<3 & data.fas$test_category3 == "optimal"),]) /
+                nrow(data.fas[(data.fas$Climate == "Temperate" &
+                                 data.fas$test_category3 == "optimal"),]), 4) * 100), "%")
 
-message(paste("The percent of polar fish that had FAS below 3:",
-              round(nrow(data.fas[(data.fas$Climate == "Polar" & data.fas$FAS<3 & data.fas$test_category3 == "optimal"),]) /
-                nrow(data.fas[(data.fas$Climate == "Polar" & data.fas$test_category3 == "optimal"),]), 4) * 100), "%")
+cat(paste("The percent of polar fish that had FAS below 3:",
+              round(nrow(data.fas[(data.fas$Climate == "Polar" &
+                                     data.fas$FAS<3 & data.fas$test_category3 == "optimal"),]) /
+                nrow(data.fas[(data.fas$Climate == "Polar" &
+                                 data.fas$test_category3 == "optimal"),]), 4) * 100), "%")
 
 # summary(dataMR$BW_g)
+```
+
+```{r methods notes}
+
+# stats on fish being started, respo chambers volumes, etc. 
+data.amr %>% 
+  dplyr::group_by(MMR_method, test_category3) %>% 
+  summarize(count = n()) %>% 
+  flextable()  
+# stats on fish being started, respo chambers volumes, etc. 
+t1<-data.amr %>% 
+  dplyr::group_by(test_category3) %>% 
+  rename("Temp category" = test_category3) %>% 
+  summarize(`Resp(L):Size(kg) (min)` = round(min(chamber_vol_L/(BW_g/1000), na.rm = TRUE), 2),
+            `Resp(L):Size(kg) (max)` = round(max(chamber_vol_L/(BW_g/1000), na.rm = TRUE), 2),
+            `Hours starved (min)` = round(min(h_starved,  na.rm = TRUE), 2),
+            `Hours starved (max)` = round(max(h_starved, na.rm = TRUE), 2),
+            `Hours in chamber (min)` = round(min(h_in_respo, na.rm = TRUE), 2),
+            `Hours in chamber (max)` = round(max(h_in_respo, na.rm = TRUE), 2)) %>% 
+  data.table::transpose(keep.names = "rn") 
+colnames(t1)<-c(" MMR ", "Optimal T", "Warm T")
+t1<-t1[-1,]
+t1 %>% flextable()  
+
+# RMR
+# stats on fish being started, respo chambers volumes, etc. 
+t1<-data.rmr %>% 
+  dplyr::group_by(test_category3) %>% 
+  rename("Temp category" = test_category3) %>% 
+  summarize(`Resp(L):Size(kg) (min)` = round(min(chamber_vol_L/(BW_g/1000), na.rm = TRUE), 2),
+            `Resp(L):Size(kg) (max)` = round(max(chamber_vol_L/(BW_g/1000), na.rm = TRUE), 2),
+            `Hours starved (min)` = round(min(h_starved,  na.rm = TRUE), 2),
+            `Hours starved (max)` = round(max(h_starved, na.rm = TRUE), 2),
+            `Hours in chamber (min)` = round(min(h_in_respo, na.rm = TRUE), 2),
+            `Hours in chamber (max)` = round(max(h_in_respo, na.rm = TRUE), 2)) %>% 
+  data.table::transpose(keep.names = "rn") 
+colnames(t1)<-c(" RMR ", "Optimal T", "Warm T")
+t1<-t1[-1,]
+t1 %>% flextable()  
+
+
+
 ```
 
 # Phylogenetic mixed models (`evolvability::Almer`)
 
 - model sets: Different random effects 
 
-  * set 2: `(1|species) +(0 + tempTest|species) + (1|species:trial)` = species intercept, nested trial under species intercept, species-specific response to temperature (i.e. different size individuals of the same species, would have different sensitivity to temperature). 
-  * set 4: `(1|species) +(0 + lnBWg|species) + (1|species:trial)` = species intercept, nested trial under species intercept, species-specific mass scaling slopes 
-  * set 5: `(1|species) +(0 + lnBWg|species:trial) + (1|species:trial)` = species intercept, nested trial under species intercept, nested species:trial mass scaling slopes
+  * set 1 (in R script used as #2): `(1|species) +(0 + tempTest|species) + (1|species:trial)` = species intercept, nested trial under species intercept, species-specific response to temperature (i.e. different size individuals of the same species, would have different sensitivity to temperature). 
+  * set 2 (in R script used as #4) : `(1|species) +(0 + lnBWg|species) + (1|species:trial)` = species intercept, nested trial under species intercept, species-specific mass scaling slopes 
+  * set 3 (in R script used as #5): `(1|species) +(0 + lnBWg|species:trial) + (1|species:trial)` = species intercept, nested trial under species intercept, nested species:trial mass scaling slopes
   
 - model types: 
   + mass and temperature affect metabolism independently 
@@ -200,23 +271,6 @@ BIC = Bayesian Information Criterion (model comparison metric)
   * pryr, viridisLite, TDbook, ggimage, ggformat2 (custom written author's package), ggpubr, cowplot, forcats, reshape2, systemfonts, flextable, here, ggh4x, tidyverse, dplyr, colorBlindness, patchwork, weathermetrics. 
 
 # Tables 
-```{r table defaults}
-# set_flextable_defaults()
-set_flextable_defaults(
-  big.mark = "",
-  table_align = "center",
-  text.align = "left",
-  font.family = "Helvetica",
-  font.size = 10,
-  digits = 2,
-  decimal.mark = ".",
-  na_str = "-",
-  padding = 1,
-  border.color = "#CCCCCC",
-  line_spacing = 1
-)
-
-```
 
 ## BIC model selection tables 
 

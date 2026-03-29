@@ -621,7 +621,7 @@ rmr.WARM.ER.good<-
   
   annotate("text", x = 0.135, y = 23, color = "black", label = expression(italic(b)[RMR]~italic(b)[MMR]),
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
-  annotate("text", x = 1.05, y = 23, color = "black", label = expression(n~(data*(species))),
+  annotate("text", x = 1.30, y = 23, color = "black", label = expression(n~(data*(species))),
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
   annotate("text", x = 0.45, y = 22, color = "black", label = 'OPTIMAL',
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+

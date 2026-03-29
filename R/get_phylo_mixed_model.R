@@ -829,8 +829,8 @@ get_model_outputs<-function(
 # ***************************************************************
 #  ------------------- DATA ANALYSIS FUNCTIONS ----------------------
 # ***************************************************************
-# lifestage = "juvenile"
-# lifestage = "adult" 
+# lifestage = "Juveniles"
+# lifestage = "Adults" 
 
 get_phylo_mixed_models<-function(data.rmr.test.modrun,
                                 data.rmrER.modrun, 
@@ -888,7 +888,7 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
   # this calls custom function 'get_data_phylo_matrix.R'. 
   # IMPORTANT: ensure to receive a message: "All species names are identified and mathced with phylo data N species" that marks that all species have been matched with original dataset. 
   if(!is.null(lifestage)){
-    if (lifestage == "adult") {
+    if (lifestage == "Adults") {
     message("Running adult data")
     # rmr
     get_phylo_matrix(species.list = unique(levels(data.rmrER$species)),
@@ -1113,7 +1113,7 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
     
     }
     
-    if(lifestage == "juvenile"){
+    if(lifestage == "Juveniles"){
     message("Running juvenile data")
     # rmr
     get_phylo_matrix(species.list = unique(levels(data.rmrER$species)),
@@ -1676,19 +1676,18 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
                    yend = scaling_params_amr_er$Intercept +
                      scaling_params_amr_er$Slope *
                      max(data.amrER$lnBWg)),
-                color = "black")+
+                color = "grey30")+
     annotate("text",  x = -5.2, y = 11.5,
              label = bquote(Optimal:~italic(b)[MMR] == .(round(scaling_params_amr_er$Slope,3))), 
                             # "\u00b1" ~ .(round(scaling_params_amr_er$SE_slope,2))),
-             size=4, hjust=0, family="Helvetica", color = "black")+
+             size=4, hjust=0, family="Helvetica", color = "grey30")+
     annotate("text",  x = -5.2, y = 9.8,
              label = bquote(Warm:~italic(b)[MMR] == .(round(scaling_params_amr_w$Slope,3))),
              size=4, hjust=0, family="Helvetica", color = cols.amr[1])+
-    scale_color_gradient( low = "grey", high = "black")+
     ylim(x = -6.3, 12)+
     xlim(x = -6.3, 12)+
     annotate("text", label = paste("n = ", nrow(data.amrER), sep=""),
-             x = -5.2, y = 8.5, size=3, hjust=0, family="Helvetica", color = "black")+
+             x = -5.2, y = 8.5, size=3, hjust=0, family="Helvetica", color = "grey30")+
     annotate("text", label = paste("n = ", nrow(data.amr.test), sep=""),
              x = -5.2, y = 7.6, size=3, hjust=0, family="Helvetica", color = cols.amr[1])+
     annotate("text", label = lifestage,
@@ -1699,15 +1698,15 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
              label = bquote("\u2193" ~ "with" ~ degree*C),
              size=4, hjust=0,  color = cols.amr[1])
     }else{
-      if(lifestage == "juvenile"){
+      if(lifestage == "Juveniles"){
         AMRmodel_plot1<-AMRmodel_plot1+ annotate("text",  x = 7.5, y = 11.5,
            label = bquote("\u2193" ~ "with" ~ degree*C),
-           size=4, hjust=0,  color = "black")
+           size=4, hjust=0,  color = "grey30")
       }
-      if(lifestage == "adult"){
+      if(lifestage == "Adults"){
         AMRmodel_plot1<-AMRmodel_plot1+ annotate("text",  x = 7.5, y = 11.5,
            label = bquote("\u2191" ~ "with" ~ degree*C),
-           size=4, hjust=0,  color = "black")
+           size=4, hjust=0,  color = "grey30")
       }
     }
   
@@ -1750,22 +1749,22 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
                 color = "black")+
     annotate("text",  x = -5.2, y = 11.5,
              label = bquote(Optimal:~italic(b)[RMR] == .(round(scaling_params_rmr_er$Slope,3))),
-             size=4, hjust=0, family="Helvetica", color = "black")+
+             size=4, hjust=0, family="Helvetica", color = "grey30")+
     annotate("text",  x = -5.2, y = 9.8,
              label = bquote(Warm:~italic(b)[RMR] == .(round(scaling_params_rmr_w$Slope,3))),
              size=4, hjust=0, family="Helvetica", color = cols.rmr[1])+
-    scale_color_gradient( low = "grey", high = "black")+
+    # scale_color_gradient( low = "grey", high = "black")+
     ylim(x = -6.3, 12)+
     xlim(x = -6.3, 12)+
     annotate("text", label = paste("n = ", nrow(data.rmrER), sep=""),
-             x = -5.2, y = 8.5, size=3, hjust=0, family="Helvetica", color = "black")+
+             x = -5.2, y = 8.5, size=3, hjust=0, family="Helvetica", color = "grey30")+
     annotate("text", label = paste("n = ", nrow(data.rmr.test), sep=""),
              x = -5.2, y = 7.6, size=3, hjust=0, family="Helvetica", color = cols.rmr[1])
   
     if(is.null(lifestage)){
       RMRmodel_plot1<-RMRmodel_plot1+ annotate("text",  x = 7.5, y = 11.5,
              label = bquote("\u2191" ~ "with" ~ degree*C),
-             size=4, hjust=0,  color = "black")
+             size=4, hjust=0,  color = "grey30")
     }else{
 
     }
@@ -1807,34 +1806,35 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
                    yend = scaling_params_as_er$Intercept +
                      scaling_params_as_er$Slope *
                      max(data.asER$lnBWg)),
-                color = "black")+
+                color = "grey30")+
     annotate("text",  x = -5.2, y = 11.5,
              label = bquote(Optimal:~italic(b)[AS] == .(round(scaling_params_as_er$Slope,3))),
-             size=4, hjust=0, family="Helvetica", color = "black")+
+             size=4, hjust=0, family="Helvetica", color = "grey30")+
     annotate("text",  x = -5.2, y = 9.8,
              label = bquote(Warm:~italic(b)[AS] == .(round(scaling_params_as_w$Slope,3))),
              size=4, hjust=0, family="Helvetica", color = cols.as[1])+
-    scale_color_gradient( low = "grey", high = "black")+
+    # scale_color_gradient( low = "grey", high = "black")+
     ylim(x = -6.3, 12)+
     xlim(x = -6.3, 12)+
     annotate("text", label = paste("n = ", nrow(data.asER), sep=""),
-             x = -5.2, y = 8.5, size=3, hjust=0, family="Helvetica", color = "black")+
+             x = -5.2, y = 8.5, size=3, hjust=0, family="Helvetica", color = "grey30")+
     annotate("text", label = paste("n = ", nrow(data.as.test), sep=""),
              x = -5.2, y = 7.6, size=3, hjust=0, family="Helvetica", color = cols.as[1])
     if(is.null(lifestage)){
       ASmodel_plot1<-ASmodel_plot1+ annotate("text",  x = 7.5, y = 11.5,
              label = bquote("\u2193" ~ "with" ~ degree*C),
-             size=4, hjust=0,  color = "black")
+             size=4, hjust=0,  color = "grey30")
       ASmodel_plot1<-ASmodel_plot1+ annotate("text",  x = 7, y = 9.8,
              label = bquote("\u2193" ~ "with" ~ degree*C),
              size=4, hjust=0,  color = cols.as[1])
     }else{
-      if(lifestage == "juvenile"){
+      if(lifestage == "Juveniles"){
         ASmodel_plot1<-ASmodel_plot1+ annotate("text",  x = 7, y = 11.5,
              label = bquote("\u2193" ~ "with" ~ degree*C),
-             size=4, hjust=0,  color = "black")
+             size=4, hjust=0,  color = "grey30")
+        print("here plot juv")
       }
-      if(lifestage == "adult"){
+      if(lifestage == "Adults"){
         ASmodel_plot1<-ASmodel_plot1+ annotate("text",  x = 7, y = 9.8,
              label = bquote("\u2191" ~ "with" ~ degree*C),
              size=4, hjust=0,  color = cols.as[1])
@@ -1878,29 +1878,29 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
                    yend = scaling_params_fas_er$Intercept +
                      scaling_params_fas_er$Slope *
                      max(data.fasER$lnBWg)),
-                color = "black")+
+                color = "grey30")+
     annotate("text",  x = -5.2, y = 11.5,
              label = bquote(Optimal:~italic(b)[FAS] == .(round(scaling_params_fas_er$Slope,3))),
-             size=4, hjust=0, family="Helvetica", color = "black")+
+             size=4, hjust=0, family="Helvetica", color = "grey30")+
     annotate("text",  x = -5.2, y = 9.8,
              label = bquote(Warm:~italic(b)[FAS] == .(round(scaling_params_fas_w$Slope,3))),
              size=4, hjust=0, family="Helvetica", color = cols.fas[1])+
-    scale_color_gradient( low = "grey", high = "black")+
+    # scale_color_gradient( low = "grey", high = "black")+
     ylim(x = -6.3, 12)+
     xlim(x = -6.3, 12)+
     annotate("text", label = paste("n = ", nrow(data.fasER), sep=""),
-             x = -5.2, y = 8.5, size=3, hjust=0, family="Helvetica", color = "black")+
+             x = -5.2, y = 8.5, size=3, hjust=0, family="Helvetica", color = "grey30")+
     annotate("text", label = paste("n = ", nrow(data.fas.test), sep=""),
              x = -5.2, y = 7.6, size=3, hjust=0, family="Helvetica", color = cols.fas[1])
     if(is.null(lifestage)){
       FASmodel_plot1<-FASmodel_plot1+ annotate("text",  x = 7.5, y = 11.5,
              label = bquote("\u2193" ~ "with" ~ degree*C),
-             size=4, hjust=0,  color = "black")
+             size=4, hjust=0,  color = "grey30")
     }else{
-      if(lifestage=="juvenile"){
+      if(lifestage=="Juveniles"){
         FASmodel_plot1<-FASmodel_plot1+ annotate("text",  x = 7.5, y = 11.5,
              label = bquote("\u2193" ~ "with" ~ degree*C),
-             size=4, hjust=0,  color = "black")
+             size=4, hjust=0,  color = "grey30")
       }
     }
   

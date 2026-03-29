@@ -140,6 +140,7 @@ data.rmr$chambSizeRatio<-data.rmr$chamber_vol_L/(data.rmr$BW_g/1000)
 
 summary(data.rmr$chambSizeRatio)
 summary(data.amr$chambSizeRatio)
+
 # Supplemental -----------
 ## Experimental checks
 ### type of MMR 
@@ -147,13 +148,14 @@ ggplot(data.amr.test, aes(x = lnBWg, y = lnAMR, color = MMR_method, alpha = temp
   geom_point(size = 1)+
   theme_classic()+
   scale_color_discrete()+
-  ggtitle("AMR warm")
+  ggtitle("MMR warm")
 
 ggplot(data.amrER, aes(x = lnBWg, y = lnAMR, color = MMR_method, alpha = tempTest))+
   geom_point(size = 1)+
   theme_classic()+
   scale_color_discrete()+
-  ggtitle("AMR ecologically relev")
+  ggtitle("MMR ecologically relev")
+
 
 ### the size of chamber  -------
 ggplot(data.amr, aes(y = chambSizeRatio, x = BW_g/1000,
@@ -188,6 +190,13 @@ ggplot(data.rmr, aes(x = lnBWg, y = lnRMR, color = chambSizeRatio))+
   geom_point(size = 1, alpha = 0.4)+
   theme_classic()+
   scale_color_viridis_c()+
+  ggtitle("RMR all")
+
+ggplot(data.rmr, aes(x = h_in_respo, y = RMR/BW_g^0.85))+
+  geom_point(size = 1, alpha = 0.4, show.legend = F)+
+  theme_classic()+
+  ylab("RMR (mgO2/min/kg ^0.85)")+
+  xlab("Hours of the respirometry trial")+
   ggtitle("RMR all")
 
 ## Histograms of fish at different size suppl ----------

@@ -2317,60 +2317,60 @@
 25,3,acclim,33,33_C3-33-OC,Lates niloticus,Nile perch,34.81,9.5448,33,33_Lates niloticus_NA,NA,juvenile,NA,48,10
 25,3,acclim,33,33_C3-33-RC,Lates niloticus,Nile perch,19.96,5.9388,33,33_Lates niloticus_NA,NA,juvenile,NA,48,10
 25,3,acclim,33,33_C3-33-BC,Lates niloticus,Nile perch,17.71,5.9784,33,33_Lates niloticus_NA,NA,juvenile,NA,48,10
-0,1,ecol_relev,0,41_1 ,Trematomus bernacchii,Emerald rockcod,47,0.92684,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,ecol_relev,0,41_2 ,Trematomus bernacchii,Emerald rockcod,27.7,0.586409,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,ecol_relev,0,41_3 ,Trematomus bernacchii,Emerald rockcod,22.4,0.586208,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,ecol_relev,0,41_8 ,Trematomus bernacchii,Emerald rockcod,32.1,0.591924,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,2,41_13 ,Trematomus bernacchii,Emerald rockcod,25.9,0.562548,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,2,41_14 ,Trematomus bernacchii,Emerald rockcod,41.1,0.969138,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,2,41_15 ,Trematomus bernacchii,Emerald rockcod,36.7,0.866487,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,2,41_16 ,Trematomus bernacchii,Emerald rockcod,46.3,1.15287,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,2,41_17 ,Trematomus bernacchii,Emerald rockcod,46.5,0.94581,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,2,41_18 ,Trematomus bernacchii,Emerald rockcod,31,0.52297,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,2,41_19 ,Trematomus bernacchii,Emerald rockcod,23.4,0.614952,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,2,41_20 ,Trematomus bernacchii,Emerald rockcod,25.6,0.603904,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,4,41_25 ,Trematomus bernacchii,Emerald rockcod,58.7,1.333664,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,4,41_26 ,Trematomus bernacchii,Emerald rockcod,24.6,0.88806,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,4,41_27 ,Trematomus bernacchii,Emerald rockcod,26.1,0.856341,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,4,41_30 ,Trematomus bernacchii,Emerald rockcod,35.3,1.455066,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,4,41_31 ,Trematomus bernacchii,Emerald rockcod,41.2,1.325816,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,4,41_32 ,Trematomus bernacchii,Emerald rockcod,42.5,1.19595,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,1,41_37 ,Trematomus bernacchii,Emerald rockcod,45.1,1.118931,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,1,41_38 ,Trematomus bernacchii,Emerald rockcod,19.4,0.597908,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,1,41_39 ,Trematomus bernacchii,Emerald rockcod,29.5,0.77467,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,1,41_40 ,Trematomus bernacchii,Emerald rockcod,29.7,0.788832,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,1,41_41 ,Trematomus bernacchii,Emerald rockcod,26.6,0.576422,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,1,41_42 ,Trematomus bernacchii,Emerald rockcod,23.6,0.54634,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,1,41_43 ,Trematomus bernacchii,Emerald rockcod,19.4,0.396148,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,1,acute,1,41_44 ,Trematomus bernacchii,Emerald rockcod,20.7,0.42849,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,0,24
-0,70 ,ecol_relev,0,41_1 ,Trematomus bernacchii,Emerald rockcod,57.9,1.332858,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-0,70 ,ecol_relev,0,41_3 ,Trematomus bernacchii,Emerald rockcod,25.3,0.434654,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-0,65 ,ecol_relev,0,41_4 ,Trematomus bernacchii,Emerald rockcod,51.7,0.767228,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-0,67 ,ecol_relev,0,41_5 ,Trematomus bernacchii,Emerald rockcod,49.7,1.066065,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-0,67 ,ecol_relev,0,41_6 ,Trematomus bernacchii,Emerald rockcod,49.1,1.051722,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-0,67 ,ecol_relev,0,41_7 ,Trematomus bernacchii,Emerald rockcod,46.4,0.937744,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-0,65 ,ecol_relev,0,41_8 ,Trematomus bernacchii,Emerald rockcod,39.3,0.965208,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-2,65 ,acclim,2,41_13 ,Trematomus bernacchii,Emerald rockcod,27.6,0.662952,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-2,65 ,acclim,2,41_14 ,Trematomus bernacchii,Emerald rockcod,40.3,0.586365,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-2,65 ,acclim,2,41_15 ,Trematomus bernacchii,Emerald rockcod,39.6,0.74844,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-2,63 ,acclim,2,41_16 ,Trematomus bernacchii,Emerald rockcod,48,0.96576,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-2,65 ,acclim,2,41_17 ,Trematomus bernacchii,Emerald rockcod,54.5,1.262765,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-2,63 ,acclim,2,41_20 ,Trematomus bernacchii,Emerald rockcod,27.2,0.526864,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-2,59 ,acclim,2,41_21 ,Trematomus bernacchii,Emerald rockcod,15.9,0.226416,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-2,59 ,acclim,2,41_23 ,Trematomus bernacchii,Emerald rockcod,9.8,0.231868,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-4,69 ,acclim,4,41_25 ,Trematomus bernacchii,Emerald rockcod,57.7,0.950319,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-4,69 ,acclim,4,41_26 ,Trematomus bernacchii,Emerald rockcod,26.3,0.890518,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-4,69 ,acclim,4,41_28 ,Trematomus bernacchii,Emerald rockcod,43.5,1.409835,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-4,63 ,acclim,4,41_30 ,Trematomus bernacchii,Emerald rockcod,36.2,0.769974,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-4,65 ,acclim,4,41_32 ,Trematomus bernacchii,Emerald rockcod,42.6,0.714828,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-4,65 ,acclim,4,41_33 ,Trematomus bernacchii,Emerald rockcod,13.6,0.290088,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-4,65 ,acclim,4,41_35 ,Trematomus bernacchii,Emerald rockcod,32.5,0.70395,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-4,65 ,acclim,4,41_36 ,Trematomus bernacchii,Emerald rockcod,9.6,0.255936,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-1,62 ,ecol_relev,1,41_37 ,Trematomus bernacchii,Emerald rockcod,57.4,1.196216,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-1,62 ,ecol_relev,1,41_38 ,Trematomus bernacchii,Emerald rockcod,22.3,0.42147,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-1,62 ,ecol_relev,1,41_39 ,Trematomus bernacchii,Emerald rockcod,31.9,0.368445,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-1,62 ,ecol_relev,1,41_40 ,Trematomus bernacchii,Emerald rockcod,31.2,0.745056,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
-1,63 ,ecol_relev,1,41_41 ,Trematomus bernacchii,Emerald rockcod,30.6,0.895662,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,0,24
+0,1,ecol_relev,0,41_1 ,Trematomus bernacchii,Emerald rockcod,47,0.92684,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,ecol_relev,0,41_2 ,Trematomus bernacchii,Emerald rockcod,27.7,0.586409,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,ecol_relev,0,41_3 ,Trematomus bernacchii,Emerald rockcod,22.4,0.586208,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,ecol_relev,0,41_8 ,Trematomus bernacchii,Emerald rockcod,32.1,0.591924,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,2,41_13 ,Trematomus bernacchii,Emerald rockcod,25.9,0.562548,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,2,41_14 ,Trematomus bernacchii,Emerald rockcod,41.1,0.969138,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,2,41_15 ,Trematomus bernacchii,Emerald rockcod,36.7,0.866487,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,2,41_16 ,Trematomus bernacchii,Emerald rockcod,46.3,1.15287,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,2,41_17 ,Trematomus bernacchii,Emerald rockcod,46.5,0.94581,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,2,41_18 ,Trematomus bernacchii,Emerald rockcod,31,0.52297,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,2,41_19 ,Trematomus bernacchii,Emerald rockcod,23.4,0.614952,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,2,41_20 ,Trematomus bernacchii,Emerald rockcod,25.6,0.603904,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,4,41_25 ,Trematomus bernacchii,Emerald rockcod,58.7,1.333664,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,4,41_26 ,Trematomus bernacchii,Emerald rockcod,24.6,0.88806,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,4,41_27 ,Trematomus bernacchii,Emerald rockcod,26.1,0.856341,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,4,41_30 ,Trematomus bernacchii,Emerald rockcod,35.3,1.455066,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,4,41_31 ,Trematomus bernacchii,Emerald rockcod,41.2,1.325816,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,4,41_32 ,Trematomus bernacchii,Emerald rockcod,42.5,1.19595,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,1,41_37 ,Trematomus bernacchii,Emerald rockcod,45.1,1.118931,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,1,41_38 ,Trematomus bernacchii,Emerald rockcod,19.4,0.597908,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,1,41_39 ,Trematomus bernacchii,Emerald rockcod,29.5,0.77467,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,1,41_40 ,Trematomus bernacchii,Emerald rockcod,29.7,0.788832,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,1,41_41 ,Trematomus bernacchii,Emerald rockcod,26.6,0.576422,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,1,41_42 ,Trematomus bernacchii,Emerald rockcod,23.6,0.54634,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,1,41_43 ,Trematomus bernacchii,Emerald rockcod,19.4,0.396148,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,1,acute,1,41_44 ,Trematomus bernacchii,Emerald rockcod,20.7,0.42849,41,41_Trematomus bernacchii_SET1,SET1,juvenile,1.8,24,48
+0,70 ,ecol_relev,0,41_1 ,Trematomus bernacchii,Emerald rockcod,57.9,1.332858,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+0,70 ,ecol_relev,0,41_3 ,Trematomus bernacchii,Emerald rockcod,25.3,0.434654,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+0,65 ,ecol_relev,0,41_4 ,Trematomus bernacchii,Emerald rockcod,51.7,0.767228,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+0,67 ,ecol_relev,0,41_5 ,Trematomus bernacchii,Emerald rockcod,49.7,1.066065,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+0,67 ,ecol_relev,0,41_6 ,Trematomus bernacchii,Emerald rockcod,49.1,1.051722,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+0,67 ,ecol_relev,0,41_7 ,Trematomus bernacchii,Emerald rockcod,46.4,0.937744,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+0,65 ,ecol_relev,0,41_8 ,Trematomus bernacchii,Emerald rockcod,39.3,0.965208,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+2,65 ,acclim,2,41_13 ,Trematomus bernacchii,Emerald rockcod,27.6,0.662952,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+2,65 ,acclim,2,41_14 ,Trematomus bernacchii,Emerald rockcod,40.3,0.586365,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+2,65 ,acclim,2,41_15 ,Trematomus bernacchii,Emerald rockcod,39.6,0.74844,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+2,63 ,acclim,2,41_16 ,Trematomus bernacchii,Emerald rockcod,48,0.96576,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+2,65 ,acclim,2,41_17 ,Trematomus bernacchii,Emerald rockcod,54.5,1.262765,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+2,63 ,acclim,2,41_20 ,Trematomus bernacchii,Emerald rockcod,27.2,0.526864,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+2,59 ,acclim,2,41_21 ,Trematomus bernacchii,Emerald rockcod,15.9,0.226416,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+2,59 ,acclim,2,41_23 ,Trematomus bernacchii,Emerald rockcod,9.8,0.231868,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+4,69 ,acclim,4,41_25 ,Trematomus bernacchii,Emerald rockcod,57.7,0.950319,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+4,69 ,acclim,4,41_26 ,Trematomus bernacchii,Emerald rockcod,26.3,0.890518,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+4,69 ,acclim,4,41_28 ,Trematomus bernacchii,Emerald rockcod,43.5,1.409835,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+4,63 ,acclim,4,41_30 ,Trematomus bernacchii,Emerald rockcod,36.2,0.769974,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+4,65 ,acclim,4,41_32 ,Trematomus bernacchii,Emerald rockcod,42.6,0.714828,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+4,65 ,acclim,4,41_33 ,Trematomus bernacchii,Emerald rockcod,13.6,0.290088,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+4,65 ,acclim,4,41_35 ,Trematomus bernacchii,Emerald rockcod,32.5,0.70395,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+4,65 ,acclim,4,41_36 ,Trematomus bernacchii,Emerald rockcod,9.6,0.255936,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+1,62 ,ecol_relev,1,41_37 ,Trematomus bernacchii,Emerald rockcod,57.4,1.196216,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+1,62 ,ecol_relev,1,41_38 ,Trematomus bernacchii,Emerald rockcod,22.3,0.42147,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+1,62 ,ecol_relev,1,41_39 ,Trematomus bernacchii,Emerald rockcod,31.9,0.368445,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+1,62 ,ecol_relev,1,41_40 ,Trematomus bernacchii,Emerald rockcod,31.2,0.745056,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
+1,63 ,ecol_relev,1,41_41 ,Trematomus bernacchii,Emerald rockcod,30.6,0.895662,41,41_Trematomus bernacchii_SET2,SET2,juvenile,1.8,24,48
 15,6-12 weeks,acute,12,43_Fish 1_FC,Oncorhynchus mykiss,redband trout,0.662,0.094807221,43,43_Oncorhynchus mykiss_POPFC,POPFC,juvenile,NA,48,12
 15,6-12 weeks,acute,12,43_Fish 2_FC,Oncorhynchus mykiss,redband trout,1.178,0.246898542,43,43_Oncorhynchus mykiss_POPFC,POPFC,juvenile,NA,48,12
 15,6-12 weeks,acute,12,43_Fish 3_FC,Oncorhynchus mykiss,redband trout,1.221,0.149422188,43,43_Oncorhynchus mykiss_POPFC,POPFC,juvenile,NA,48,12
