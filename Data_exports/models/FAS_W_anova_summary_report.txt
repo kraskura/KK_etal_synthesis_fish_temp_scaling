@@ -5,16 +5,16 @@
 Model formula:
 lnFAS ~ lnBWg + tempTest + (1 | species) + (0 + tempTest | species) + 
     (1 | species:trial)
-<environment: 0x75dfdd188>
+<environment: 0x7f590c6d0>
 
 ANOVA Type selected automatically: Type II
  **************** ANOVA Table ****************  
 Analysis of Deviance Table (Type II Wald chisquare tests)
 
 Response: lnFAS
-           Chisq Df Pr(>Chisq)    
-lnBWg     13.008  1  0.0003102 ***
-tempTest 485.880  1  < 2.2e-16 ***
+            Chisq Df Pr(>Chisq)    
+lnBWg      8.9516  1   0.002772 ** 
+tempTest 539.4840  1  < 2.2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
@@ -26,27 +26,27 @@ lnFAS ~ lnBWg + tempTest + (1 | species) + (0 + tempTest | species) +
    Data: data.fas.test
 
      AIC      BIC   logLik deviance df.resid 
-   428.2    463.3   -207.1    414.2     1108 
+   277.8    313.0   -131.9    263.8     1108 
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--4.8919 -0.5146  0.0399  0.5282  4.4489 
+-4.5965 -0.5231  0.0422  0.5094  4.6307 
 
 Random effects:
  Groups        Name        Variance Std.Dev.
- species.trial (Intercept) 0.10310  0.3211  
+ species.trial (Intercept) 0.01315  0.1147  
  species       tempTest    0.00000  0.0000  
- species.1     (Intercept) 0.30173  0.5493  
- Residual                  0.06967  0.2639  
+ species.1     (Intercept) 0.18234  0.4270  
+ Residual                  0.06470  0.2544  
 Number of obs: 1115, groups:  species:trial, 56; species, 24
 
 Fixed effects:
              Estimate Std. Error t value
-(Intercept)  2.588900   0.149703  17.294
-lnBWg       -0.068898   0.019103  -3.607
-tempTest    -0.045564   0.002067 -22.043
+(Intercept)  2.443368   0.117789  20.744
+lnBWg       -0.051757   0.017299  -2.992
+tempTest    -0.045394   0.001954 -23.227
 
 Correlation of Fixed Effects:
          (Intr) lnBWg 
-lnBWg    -0.413       
-tempTest -0.387  0.061
+lnBWg    -0.475       
+tempTest -0.466  0.064

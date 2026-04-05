@@ -155,6 +155,77 @@ set_flextable_defaults(
 
 ```
 
+```{r, include=F}
+
+summary(data.rmr.test$tempTest)
+summary(data.rmrER$tempTest)
+
+summary(data.amr.test$tempTest)
+summary(data.amrER$tempTest)
+
+summary(data.as.test$tempTest)
+summary(data.asER$tempTest)
+
+summary(data.fas.test$tempTest)
+summary(data.fasER$tempTest)
+
+# mass
+summary(data.rmr.test$BW_g)
+summary(data.rmrER$BW_g)
+
+summary(data.amr.test$BW_g)
+summary(data.amrER$BW_g)
+
+summary(data.as.test$BW_g)
+summary(data.asER$BW_g)
+
+summary(data.fas.test$BW_g)
+summary(data.fasER$BW_g)
+
+#### 
+summary(dataMR$BW_g)
+summary(dataMR$tempTest)
+
+###
+summary(data.fas$FAS)
+data.fas %>% 
+    filter(DemersPelag == "pelagic" & test_category3 == "warm") %>% 
+  summarise(mean_FAS = mean(FAS))
+data.fas %>% 
+    filter(DemersPelag == "pelagic" & test_category3 == "optimal") %>% 
+  summarise(mean_FAS = mean(FAS))
+data.fas %>% 
+    filter(Climate == "Polar" & test_category3 == "optimal") %>% 
+  summarise(mean_FAS = mean(FAS), n= n())
+data.fas %>% 
+    filter(test_category3 == "optimal") %>% 
+  group_by(Climate) %>% 
+  summarise(mean_FAS = median(FAS), n= n())
+
+data.rmr %>% 
+  group_by(test_category3, lifestage) %>% 
+  summarise(mintemp = min(tempTest), 
+            maxtemp = max(tempTest), 
+            minsize = min(BW_g), 
+            maxsize = max(BW_g) )
+
+data.amr %>% 
+  group_by(test_category3, lifestage) %>% 
+  summarise(mintemp = min(tempTest), 
+            maxtemp = max(tempTest), 
+            minsize = min(BW_g), 
+            maxsize = max(BW_g) )
+
+data.as %>% 
+  group_by(test_category3, lifestage) %>% 
+  summarise(mintemp = min(tempTest), 
+            maxtemp = max(tempTest), 
+            minsize = min(BW_g), 
+            maxsize = max(BW_g) )
+
+
+```
+
 # General summary statistics
 
 ```{r, message  = FALSE}

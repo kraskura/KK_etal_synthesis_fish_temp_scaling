@@ -169,9 +169,7 @@ cat(">>> Datasets witha all data are ready, all lifestages included")
 # 4. ANOVA estimation for wach model 
 #   >>> Interaction term(s) detected — using Type III ANOVA
 
-# Explanation of warnings:  herehere
-#  - 
-
+# outputs pro\duce Figure 3 in the manuscript
 ontogeny_models<-get_phylo_mixed_models(data.rmr.test.modrun = data.rmr.test0,
                                         data.rmrER.modrun = data.rmrER0, 
                                         data.amr.test.modrun = data.amr.test0,
@@ -181,16 +179,18 @@ ontogeny_models<-get_phylo_mixed_models(data.rmr.test.modrun = data.rmr.test0,
                                         data.fas.test.modrun = data.fas.test0,
                                         data.fasER.modrun = data.fasER0)
 # juvenile models
+# outputs produce Figure 5 in the manuscript
 juvenile_models<-get_phylo_mixed_models(data.rmr.test.modrun = data.rmr.test0,
                                         data.rmrER.modrun = data.rmrER0, 
                                         data.amr.test.modrun = data.amr.test0,
-                                        data.amrER.modrun = data.amrER0,                        
+                                        data.amrER.modrun = data.amrER0,              
                                         data.as.test.modrun = data.as.test0,
                                         data.asER.modrun = data.asER0, 
                                         data.fas.test.modrun = data.fas.test0,
                                         data.fasER.modrun = data.fasER0,
                                         lifestage = "juvenile")
 # adult models
+# # outputs produce Figure 4 in the manuscript
 adult_models<-get_phylo_mixed_models(data.rmr.test.modrun = data.rmr.test0,
                                         data.rmrER.modrun = data.rmrER0, 
                                         data.amr.test.modrun = data.amr.test0,
@@ -218,7 +218,6 @@ fas_mod_W<-ontogeny_models[[8]]
 scaling.params<-read.csv(here("./Data_exports/models/scaling_parameters.csv")) # main model
 scaling.params.j<-read.csv(here("./Data_exports/juvenilemodels/scaling_parameters.csv")) # main model
 
-
 # slopes available from  function call or saved new vars
 RMR_slope<-round(as.numeric(scaling.params[scaling.params$performance == "RMR" & 
                             scaling.params$temp_categ == "ecol_relev" &
@@ -244,6 +243,7 @@ RMR_slope_w<-round(as.numeric(scaling.params[scaling.params$performance == "RMR"
 AMR_slope_w<-round(as.numeric(scaling.params[scaling.params$performance == "MMR" & 
                             scaling.params$temp_categ == "warm"&
                             scaling.params$Temperature == 20, "Slope"]),2)
+
 
 
 # ************************************************************************************
@@ -562,9 +562,10 @@ ecolAS1<-ggplot(data=data.as, aes(y=mass_specas, fill=DemersPelag_plot,
   annotate(geom = "text", y = 3.25, x = 3.21, label = "MMR", size = 3, hjust = 0)+
   annotate(geom = "text", y = 2.05, x = 3.21, label = "AS", size = 3, hjust = 0)+
   annotate(geom = "text", y = 1.5, x = 3.31, label = "RMR", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 7.9, x = 1, label = "AS,MMR,RMR***", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 7.9, x = 1, label = "∆BIC: AS,MMR,RMR***", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 7, x = 1, label = "ANOVA: p(AS, MMR) < 0.001, p(RMR) = 0.619", size = 3, hjust = 0)+
   annotate(geom = "text", y = 7.9, x = 5.0, label = "", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 7.55, x = 4.3, label = "OPTIMAL\n TEMPERATURES",
+  annotate(geom = "text", y = 7.9, x = 4.3, label = "OPTIMAL",
            hjust = 1, fontface = "bold", size = 3)+
   annotate(geom = "text", y = 7.9, x = 8.2, label = "WARM",size = 3, hjust = 1, fontface = "bold")+
   geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
@@ -610,7 +611,8 @@ data.amr$BodyShapeI_plot<-factor(data.amr$BodyShapeI_plot, c(
                             "elongated-warm",
                             "fusiform-warm",
                             "short/deep-warm") )
-data.fas$BodyShapeI_plot<-factor(data.fas$BodyShapeI_plot, c(                            
+data.fas$BodyShapeI_plot<-factor(data.fas$BodyShapeI_plot, c(
+                            "eel-like-ecol_relev",
                             "elongated-ecol_relev",
                             "fusiform-ecol_relev",
                             "short/deep-ecol_relev",
@@ -643,8 +645,8 @@ ecolAS2<-ggplot(data=data.as, aes(y=mass_specas, fill=BodyShapeI_plot,
                             "fusiform-warm" = "Fusiform",
                             "short/deep-warm" = "Short/Deep"))+
   ylim(0,8)+
-  annotate(geom = "text", y = 7.9, x = 1, label = "MMR,RMR***", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7.9, x = 5, label = "AS*", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7.9, x = 1, label = "∆BIC: MMR, RMR***", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7, x = 1, label = "ANOVA: p(RMR) < 0.003, p(MMR) = 0.740", size = 3, hjust =0)+
   geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
 ggformat(ecolAS2, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=F, size_text = 11)
 ecolAS2 <- ecolAS2 + theme(
@@ -741,8 +743,8 @@ ecolAS3<-ggplot(data=data.as, aes(y=mass_specas, fill=salintyComb_plot, x=salint
       "Marine; brackish-warm" = "Marine/ \n brackish",
       "Marine; freshwater; brackish-warm" = "All \n salinities"))+
   ylim(0,8)+
-  annotate(geom = "text", y = 7.9, x = 1, label = "MMR,RMR*", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7.9, x = 6.05, label = "", size = 3, hjust= 0)+
+  annotate(geom = "text", y = 7.9, x = 1, label = "∆BIC: RMR*** MMR*", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7, x = 1, label = "ANOVA: p(RMR) = 0.626, p(MMR) = 0.038", size = 3, hjust= 0)+
   geom_vline(xintercept = 5.5, color = "grey", linetype = "dashed")
 ggformat(ecolAS3, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=F, size_text = 11)
 ecolAS3 <- ecolAS3 + theme(
@@ -824,7 +826,8 @@ ecolAS4<-ggplot(data=data.as, aes(y=mass_specas, fill=Climate_plot, x=Climate_pl
                                 "Subtropical-warm" = "Subtropical",
                                 "Tropical-warm" = "Tropical"))+
   ylim(0,8)+
-  annotate(geom = "text", y = 7.9, x = 1, label = "RMR*** MMR*", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7.9, x = 1, label = "∆BIC: RMR*** MMR*", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7, x = 1, label = "ANOVA: p(RMR) = 0.044, p(MMR) = 0.408", size = 3, hjust =0)+
   annotate(geom = "text", y = 7.9, x = 5.0, label = "", size = 3, hjust = 0)+
   geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
 ggformat(ecolAS4, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=F, size_text = 11)
@@ -861,9 +864,11 @@ ecolFAS1<-ggplot(data=data.fas, aes(y=FAS, fill=DemersPelag_plot, x=DemersPelag_
                                   "pelagic-warm" = "Pelagic",
                                   "reef-associated-warm" = "Reef- \n associac."
                                   ))+
-  ylim(0,20)+
-  annotate(geom = "text", y = 19.5, x = 1, label = "*", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 19.5, x = 5.0, label = "", size = 3, hjust = 0)+
+  ylim(0,28)+
+  scale_y_continuous(breaks = c(5, 10, 15, 20, 25))+
+  # annotate(geom = "text", y = 19.5, x = 1, label = "", size = 3, hjust = 0)+
+  # annotate(geom = "text", y = 18, x = 1, label = "ns", size = 3, hjust = 0)+
+  # annotate(geom = "text", y = 19.5, x = 5.0, label = "", size = 3, hjust = 0)+
   geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
 ggformat(ecolFAS1, y_title = bquote("FAS"), x_title = element_blank() , print=T, size_text = 11)
 ecolFAS1 <- ecolFAS1 + theme(
@@ -884,6 +889,7 @@ ecolFAS1
 ### Body shape FAS -----------
 # add empty layers for plotting x-axis. 
 data.fas$BodyShapeI_plot<-factor(data.fas$BodyShapeI_plot, c(
+  "eel-like-ecol_relev",
   "elongated-ecol_relev",
   "fusiform-ecol_relev",
   "short/deep-ecol_relev",
@@ -895,17 +901,21 @@ ecolFAS2<-ggplot(data=data.fas, aes(FAS, fill=BodyShapeI_plot, x=BodyShapeI_plot
   geom_violin(alpha = 1, outlier.size = 0.2, size = 0.2, drop = FALSE)+
   scale_fill_manual(values = c("#fde725", "#5ec962", "#440154",
                                "#fde725", "#5ec962", "#440154"))+
-  scale_x_discrete(labels=c("elongated-ecol_relev" = "Elongated",
+  scale_x_discrete(labels=c("eel-like-ecol_relev" = "Eel-like",
+                            "elongated-ecol_relev" = "Elongated",
                             "fusiform-ecol_relev" = "Fusiform",
                             "short/deep-ecol_relev" = "Short/Deep",
                             "elongated-warm" = "Elongated",
                             "fusiform-warm" = "Fusiform",
                             "short/deep-warm" = "Short/Deep"), drop = FALSE)+
                    # expand = expansion(mult = c(0.5, 0)))+
-  ylim(0,20)+
-  annotate(geom = "text", y = 19.5, x = 1, label = "*", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 19.5, x = 4.05, label = "", size = 3, hjust = 0)+
-  geom_vline(xintercept =3.5, color = "grey", linetype = "dashed")
+  ylim(0,28)+
+  scale_y_continuous(breaks = c(5, 10, 15, 20, 25))+
+  annotate(geom = "text", y = 25, x = 1, label = "∆BIC: FAS*", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 21, x = 1, label = "ANOVA: FAS p = 0.690", size = 3, hjust = 0)+
+  # annotate(geom = "text", y = 18, x = 1, label = "ns", size = 3, hjust = 0)+
+  # annotate(geom = "text", y = 19.5, x = 4.05, label = "", size = 3, hjust = 0)+
+  geom_vline(xintercept =4.5, color = "grey", linetype = "dashed")
 ggformat(ecolFAS2, y_title = bquote("FAS"), x_title = element_blank() , print=F, size_text = 11)
 ecolFAS2 <- ecolFAS2 + theme( 
   plot.title = element_text(face = "bold", size=15, hjust = 0.5),
@@ -940,9 +950,10 @@ ecolFAS3<-ggplot(data=data.fas, aes(FAS, fill=salintyComb_plot, x=salintyComb_pl
       "Marine-warm" = "Marine",
       "Marine; brackish-warm" = "Marine/ \n brackish",
       "Marine; freshwater; brackish-warm" = "All \n salinities"))+
-  ylim(0,20)+
-  annotate(geom = "text", y = 19.5, x = 1, label = "", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 19.5, x = 6.05, label = "", size = 3, hjust = 0)+
+  ylim(0,28)+
+  scale_y_continuous(breaks = c(5, 10, 15, 20, 25))+
+  # annotate(geom = "text", y = 19.5, x = 1, label = "", size = 3, hjust = 0)+
+  # annotate(geom = "text", y = 19.5, x = 6.05, label = "", size = 3, hjust = 0)+
   geom_vline(xintercept = 5.5, color = "grey", linetype = "dashed")
 ggformat(ecolFAS3, y_title = bquote("FAS"), x_title = element_blank() , print=F, size_text = 11)
 ecolFAS3 <- ecolFAS3 + theme(
@@ -973,9 +984,12 @@ ecolFAS4<-ggplot(data=data.fas, aes(FAS, fill=Climate_plot, x=Climate_plot))+
                                 "Temperate-warm" = "Temperate",
                                 "Subtropical-warm" = "Subtropical",
                                 "Tropical-warm" = "Tropical"))+
-  ylim(0,20)+
-  annotate(geom = "text", y = 19.5, x = 1, label = "*", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 19.5, x = 5, label = "", size = 3, hjust = 0)+
+  ylim(0,28)+
+  scale_y_continuous(breaks = c(5, 10, 15, 20, 25))+
+  annotate(geom = "text", y = 25, x = 1, label = "∆BIC: FAS ***", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 21, x = 1, label = "ANOVA: FAS p < 0.001 ", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 25, x = 5, label = "∆BIC: FAS *", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 21, x = 5, label = "ANOVA: FAS p < 0.001 ", size = 3, hjust = 0)+
   geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
 ggformat(ecolFAS4, y_title = bquote("FAS"), x_title = element_blank() , print=F, size_text = 11)
 ecolFAS4 <- ecolFAS4 + theme(
@@ -1052,12 +1066,20 @@ ggsave(filename = paste("./Figures/Suppl_temp_mass_spec.png", sep=""),
 
 
 # Boxplots: FAS, AS, MR, mass-independent values ----------
-fas_boxplot<-ggplot(data=data.fas, aes(y=FAS, x = test_category,  fill=test_category3))+
+# make FAS mass specific 
+# warm (-0.069)
+# optimal @ 20C  (0.0036)
+data.fas$mass_specfas<-data.fas$FAS/(data.fas$BW_g^0.0036) # optimal
+data.fas$mass_specfas[data.fas$test_category3 == "warm"]<- # warm only
+  data.fas$FAS[data.fas$test_category3 == "warm"]/(data.fas$BW_g[data.fas$test_category3 == "warm"]^-0.069)
+
+
+fas_boxplot<-ggplot(data=data.fas, aes(y=mass_specfas, x = test_category,  fill=test_category3))+
   geom_boxplot(show.legend = F)+
   scale_fill_manual(values=cols.fas)+
-  ylim(0,50)+
+  ylim(0,28)+
   scale_x_discrete(labels=c("acclim" = "Acclimated \n warm", "acute" = "Acute \n warm", "ecol_relev" = "Optimal"))
-ggformat(fas_boxplot, y_title = expression(FAS~(MMR/RMR)), x_title = "", print = F)
+ggformat(fas_boxplot, y_title = expression(FAS~(scaled)), x_title = "", print = F)
 fas_boxplot<-fas_boxplot+theme(legend.position = "none")
 
 rmr_boxplot<-ggplot(data=data.rmr, aes(y=mass_specrmr, x = test_category, fill=test_category))+
@@ -1074,12 +1096,12 @@ amr_boxplot<-ggplot(data=data.amr, aes(y=mass_specamr, x = test_category, fill=t
 ggformat(amr_boxplot, y_title = expression(MMR~(mgO[2]~g^-1~h^-1)), x_title = "", print = F)
 amr_boxplot<-amr_boxplot+theme(legend.position = "none")
 
-fas_boxplot2<-ggplot(data=data.fas, aes(y=FAS, x = test_category3,  fill=test_category3))+
+fas_boxplot2<-ggplot(data=data.fas, aes(y=mass_specfas, x = test_category3,  fill=test_category3))+
   geom_boxplot(show.legend = F)+
   scale_fill_manual(values=cols.fas)+
-  ylim(0,50)+
+  ylim(0,28)+
   scale_x_discrete(labels=c("warm" = "Warm", "ecol_relev" = "Optimal"))
-ggformat(fas_boxplot2, y_title = expression(FAS~(MMR/RMR)), x_title = "", print = F)
+ggformat(fas_boxplot2, y_title = expression(FAS~(scaled)), x_title = "", print = F)
 fas_boxplot2<-fas_boxplot2+theme(legend.position = "none")
 
 rmr_boxplot2<-ggplot(data=data.rmr, aes(y=mass_specrmr, x = test_category3, fill=test_category3))+
@@ -1107,4 +1129,19 @@ cowplot:::plot_grid(amr_boxplot,rmr_boxplot,fas_boxplot,
 ggsave(filename = "./Figures/Supl_fig1_boxplots_Phylo.png", width = 12.5, height =10)
 
 
+# quick stats
+# pelagic fish AS
+data.as %>% 
+  group_by(test_category3, DemersPelag) %>% 
+  summarize(minval= min(mass_specas),
+            maxVAL = max(mass_specas),
+            meanval = mean(mass_specas))
 
+
+data.fas %>% 
+  group_by(test_category3, DemersPelag) %>% 
+  summarize(minval= min(FAS),
+            maxVAL = max(FAS),
+            meanval = mean(FAS))
+
+summary(data.fas$FAS)

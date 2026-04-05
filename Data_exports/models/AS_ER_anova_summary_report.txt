@@ -5,7 +5,7 @@
 Model formula:
 lnAS ~ lnBWg * tempTest + (1 | species) + (0 + lnBWg | species:trial) + 
     (1 | species:trial)
-<environment: 0x75dfdd188>
+<environment: 0x7f590c6d0>
 
 ANOVA Type selected automatically: Type III
  **************** ANOVA Table ****************  
@@ -13,10 +13,10 @@ Analysis of Deviance Table (Type III Wald chisquare tests)
 
 Response: lnAS
                    Chisq Df Pr(>Chisq)    
-(Intercept)       9.4476  1   0.002114 ** 
-lnBWg          1645.5402  1  < 2.2e-16 ***
-tempTest        205.5251  1  < 2.2e-16 ***
-lnBWg:tempTest   69.2880  1  < 2.2e-16 ***
+(Intercept)       9.5831  1   0.001964 ** 
+lnBWg          1649.6474  1  < 2.2e-16 ***
+tempTest        208.0650  1  < 2.2e-16 ***
+lnBWg:tempTest   70.5640  1  < 2.2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
@@ -28,26 +28,26 @@ lnAS ~ lnBWg * tempTest + (1 | species) + (0 + lnBWg | species:trial) +
    Data: data.asER
 
      AIC      BIC   logLik deviance df.resid 
-   933.6    982.4   -458.8    917.6     3286 
+   939.0    987.8   -461.5    923.0     3286 
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--8.3537 -0.4716  0.0486  0.5488  3.5845 
+-8.3453 -0.4716  0.0495  0.5510  3.5813 
 
 Random effects:
  Groups          Name        Variance Std.Dev.
- species.trial   (Intercept) 0.007484 0.08651 
- species.trial.1 lnBWg       0.001283 0.03582 
- species         (Intercept) 2.447376 1.56441 
- Residual                    0.067683 0.26016 
+ species.trial   (Intercept) 0.007213 0.08493 
+ species.trial.1 lnBWg       0.001285 0.03584 
+ species         (Intercept) 2.429175 1.55858 
+ Residual                    0.067829 0.26044 
 Number of obs: 3294, groups:  species:trial, 140; species, 64
 
 Fixed effects:
                 Estimate Std. Error t value
-(Intercept)    -2.212477   0.719809  -3.074
-lnBWg           1.046613   0.025801  40.565
-tempTest        0.068745   0.004795  14.336
-lnBWg:tempTest -0.009922   0.001192  -8.324
+(Intercept)    -2.220137   0.717176  -3.096
+lnBWg           1.047634   0.025794  40.616
+tempTest        0.069144   0.004794  14.424
+lnBWg:tempTest -0.010012   0.001192  -8.400
 
 Correlation of Fixed Effects:
             (Intr) lnBWg  tmpTst

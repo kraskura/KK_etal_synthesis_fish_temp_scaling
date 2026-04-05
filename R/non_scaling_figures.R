@@ -308,7 +308,7 @@ hist.plot<-cowplot:::plot_grid(plot_hist_amr, plot_hist_amr_T,
                                align = "hv",
                                axis = "l",
                                nrow = 3,
-                               ncol = 2, label = "AUTO") 
+                               ncol = 2, labels = "AUTO") 
 ggsave(filename = paste("./Figures/Suppl_Size_hist.png", sep=""),
           hist.plot, width = 13, height = 9, units = "in")
 
@@ -339,6 +339,18 @@ MRcorrel1.large<-ggplot(data.amr[data.amr$BW_g>=1000,], aes(x=RMR, y=AMR, group=
   facet_grid(.~test_category3)
 ggformat(MRcorrel1.large, title = "", y_title = expression(MMR~(mg~O[2]~h^-1)), x_title = expression(RMR~(mg~O[2]~h^-1)), print = F, size_text = 12)
 
+# all
+MRcorrel1<-ggplot(data.amr, aes(x=RMR, y=AMR, group=test_category, fill=tempTest, color = tempTest, shape=test_category)) +
+  geom_point(alpha=1,shape=1,  show.legend = TRUE, size=1)+
+  geom_abline(slope = 1, intercept = 0, lty = "dashed")+
+  scale_fill_viridis_c(option = "C")+
+  scale_color_viridis_c(option = "C")+
+  scale_shape_manual(values= c(22,23,24))+
+  facet_grid(.~test_category3)
+ggformat(MRcorrel1, title = "", y_title = expression(MMR~(mg~O[2]~h^-1)),
+         x_title = expression(RMR~(mg~O[2]~h^-1)), print = F, size_text = 12)
+
+
 # inset_plot<-ggdraw(MRcorrel1.large + theme_half_open( font_size =20)) + theme(legend.position="none") +
 #   draw_plot(MRcorrel1.small + theme(legend.position="none") , 0.57, .58, .42, .4)
 
@@ -348,6 +360,13 @@ cowplot:::plot_grid(MRcorrel1.small,MRcorrel1.large,
                          nrow = 2,
                          ncol = 1, labels = c("A (< 1000 g)", "B (>= 1000 g)")) %>%
 ggsave(filename = paste("./Figures/suppl_MMRvsRMR.png"), width = 7, height = 7)
+
+cowplot:::plot_grid(MRcorrel1,
+                         align = "hv",
+                         axis = "l",
+                         nrow = 1,
+                         ncol = 1, labels = c("All fish")) %>%
+ggsave(filename = paste("./Figures/suppl_MMRvsRMR_all.png"), width = 7, height = 3)
 
 AScorrel1.small<-ggplot(data.amr[data.amr$BW_g<1000,],
                         aes(x=AMR, y=AS, group=test_category3,
@@ -374,6 +393,26 @@ AScorrel1.large<-ggplot(data.amr,
   scale_x_continuous(breaks = c(0, 1000, 3000, 5000))+
   geom_abline(slope = 1, intercept = 0, lty = "dashed")
 ggformat(AScorrel1.large, title = "", x_title = expression(MMR~(mg~O[2]~h^-1)), y_title = expression(AS~(mg~O[2]~h^-1)), print = F, size_text = 12)
+
+AScorrel1<-ggplot(data.amr, aes(y=AS, x=AMR, group=test_category,
+                            fill=tempTest, shape=test_category,
+                            color = tempTest)) +
+  geom_point(alpha=1,shape=1,  show.legend = TRUE, size=1)+
+  scale_fill_viridis_c(option = "C")+
+  scale_color_viridis_c(option = "C")+
+  scale_shape_manual(values= c(22,23,24))+
+  facet_grid(.~test_category3)+
+  geom_abline(slope = 1, intercept = 0, lty = "dashed")
+ggformat(AScorrel1, title = "", x_title = expression(MMR~(mg~O[2]~h^-1)),
+         y_title = expression(AS~(mg~O[2]~h^-1)), print = F, size_text = 12)
+
+cowplot:::plot_grid(AScorrel1,
+                    align = "hv",
+                    axis = "l",
+                    nrow = 1,
+                    ncol = 1, labels = c("All fish")) %>%
+  # fig_part4.1
+  ggsave(filename = "./Figures/suppl_MMRvsAS_all.png", width = 7, height = 3)
 
 cowplot:::plot_grid(AScorrel1.small,AScorrel1.large,
                     align = "hv",
@@ -409,6 +448,18 @@ AScorrel1.large.rmr<-ggplot(data.amr,
   geom_abline(slope = 1, intercept = 0, lty = "dashed")
 ggformat(AScorrel1.large.rmr, title = "", x_title = expression(RMR~(mg~O[2]~h^-1)), y_title = expression(AS~(mg~O[2]~h^-1)), print = F, size_text = 12)
 
+AScorrel1.rmr<-ggplot(data.amr, aes(y=AS, x=RMR, group=test_category,
+                                fill=tempTest, shape=test_category, 
+                                color = tempTest)) +
+  geom_point(alpha=1,shape=1,  show.legend = TRUE, size=1)+
+  scale_fill_viridis_c(option = "C")+
+  scale_color_viridis_c(option = "C")+
+  scale_shape_manual(values= c(22,23,24))+
+  facet_grid(.~test_category3)+
+  geom_abline(slope = 1, intercept = 0, lty = "dashed")
+ggformat(AScorrel1.rmr, title = "", x_title = expression(RMR~(mg~O[2]~h^-1)), y_title = expression(AS~(mg~O[2]~h^-1)), print = F, size_text = 12)
+
+
 cowplot:::plot_grid(AScorrel1.small.rmr,AScorrel1.large.rmr,
                     align = "hv",
                     axis = "l",
@@ -416,9 +467,16 @@ cowplot:::plot_grid(AScorrel1.small.rmr,AScorrel1.large.rmr,
                     ncol = 1, labels = c("A (< 1000 g)", "B (>= 1000 g)")) %>%
   ggsave(filename = "./Figures/suppl_RMRvsAS.png", width = 7, height = 7)
 
+cowplot:::plot_grid(AScorrel1.rmr,
+                    align = "hv",
+                    axis = "l",
+                    nrow = 1,
+                    ncol = 1, labels = c("All fish")) %>%
+  ggsave(filename = "./Figures/suppl_RMRvsAS_all.png", width = 7, height = 3)
+
+
 
 # fas in pelagic fish 
 # summary(data.fasER[data.fasER$DemersPelag == "pelagic","FAS"])
 # summary(data.fas.test[data.fas.test$DemersPelag == "pelagic","FAS"])
-
-
+view(data.amr[which(data.amr$AS<data.amr$RMR),])

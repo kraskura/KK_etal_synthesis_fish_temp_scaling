@@ -3,54 +3,49 @@
 ============================================================
 
 Model formula:
-log(FAS) ~ lnBWg * tempTest + (1 | species) + (0 + tempTest | 
+log(FAS) ~ lnBWg + tempTest + (1 | species) + (0 + tempTest | 
     species) + (1 | species:trial)
-<environment: 0x75e1972d8>
+<environment: 0x80ec4f3b8>
 
-ANOVA Type selected automatically: Type III
+ANOVA Type selected automatically: Type II
  **************** ANOVA Table ****************  
-Analysis of Deviance Table (Type III Wald chisquare tests)
+Analysis of Deviance Table (Type II Wald chisquare tests)
 
 Response: log(FAS)
-                 Chisq Df Pr(>Chisq)    
-(Intercept)    124.802  1  < 2.2e-16 ***
-lnBWg           23.711  1  1.120e-06 ***
-tempTest         0.499  1     0.4799    
-lnBWg:tempTest  25.493  1  4.439e-07 ***
+           Chisq Df Pr(>Chisq)    
+lnBWg     1.2758  1     0.2587    
+tempTest 32.1090  1  1.458e-08 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
  ****************  Model Summary **************** 
 Linear mixed model fit by maximum likelihood  ['lmerMod']
-Formula: 
-log(FAS) ~ lnBWg * tempTest + (1 | species) + (0 + tempTest |  
+Formula: log(FAS) ~ lnBWg + tempTest + (1 | species) + (0 + tempTest |  
     species) + (1 | species:trial)
    Data: data.fasER
 
      AIC      BIC   logLik deviance df.resid 
-  1258.8   1307.6   -621.4   1242.8     3286 
+   605.4    637.8   -295.7    591.4      744 
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--4.4274 -0.5147 -0.0073  0.4845 12.7861 
+-3.5103 -0.5029  0.0188  0.4732  4.8797 
 
 Random effects:
- Groups        Name        Variance  Std.Dev.
- species.trial (Intercept) 4.315e-02 0.207715
- species       tempTest    8.508e-05 0.009224
- species.1     (Intercept) 1.256e-01 0.354331
- Residual                  7.441e-02 0.272788
-Number of obs: 3294, groups:  species:trial, 140; species, 64
+ Groups        Name        Variance Std.Dev.
+ species.trial (Intercept) 0.01372  0.1171  
+ species       tempTest    0.00000  0.0000  
+ species.1     (Intercept) 0.05413  0.2327  
+ Residual                  0.11796  0.3435  
+Number of obs: 751, groups:  species:trial, 33; species, 17
 
 Fixed effects:
-                Estimate Std. Error t value
-(Intercept)     1.476810   0.132195  11.171
-lnBWg           0.128451   0.026379   4.869
-tempTest       -0.005130   0.007262  -0.706
-lnBWg:tempTest -0.006239   0.001236  -5.049
+             Estimate Std. Error t value
+(Intercept)  2.137524   0.164496  12.994
+lnBWg       -0.022669   0.020070  -1.130
+tempTest    -0.031706   0.005595  -5.666
 
 Correlation of Fixed Effects:
-            (Intr) lnBWg  tmpTst
-lnBWg       -0.747              
-tempTest    -0.663  0.566       
-lnBWg:tmpTs  0.709 -0.932 -0.591
+         (Intr) lnBWg 
+lnBWg    -0.644       
+tempTest -0.806  0.272
