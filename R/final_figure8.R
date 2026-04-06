@@ -1,3 +1,7 @@
+# Author: Krista Kraskura 
+# Date: april 6 
+# theme functions and color assignment functions generated with help from Claude code AI; data not shared only the conceptual functionality of the code. 
+
 library(ggplot2)
 library(dplyr)
 library(cowplot)
@@ -100,9 +104,8 @@ dat_inset2 <- assign_colors(dat_inset2,
                             n_temp = 30)
 
 
-# -------------------------------------------------------
-# --- X bounds and segment endpoints ---
-# -------------------------------------------------------
+
+# --- X bounds and segment endpoints --------------------------------
 x_min <- -5
 x_max <-  7
 
@@ -140,9 +143,7 @@ y_lim <- range(c(dat_main$y_start,   dat_main$y_end,
 
 x_lim <- c(x_min, x_max)
 
-# -------------------------------------------------------
-# --- Themes ---
-# -------------------------------------------------------
+# --- Themes ------------------------------------------
 panel_theme <- theme_classic(base_size = 11, base_family = base_font) +
   theme(
     axis.text.y      = element_text(size = 11, colour = "black", family = base_font),
