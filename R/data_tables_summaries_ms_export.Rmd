@@ -157,6 +157,11 @@ set_flextable_defaults(
 
 ```{r, include=F}
 
+summary(data.amr$h_in_respo)
+summary(data.rmr$h_in_respo)
+summary(dataMR$BW_g)
+summary(dataMR$tempTest)
+
 summary(data.rmr.test$tempTest)
 summary(data.rmrER$tempTest)
 

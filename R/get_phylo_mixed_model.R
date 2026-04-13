@@ -1,4 +1,4 @@
-# Author: Krista Kraskura
+
 # Description: 
 #   - phylogentic models 
 #   - make life stage specific main text figures
@@ -1687,8 +1687,8 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
   
     if(is.null(lifestage)){
       AMRmodel_plot1<-AMRmodel_plot1+
-          annotate("text",  x = 8, y = 10,
-                     label = bquote("\u2193" ~ "with" ~ degree*C),
+          annotate("text",  x = 7.5, y = 10,
+                     label = bquote("\u2193" ~ "with" ~ "\u2191" ~ degree*C),
                      size=3.5, hjust=0,  color = cols.amr[1])+
           annotate("text", label = "Ontogenetic",
             x = 4, y = -5,
@@ -1704,8 +1704,8 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
     }else{
       if(lifestage == "juvenile"){
         AMRmodel_plot1<-AMRmodel_plot1+
-          annotate("text",  x = 8, y = 11.7,
-           label = bquote("\u2193" ~ "with" ~ degree*C),
+          annotate("text",  x = 7.5, y = 11.7,
+           label = bquote("\u2193" ~ "with" ~ "\u2191" ~ degree*C),
            size=3.5, hjust=0,  color = "grey30")+
           annotate("text", label = "Juveniles",
             x = 5, y = -5,
@@ -1720,8 +1720,8 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
       }
       if(lifestage == "adult"){
         AMRmodel_plot1<-AMRmodel_plot1+
-          annotate("text",  x = 8, y = 11.7,
-           label = bquote("\u2191" ~ "with" ~ degree*C),
+          annotate("text",  x = 7.5, y = 11.7,
+           label = bquote("\u2191" ~ "with" ~ "\u2191" ~ degree*C),
            size=3.5, hjust=0,  color = "grey30")+
           annotate("text", label = "Adults",
             x = 5, y = -5,
@@ -1782,8 +1782,8 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
   
     if(is.null(lifestage)){
       RMRmodel_plot1<-RMRmodel_plot1+
-        annotate("text", x = 8, y = 11.7,
-             label = bquote("\u2191" ~ "with" ~ degree*C),
+        annotate("text", x = 7.5, y = 11.7,
+             label = bquote("\u2191" ~ "with" ~ "\u2191" ~ degree*C),
              size=3.5, hjust=0,  color = "grey30")+
         annotate("text",  x = -5.2, y = 11.5,
              label = bquote(Optimal:~italic(b)[RMR*"@20" * degree*C] == .(round(scaling_params_rmr_er$Slope,3))),
@@ -1861,24 +1861,24 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
   
     if(is.null(lifestage)){
       ASmodel_plot1<-ASmodel_plot1+
-        annotate("text",  x = 8, y = 11.7,
-             label = bquote("\u2193" ~ "with" ~ degree*C),
+        annotate("text",  x = 7.5, y = 11.7,
+             label = bquote("\u2193" ~ "with" ~ "\u2191" ~ degree*C),
              size=3.5, hjust=0,  color = "grey30")+
-        annotate("text",  x = 8, y = 10,
-             label = bquote("\u2193" ~ "with" ~ degree*C),
+        annotate("text",  x = 7.5, y = 10,
+             label = bquote("\u2193" ~ "with" ~ "\u2191" ~ degree*C),
              size=3.5, hjust=0,  color = cols.as[1])+
         annotate("text",  x = -5.2, y = 11.5,
-             label = bquote(Optimal:~italic(b)[AS] == .(round(scaling_params_as_er$Slope,3))),
+             label = bquote(Optimal:~italic(b)[AS*"@20" * degree*C] == .(round(scaling_params_as_er$Slope,3))),
              size=3.5, hjust=0, family="Helvetica", color = "grey30")+
         annotate("text",  x = -5.2, y = 9.8,
-             label = bquote(Warm:~italic(b)[AS] == .(round(scaling_params_as_w$Slope,3))),
+             label = bquote(Warm:~italic(b)[AS*"@20" * degree*C] == .(round(scaling_params_as_w$Slope,3))),
              size=3.5, hjust=0, family="Helvetica", color = cols.as[1])
       
     }else{
       if(lifestage == "juvenile"){
         ASmodel_plot1<-ASmodel_plot1+
-          annotate("text",  x = 8, y = 11.7,
-             label = bquote("\u2193" ~ "with" ~ degree*C),
+          annotate("text",  x = 7.5, y = 11.7,
+             label = bquote("\u2193" ~ "with" ~ "\u2191" ~ degree*C),
              size=3.5, hjust=0,  color = "grey30")+
         annotate("text",  x = -5.2, y = 11.5,
              label = bquote(Optimal:~italic(b)[AS*"@20" * degree*C] == .(round(scaling_params_as_er$Slope,3))),
@@ -1890,8 +1890,8 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
       }
       if(lifestage == "adult"){
         ASmodel_plot1<-ASmodel_plot1+
-          annotate("text",  x = 8, y = 10,
-             label = bquote("\u2191" ~ "with" ~ degree*C),
+          annotate("text",  x = 7.5, y = 10,
+             label = bquote("\u2193" ~ "with" ~ "\u2191" ~ degree*C),
              size=3.5, hjust=0,  color = cols.as[1])+
           annotate("text",  x = -5.2, y = 11.5,
                label = bquote(Optimal:~italic(b)[AS] == .(round(scaling_params_as_er$Slope,3))),
@@ -1951,7 +1951,7 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
     if(is.null(lifestage)){
       FASmodel_plot1<-FASmodel_plot1+
         annotate("text",  x = 7.5, y = 11.7,
-             label = bquote("\u2193" ~ "with" ~ degree*C),
+             label = bquote("\u2193" ~ "with" ~ "\u2191" ~ degree*C),
              size=3.5, hjust=0,  color = "grey30")+
         annotate("text",  x = -5.2, y = 11.5,
              label = bquote(Optimal:~italic(b)[FAS*"@20" * degree*C] == .(round(scaling_params_fas_er$Slope,3))),
@@ -1963,8 +1963,8 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
     }else{
       if(lifestage=="juvenile"){
         FASmodel_plot1<-FASmodel_plot1+
-          annotate("text",  x = 8, y = 11.7,
-             label = bquote("\u2193" ~ "with" ~ degree*C),
+          annotate("text",  x = 7.5, y = 11.7,
+             label = bquote("\u2193" ~ "with" ~ "\u2191" ~ degree*C),
              size=3.5, hjust=0,  color = "grey30")+
           annotate("text",  x = -5.2, y = 11.5,
                label = bquote(Optimal:~italic(b)[FAS*"@20" * degree*C] == .(round(scaling_params_fas_er$Slope,3))),

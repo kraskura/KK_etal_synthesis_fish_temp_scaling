@@ -1,4 +1,4 @@
-# Author: Krista Kraskura
+
 # Description: 
 #   Supplemental material:
 #     - histograms 

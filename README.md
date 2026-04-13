@@ -2,9 +2,7 @@
 
 Title: *Variation in metabolic scaling reveals aerobic constraints with temperature in fishes."*
 
-Authors: Krista Kraskura\*, Christopher L. Jerde, Erika J. Eliason
-
-Contact Info: Krista Kraskura, kkraskura\@towson.edu
+GitHub Repository: https://github.com/kraskura/KK_etal_synthesis_fish_temp_scaling
 
 ------------------------------------------------------------------------
 

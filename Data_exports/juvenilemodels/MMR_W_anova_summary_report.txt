@@ -5,7 +5,7 @@
 Model formula:
 lnAMR ~ lnBWg + tempTest + (1 | species) + (0 + lnBWg | species) + 
     (1 | species:trial)
-<environment: 0x7b8c9a388>
+<environment: 0x8972cce08>
 
 ANOVA Type selected automatically: Type II
  **************** ANOVA Table ****************  
@@ -20,7 +20,8 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 
  ****************  Model Summary **************** 
 Linear mixed model fit by maximum likelihood  ['lmerMod']
-Formula: lnAMR ~ lnBWg + tempTest + (1 | species) + (0 + lnBWg | species) +  
+Formula: 
+lnAMR ~ lnBWg + tempTest + (1 | species) + (0 + lnBWg | species) +  
     (1 | species:trial)
    Data: data.amr.test
 

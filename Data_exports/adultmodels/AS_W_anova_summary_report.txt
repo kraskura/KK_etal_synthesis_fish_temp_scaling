@@ -5,7 +5,7 @@
 Model formula:
 lnAS ~ lnBWg * tempTest + (1 | species) + (0 + lnBWg | species:trial) + 
     (1 | species:trial)
-<environment: 0x80ec4f3b8>
+<environment: 0x8a162a0b0>
 
 ANOVA Type selected automatically: Type III
  **************** ANOVA Table ****************  

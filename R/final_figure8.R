@@ -1,4 +1,4 @@
-# Author: Krista Kraskura 
+
 # Date: april 6 
 # theme functions and color assignment functions generated with help from Claude code AI; data not shared only the conceptual functionality of the code. 
 
@@ -6,6 +6,7 @@ library(ggplot2)
 library(dplyr)
 library(cowplot)
 library(colorspace)
+library(here)
 
 base_font <- "Helvetica"
 
@@ -807,5 +808,8 @@ composed<-cowplot::plot_grid(composed_amr_er,
                    composed_as_w,
                    composed_fas_er,
                    composed_fas_w, 
-                   nrow = 4, ncol = 2) 
+                   nrow = 4, ncol = 2,
+                   labels = "AUTO", 
+                   label_x = c(0.21, 0.21), 
+                   label_y = c(0.95, 0.95, 0.95, 0.95)) 
 ggsave(here("./Figures/Figure8.png"), composed,  width = 6.5, height = 12, dpi = 300)

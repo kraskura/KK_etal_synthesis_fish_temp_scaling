@@ -1,4 +1,4 @@
-# Author: Krista Kraskura
+
 # Description: 
 #  - estimating species level scaling relationships (custom function, simple GLM)
 #     - export all scaling parameters 
@@ -601,16 +601,20 @@ rmr.WARM.ER.good<-
                "","Short/deep",
                "","Fusiform",
                "","Elongated"))+
+
+  geom_point(pch=21, stroke=0.1, alpha=0.6, color = "black")+
+  geom_point(data = ecology_data.AMRd.g,
+             pch=21,  stroke=0.1, alpha=0.6, color = "black")+
   geom_text(aes(label = slope,  x = 0.25, color=interaction(test_category3, MR)),
             family = "Helvetica",  size=3.5, hjust = 1)+
   geom_text(data = ecology_data.AMRd.g, aes(label = slope,  x = 0.3),
             family = "Helvetica",  size=3.5, hjust = 0)+
   
   geom_line(arrow = arrow(length=unit(0,"cm"), ends="last", type = "closed"),
-            linewidth = 0.7, color = "grey", alpha = 0.7)+
+            linewidth = 0.7, color = cols.rmr[2], alpha = 0.7)+
   geom_line(data = ecology_data.AMRd.g,
             arrow = arrow(length=unit(0,"cm"), ends="last", type = "closed"),
-            linewidth = 0.7, color = "grey", alpha = 0.7)+
+            linewidth = 0.7, color = cols.amr[2], alpha = 0.7)+
 
   geom_text(data = ecology_data.RMRd.g,
             mapping = aes(label =  n_data_n_species, x = 1.5, color=interaction(test_category3, MR)),
@@ -621,7 +625,7 @@ rmr.WARM.ER.good<-
   
   annotate("text", x = 0.135, y = 23, color = "black", label = expression(italic(b)[RMR]~italic(b)[MMR]),
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
-  annotate("text", x = 1.30, y = 23, color = "black", label = expression(n~(data*(species))),
+  annotate("text", x = 1.30, y = 23, color = "black", label = expression(N~indiv~(species)),
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
   annotate("text", x = 0.45, y = 22, color = "black", label = 'OPTIMAL',
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
@@ -630,24 +634,20 @@ rmr.WARM.ER.good<-
   geom_linerange(data = ecology_data.RMRd.g,
                  aes(xmin = as.numeric(slope.ciL),
                      xmax = as.numeric(slope.ciH)),
-                 alpha = 1, linewidth = 0.5)+
+                 alpha = 1, linewidth = 0.7)+
   geom_linerange(data = ecology_data.AMRd.g,
                  mapping = aes(xmin = as.numeric(slope.ciL),
                                xmax = as.numeric(slope.ciH)),
-                 alpha = 1, linewidth = 0.5)+
+                 alpha = 1, linewidth = 0.7)+
   
   geom_vline(xintercept = 1, lty = "dotted", color="grey50")+
   geom_vline(xintercept = 0.75, lty = "dotted", color="grey50")+
 
-  geom_point(pch=21, stroke=0.1, alpha=0.7, color = "black")+
-  geom_point(data = ecology_data.AMRd.g,
-             pch=21,  stroke=0.1, alpha=0.7, color = "black")+
-
   scale_color_manual(values=c("black",cols.rmr[1],"black", cols.amr[2]))+
-  scale_fill_manual(values=c("black",cols.rmr[1], "black", cols.amr[2]))+
+  scale_fill_manual(values=c("black",cols.rmr[1], "black", cols.amr[2]))+# c("white", "white", "white", "white"))+
   xlab(expression(Slope~value~(italic(b))))+
   scale_x_continuous(limits = c(0.13,1.8))+
-  scale_size_manual(values = c(4, 2))+
+  scale_size_manual(values = c(3,3))+
   # scale_y_discrete(limits=rev)+
   theme_classic()+
   theme(axis.text.y = element_text( family="Helvetica", color = "black", size = 12,
@@ -660,9 +660,9 @@ rmr.WARM.ER.good<-
         axis.ticks.y=element_line(linewidth=0.5),
         axis.ticks.x=element_line(linewidth=0),
         text=element_text(size=12,  family="Helvetica"), 
-        plot.margin = margin(2, 1, 1, 1, "cm"))+
+        plot.margin = margin(1, 1, -3, 1, "cm"))+
   coord_cartesian(clip = "off")
-# rmr.WARM.ER.good
+rmr.WARM.ER.good
 
 
 fas.WARM.ER.good<-ggplot(data=ecology_data.FASd.g,
@@ -683,17 +683,17 @@ fas.WARM.ER.good<-ggplot(data=ecology_data.FASd.g,
                "","Short/deep",
                "","Fusiform",
                "","Elongated"))+
-  geom_text(aes(label = n_data_n_species,  x = 0.2), family = "Helvetica", size=3.5, hjust=0)+
+  geom_text(aes(label = n_data_n_species,  x = 0.21), family = "Helvetica", size=3.5, hjust=0)+
   geom_text(aes(label = slope, x = -0.36, family = "Helvetica"), size=3.5, hjust=1)+
   geom_line(arrow = arrow(length=unit(0,"cm"), ends="first", type = "closed"),
-            linewidth = 0.7, color = "grey", alpha = 0.7)+
+            linewidth = 0.7, color = cols.fas[2], alpha = 0.7)+
   geom_linerange(data = ecology_data.FASd.g,
                  aes(xmin = as.numeric(slope.ciL) ,
                      xmax = as.numeric(slope.ciH)),
                  alpha = 1)+
   annotate("text", x = -0.43, y = 23, color = "black", label = expression(italic(b)[FAS]),
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
-  annotate("text", x = 0.023, y = 23, color = "black", label = expression(n~(data*(species))),
+  annotate("text", x = 0.16, y = 23, color = "black", label = expression(N~indiv~(species)),
             family = "Helvetica", size=3.5, hjust = 0, parse = T)+
   geom_vline(xintercept = 0, lty = "dotted", color="grey50")+
   geom_linerange(aes(xmin = slope.ciL, xmax = slope.ciH), alpha = 1)+
@@ -705,32 +705,33 @@ fas.WARM.ER.good<-ggplot(data=ecology_data.FASd.g,
   # scale_y_discrete(limits=rev)+
   theme_classic()+
   theme(
-    # axis.text.y = element_text(face = "italic", color = "black", size = 15),
+    axis.text.y = element_text( family="Helvetica", color = "black", size = 12,
+                                    vjust = 1.2, hjust = 1),
         axis.text.x = element_text(family="Helvetica",  color = "black", size = 12),
         axis.title.y = element_blank(),
         legend.position = "none",
         axis.line.y=element_line(colour = 'black',size=0.5),
         axis.line.x=element_line(colour = 'black',size=0.5),
         axis.ticks.y=element_line(size=0.5),
-        axis.text.y = element_blank(),
+        # axis.text.y = element_blank(),
         axis.ticks.x=element_line(size=0),
         text=element_text(size=12,  family="Helvetica"),
-        plot.margin = margin(2, 1, 1, 0, "cm"))+
+        plot.margin = margin(-5, 1, 1, 1, "cm"))+
   coord_cartesian(clip = "off")
-# fas.WARM.ER.good
+fas.WARM.ER.good
 
 cowplot::plot_grid(rmr.WARM.ER.good,
                    fas.WARM.ER.good,
-                  nrow = 1, 
+                  nrow = 2, 
                   labels = "AUTO", 
-                  rel_widths = c(1, 0.5),
-                  label_x = c(0.22, -00.1),
-                  label_y = c(0.89, 0.89)) 
+                  rel_widths = c(1, 1),
+                  label_x = c(0.22),
+                  label_y = c(0.99, 0.99), align = "hv") 
 ggsave(filename = paste("./Figures/Figure4.png", sep=""),
-         width = 9.5, height = 6)
+         width = 6.5, height = 12)
 
 
-## Ecologies: Marginal estimates, all MR performances ------
+ ## Ecologies: Marginal estimates, all MR performances ------
 # 
 # ggplot()+
 #   geom_pointrange(data = ecol.emmeans, 
