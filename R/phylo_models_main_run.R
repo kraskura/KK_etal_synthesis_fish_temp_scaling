@@ -82,11 +82,11 @@ cols<-c(cols.amr[1],cols.rmr[1],cols.amr[3],cols.rmr[3], cols.amr[5],cols.rmr[5]
 dir.create("./Data_exports/Phylo_matrices/", recursive =TRUE) # compile all Phylo relatedness matrices
 dir.create("./Data_exports/Phylo_plots/", recursive =TRUE) # compile all Phylo trees
 dir.create("./Data_exports/BICs/", recursive =TRUE) # compile all BIC scores
-dir.create("./Data_exports/models/", recursive =TRUE) # compile all BIC scores
-dir.create("./Data_exports/adultmodels/", recursive =TRUE) # compile all BIC scores
-dir.create("./Data_exports/juvenilemodels/", recursive =TRUE) # compile all BIC scores
-dir.create("./Data_exports/Ecologies/", recursive =TRUE) # compile all BIC scores
-dir.create("./Data_exports/Species/", recursive =TRUE) # compile all BIC scores
+dir.create("./Data_exports/models/", recursive =TRUE) # compile all output variable for global models
+dir.create("./Data_exports/adultmodels/", recursive =TRUE) # compile all variables for adult models
+dir.create("./Data_exports/juvenilemodels/", recursive =TRUE) # compile all variables for juvenile models
+dir.create("./Data_exports/Ecologies/", recursive =TRUE) # compile all ecology specific outputs
+dir.create("./Data_exports/Species/", recursive =TRUE) # compile all species specific outputs
 
 # DATA SETS -------------------
 message("import datasets")
@@ -153,7 +153,7 @@ data.amr0[data.amr0$test_category == "ecol_relev", "test_category3"] <- "optimal
 data.rmr0$test_category3 <- "warm"
 data.rmr0[data.rmr0$test_category == "ecol_relev", "test_category3"] <- "optimal"
 
-cat(">>> Datasets witha all data are ready, all lifestages included")
+cat(">>> Datasets with all data are ready, all lifestages included")
 
 # **********************
 # run the models - must get message that best model selection matches selection. or best model is not properly identified. 
@@ -202,21 +202,66 @@ adult_models<-get_phylo_mixed_models(data.rmr.test.modrun = data.rmr.test0,
                                         lifestage = "adult")
 
 # the rest of the analysis is only in ontogeny models
-rmr_mod_ER<-ontogeny_models[[1]]
-amr_mod_ER<-ontogeny_models[[2]]
-as_mod_ER<-ontogeny_models[[3]]
-fas_mod_ER<-ontogeny_models[[4]]
+rmr_mod_ER<-ontogeny_models[[1]] # int
+amr_mod_ER<-ontogeny_models[[2]] # NO int
+as_mod_ER<-ontogeny_models[[3]] # int
+fas_mod_ER<-ontogeny_models[[4]] # int
 
-rmr_mod_W<-ontogeny_models[[5]]
-amr_mod_W<-ontogeny_models[[6]]
-as_mod_W<-ontogeny_models[[7]]
-fas_mod_W<-ontogeny_models[[8]]
+rmr_mod_W<-ontogeny_models[[5]] # NO int
+amr_mod_W<-ontogeny_models[[6]]# int
+as_mod_W<-ontogeny_models[[7]] # int
+fas_mod_W<-ontogeny_models[[8]] # NO int
+
+# adult models; only used for the hypothesis testing immediately below 
+rmr_mod_ER.a<-adult_models[[1]] # NO int
+amr_mod_ER.a<-adult_models[[2]] # int
+as_mod_ER.a<-adult_models[[3]] # NO int
+fas_mod_ER.a<-adult_models[[4]] # NO int
+
+rmr_mod_W.a<-adult_models[[5]] # NO int
+amr_mod_W.a<-adult_models[[6]]# NO int
+as_mod_W.a<-adult_models[[7]] # int
+fas_mod_W.a<-adult_models[[8]] # NO int
+
+# juvenile models; only used for the hypothesis testing immediately below 
+rmr_mod_ER.j<-juvenile_models[[1]] # NO int
+amr_mod_ER.j<-juvenile_models[[2]] # int
+as_mod_ER.j<-juvenile_models[[3]] # int
+fas_mod_ER.j<-juvenile_models[[4]] # int
+
+rmr_mod_W.j<-juvenile_models[[5]] # NO int
+amr_mod_W.j<-juvenile_models[[6]] # NO int
+as_mod_W.j<-juvenile_models[[7]] # NO int
+fas_mod_W.j<-juvenile_models[[8]] # NO int
+
+# *************************************************************
+# *************************************************************
+# Test if the slope is different than 1 
+# use car linerhypothesis
+# inter-specific global ; ontogenetic models; excluda FAS
+linearHypothesis(amr_mod_ER, "lnBWg = 1") # NS  1 0.5781     0.4471
+linearHypothesis(rmr_mod_W, "lnBWg = 1") # Sig  1 4.4767    0.03436 *
+# adults; excluda FAS
+linearHypothesis(rmr_mod_ER.a, "lnBWg = 1")# Sig  1 4.9981    0.02537 *
+linearHypothesis(as_mod_ER.a, "lnBWg = 1")# NS    1     0      0.998
+linearHypothesis(rmr_mod_W.a, "lnBWg = 1")# Sig   1 41.26  1.333e-10 ***
+linearHypothesis(amr_mod_W.a, "lnBWg = 1")# Sig   1 50.058  1.493e-12 ***
+# juveniles; excluda FAS
+linearHypothesis(rmr_mod_ER.j, "lnBWg = 1")# NS   1 1.0401     0.3078
+linearHypothesis(rmr_mod_W.j, "lnBWg = 1")# Sig   1 75.404  < 2.2e-16 ***
+linearHypothesis(amr_mod_W.j, "lnBWg = 1")# NS    1 2.0966     0.1476
+linearHypothesis(as_mod_W.j, "lnBWg = 1")# Sig    1 58.956  1.612e-14 ***
+
+
+# testing zeros that are reported in the manuscript. 
+linearHypothesis(fas_mod_W, "lnBWg = 0")# Sig    1 58.956  1.612e-14 ***
+
 
 # **************************************************************
 # **************************************************************
 # and prep mass-specific values; use exported data
 scaling.params<-read.csv(here("./Data_exports/models/scaling_parameters.csv")) # main model
-scaling.params.j<-read.csv(here("./Data_exports/juvenilemodels/scaling_parameters.csv")) # main model
+# scaling.params.j<-read.csv(here("./Data_exports/juvenilemodels/scaling_parameters.csv")) # main model
 
 # slopes available from  function call or saved new vars
 RMR_slope<-round(as.numeric(scaling.params[scaling.params$performance == "RMR" & 

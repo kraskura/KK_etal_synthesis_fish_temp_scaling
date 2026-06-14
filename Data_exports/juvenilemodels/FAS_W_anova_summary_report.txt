@@ -5,7 +5,7 @@
 Model formula:
 lnFAS ~ lnBWg + tempTest + (1 | species) + (0 + tempTest | species) + 
     (1 | species:trial)
-<environment: 0x8972cce08>
+<environment: 0xbb0a25ce8>
 
 ANOVA Type selected automatically: Type II
  **************** ANOVA Table ****************  
@@ -16,29 +16,40 @@ Response: lnFAS
 lnBWg     2.1884  1     0.1391    
 tempTest 39.0720  1  4.085e-10 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Signif. codes:  
+  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’
+  0.1 ‘ ’ 1
 
  ****************  Model Summary **************** 
-Linear mixed model fit by maximum likelihood  ['lmerMod']
+Linear mixed model fit by maximum
+  likelihood [lmerMod]
 Formula: 
 lnFAS ~ lnBWg + tempTest + (1 | species) + (0 + tempTest | species) +  
     (1 | species:trial)
    Data: data.fas.test
 
-     AIC      BIC   logLik deviance df.resid 
-    41.5     73.8    -13.8     27.5      732 
+      AIC       BIC    logLik -2*log(L) 
+     41.5      73.8     -13.8      27.5 
+ df.resid 
+      732 
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
 -3.9227 -0.5276  0.0308  0.4864  4.0511 
 
 Random effects:
- Groups        Name        Variance  Std.Dev.
- species.trial (Intercept) 0.0101217 0.100607
- species       tempTest    0.0000861 0.009279
- species.1     (Intercept) 0.1743274 0.417525
- Residual                  0.0532118 0.230677
-Number of obs: 739, groups:  species:trial, 36; species, 12
+ Groups        Name        Variance 
+ species.trial (Intercept) 0.0101217
+ species       tempTest    0.0000861
+ species.1     (Intercept) 0.1743274
+ Residual                  0.0532118
+ Std.Dev.
+ 0.100607
+ 0.009279
+ 0.417525
+ 0.230677
+Number of obs: 739, groups:  
+species:trial, 36; species, 12
 
 Fixed effects:
              Estimate Std. Error t value

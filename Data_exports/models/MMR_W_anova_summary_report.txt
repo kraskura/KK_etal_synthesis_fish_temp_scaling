@@ -5,7 +5,7 @@
 Model formula:
 lnAMR ~ lnBWg * tempTest + (1 | species) + (0 + tempTest | species) + 
     (1 | species:trial)
-<environment: 0x89c21fc40>
+<environment: 0xbb18563c0>
 
 ANOVA Type selected automatically: Type III
  **************** ANOVA Table ****************  
@@ -18,17 +18,18 @@ lnBWg          882.3435  1  < 2.2e-16 ***
 tempTest         8.8971  1   0.002856 ** 
 lnBWg:tempTest  37.6651  1  8.399e-10 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Signif. codes:  
+0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
  ****************  Model Summary **************** 
-Linear mixed model fit by maximum likelihood  ['lmerMod']
+Linear mixed model fit by maximum likelihood [lmerMod]
 Formula: 
 lnAMR ~ lnBWg * tempTest + (1 | species) + (0 + tempTest | species) +  
     (1 | species:trial)
    Data: data.amr.test
 
-     AIC      BIC   logLik deviance df.resid 
-  -257.0   -215.3    136.5   -273.0     1355 
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   -257.0    -215.3     136.5    -273.0      1355 
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
@@ -40,7 +41,8 @@ Random effects:
  species       tempTest    0.000746 0.02731 
  species.1     (Intercept) 0.104767 0.32368 
  Residual                  0.039299 0.19824 
-Number of obs: 1363, groups:  species:trial, 68; species, 31
+Number of obs: 1363, groups:  
+species:trial, 68; species, 31
 
 Fixed effects:
                 Estimate Std. Error t value
