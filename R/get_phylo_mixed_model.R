@@ -1690,8 +1690,8 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
           annotate("text",  x = 7.5, y = 10,
                      label = bquote("\u2193" ~ "with" ~ "\u2191" ~ degree*C),
                      size=3.5, hjust=0,  color = cols.amr[1])+
-          annotate("text", label = "Global",
-            x = 4, y = -5,
+          annotate("text", label = "Inter-Specific \n Global",
+            x = 3, y = -4,
             size=5, hjust=0, family="Helvetica", color = "black")+
           annotate("text",  x = -5.2, y = 11.5,
              label = bquote(Optimal:~italic(b)[MMR] == .(round(scaling_params_amr_er$Slope,3))), 

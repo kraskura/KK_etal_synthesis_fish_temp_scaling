@@ -5,7 +5,7 @@
 Model formula:
 lnRMR ~ lnBWg + tempTest + (1 | species) + (0 + lnBWg | species) + 
     (1 | species:trial)
-<environment: 0xbb18563c0>
+<environment: 0xc7dab0c80>
 
 ANOVA Type selected automatically: Type II
  **************** ANOVA Table ****************  
