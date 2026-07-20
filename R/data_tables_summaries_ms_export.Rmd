@@ -195,10 +195,16 @@ summary(dataMR$tempTest)
 summary(data.fas$FAS)
 data.fas %>% 
     filter(DemersPelag == "pelagic" & test_category3 == "warm") %>% 
-  summarise(mean_FAS = mean(FAS))
+  summarise(mean_FAS = mean(FAS),
+            min_FAS = min(FAS),
+            max_FAS = max(FAS),
+            n = n())
 data.fas %>% 
     filter(DemersPelag == "pelagic" & test_category3 == "optimal") %>% 
-  summarise(mean_FAS = mean(FAS))
+  summarise(mean_FAS = mean(FAS),
+            min_FAS = min(FAS),
+            max_FAS = max(FAS),
+            n = n())
 data.fas %>% 
     filter(Climate == "Polar" & test_category3 == "optimal") %>% 
   summarise(mean_FAS = mean(FAS), n= n())
@@ -228,6 +234,51 @@ data.as %>%
             minsize = min(BW_g), 
             maxsize = max(BW_g) )
 
+# how many studies per ecol group and temp categ?
+data.amr %>%
+  mutate(test_category2 = if_else(test_category == "ecol_relev", "ER", "W")) %>% 
+  group_by(salintyComb, test_category2) %>%
+  summarise(
+    n_unique_studies = n_distinct(study_ID),
+    n_unique_species = n_distinct(species),
+    .groups = "drop"
+  )
+
+data.rmr %>%
+  mutate(test_category2 = if_else(test_category == "ecol_relev", "ER", "W")) %>% 
+  group_by(salintyComb, test_category2) %>%
+  summarise(
+    n_unique_studies = n_distinct(study_ID),
+    n_unique_species = n_distinct(species),
+    .groups = "drop"
+  )
+
+# specific study ID for each 
+# optimal 
+unique(data.amr |> 
+  mutate(test_category2 = if_else(test_category == "ecol_relev", "ER", "W")) %>%
+  filter(salintyComb =="Freshwater" & 
+           test_category2 == "ER") |> 
+  select(study_ID))
+
+unique(data.rmr |> 
+  mutate(test_category2 = if_else(test_category == "ecol_relev", "ER", "W")) %>%
+  filter(salintyComb =="Freshwater" & 
+           test_category2 == "ER") |> 
+  select(study_ID))
+
+# Warm 
+unique(data.amr |> 
+  mutate(test_category2 = if_else(test_category == "ecol_relev", "ER", "W")) %>%
+  filter(salintyComb =="Freshwater" & 
+           test_category2 == "W") |> 
+  select(study_ID))
+
+unique(data.rmr |> 
+  mutate(test_category2 = if_else(test_category == "ecol_relev", "ER", "W")) %>%
+  filter(salintyComb =="Freshwater" & 
+           test_category2 == "W") |> 
+  select(study_ID))
 
 ```
 
@@ -240,8 +291,12 @@ cat(paste("The number of trials total:", length(levels(dataMR$trial))))
 cat(paste("The number of studies total:", length(levels(dataMR$study_ID))))
 cat(paste("The number of species total:", length(levels(dataMR$species))))
 cat(paste("The number of individual fish:",length(unique(dataMR$fish_ID))))
-cat(paste("The number of individual fish below 1000 g:", nrow(dataMR[c(!duplicated(dataMR$fish_ID)) & dataMR$BW_g<1000,])))
-
+cat(paste("The number of individual fish below 1000 g in MMR dataset:",
+          nrow(data.amr[data.amr$BW_g<1000,]), "( proportion:", 
+          round(nrow(data.amr[data.amr$BW_g<1000,]) / nrow(data.amr), 3), ")"))
+cat(paste("The number of individual fish below 1000 g in RMR dataset:",
+          nrow(data.rmr[data.rmr$BW_g<1000,]), "( proportion:", 
+          round(nrow(data.rmr[data.rmr$BW_g<1000,]) / nrow(data.rmr), 3), ")"))
 
 cat(paste("The number of datapoints in AS data subset:", nrow(data.as)))
 cat(paste("The number of trials in AS data subset:", length(levels(data.as$trial))))
@@ -350,7 +405,7 @@ BIC = Bayesian Information Criterion (model comparison metric)
 
 ## BIC model selection tables 
 
-### Ontogenic scaling (adults and juveniles together) (TABLES 1 - 8)
+## Inter-specific global scaling (adults and juveniles together) (TABLES 1 - 8)
 
 #### Table S1. Selection of best fit scaling relationship of RMR in optimal temperatures using BIC comparison. 
 ```{r, echo = FALSE}
@@ -359,7 +414,7 @@ read.csv(here("Data_exports", "BICs", "RMR_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines( "All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines( "All models ∆BIC < 7 could be considered significant") %>% 
   color(part = "footer", color = "#666666")
 ```
 
@@ -370,7 +425,7 @@ read.csv(here("Data_exports", "BICs", "RMR_W_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines( "All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines( "All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
@@ -381,7 +436,7 @@ read.csv(here("Data_exports", "BICs", "MMR_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
@@ -392,7 +447,7 @@ read.csv(here("Data_exports", "BICs", "MMR_W_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 
@@ -404,7 +459,7 @@ read.csv(here("Data_exports", "BICs", "AS_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
@@ -415,7 +470,7 @@ read.csv(here("Data_exports", "BICs", "AS_W_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
@@ -427,7 +482,7 @@ read.csv(here("Data_exports", "BICs", "FAS_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 ```
 
@@ -437,13 +492,13 @@ read.csv(here("Data_exports", "BICs", "FAS_W_BIC.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
 
 
-## Static scaling: juveniles only  (TABLES 1.j - 8.j)
+## Life-stage specific scaling: juveniles only  (TABLES 1.j - 8.j)
 #### Table S1.j. Selection of best fit scaling relationship of RMR in optimal temperatures using BIC comparison. 
 ```{r, echo = FALSE}
 
@@ -451,7 +506,7 @@ read.csv(here("Data_exports", "BICs", "RMR_BIC_juvenile.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines( "All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines( "All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 ```
 
@@ -462,7 +517,7 @@ read.csv(here("Data_exports", "BICs", "RMR_W_BIC_juvenile.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines( "All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines( "All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
@@ -473,7 +528,7 @@ read.csv(here("Data_exports", "BICs", "MMR_BIC_juvenile.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
@@ -484,7 +539,7 @@ read.csv(here("Data_exports", "BICs", "MMR_W_BIC_juvenile.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 
@@ -496,7 +551,7 @@ read.csv(here("Data_exports", "BICs", "AS_BIC_juvenile.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
@@ -507,7 +562,7 @@ read.csv(here("Data_exports", "BICs", "AS_W_BIC_juvenile.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
@@ -519,7 +574,7 @@ read.csv(here("Data_exports", "BICs", "FAS_BIC_juvenile.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 ```
 
@@ -529,13 +584,13 @@ read.csv(here("Data_exports", "BICs", "FAS_W_BIC_juvenile.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
 
 
-## Static scaling: adults only  (TABLES 1.a - 8.a)
+## Life-stage specific scaling: adults only  (TABLES 1.a - 8.a)
 #### Table S1.a. Selection of best fit scaling relationship of RMR in optimal temperatures using BIC comparison. 
 ```{r, echo = FALSE}
 
@@ -543,7 +598,7 @@ read.csv(here("Data_exports", "BICs", "RMR_BIC_adult.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines( "All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines( "All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 ```
 
@@ -554,7 +609,7 @@ read.csv(here("Data_exports", "BICs", "RMR_W_BIC_adult.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines( "All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines( "All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
@@ -565,7 +620,7 @@ read.csv(here("Data_exports", "BICs", "MMR_BIC_adult.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
@@ -576,7 +631,7 @@ read.csv(here("Data_exports", "BICs", "MMR_W_BIC_adult.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 
@@ -588,7 +643,7 @@ read.csv(here("Data_exports", "BICs", "AS_BIC_adult.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
@@ -599,7 +654,7 @@ read.csv(here("Data_exports", "BICs", "AS_W_BIC_adult.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
@@ -611,7 +666,7 @@ read.csv(here("Data_exports", "BICs", "FAS_BIC_adult.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 ```
 
@@ -621,7 +676,7 @@ read.csv(here("Data_exports", "BICs", "FAS_W_BIC_adult.csv")) %>%
   dplyr::rename("Model ID" = X) %>%
   dplyr::mutate(across(df:delta, ~ round(.x, 2))) %>% 
   flextable() %>% 
-  add_footer_lines("All models within ∆BIC 7 could be considered significant.") %>% 
+  add_footer_lines("All models ∆BIC < 7 could be considered significant.") %>% 
   color(part = "footer", color = "#666666")
 
 ```
@@ -863,16 +918,20 @@ data.fas %>%
 ## Best model outputs and ANOVA results for statistical significance
 
 <!-- ### Global models -->
-### Ontogenic scaling 
+### Inter-specific global scaling 
 #### MMR optimal temperatures
 ```{r}
 report_lines <- readLines(here("Data_exports","models", "MMR_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+report_lines <- readLines(here("Data_exports","models", "MMR_ER_anova_summary_report_linearHyp.txt"))
 cat(paste(report_lines, collapse = "\n"))
 ```
 
 #### RMR optimal temperatures
 ```{r}
 report_lines <- readLines(here("Data_exports","models", "RMR_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+report_lines <- readLines(here("Data_exports","models", "RMR_ER_anova_summary_report_linearHyp.txt"))
 cat(paste(report_lines, collapse = "\n"))
 ```
 
@@ -898,6 +957,8 @@ cat(paste(report_lines, collapse = "\n"))
 ```{r}
 report_lines <- readLines(here("Data_exports","models", "RMR_W_anova_summary_report.txt"))
 cat(paste(report_lines, collapse = "\n"))
+report_lines <- readLines(here("Data_exports","models", "RMR_W_anova_summary_report_linearHyp.txt"))
+cat(paste(report_lines, collapse = "\n"))
 ```
 
 #### AS warm temperatures
@@ -913,7 +974,7 @@ cat(paste(report_lines, collapse = "\n"))
 ```
 
 <br>
-### Static scaling - juveniles only
+### Life-stage specific scaling - juveniles only
 #### MMR optimal temperatures, juveniles
 ```{r}
 report_lines <- readLines(here("Data_exports","juvenilemodels", "MMR_ER_anova_summary_report.txt"))
@@ -923,6 +984,8 @@ cat(paste(report_lines, collapse = "\n"))
 #### RMR optimal temperatures, juveniles
 ```{r}
 report_lines <- readLines(here("Data_exports","juvenilemodels", "RMR_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+report_lines <- readLines(here("Data_exports","juvenilemodels", "RMR_ER_anova_summary_report_linearHyp.txt"))
 cat(paste(report_lines, collapse = "\n"))
 ```
 
@@ -942,17 +1005,23 @@ cat(paste(report_lines, collapse = "\n"))
 ```{r}
 report_lines <- readLines(here("Data_exports","juvenilemodels", "MMR_W_anova_summary_report.txt"))
 cat(paste(report_lines, collapse = "\n"))
+report_lines <- readLines(here("Data_exports","juvenilemodels", "MMR_W_anova_summary_report_linearHyp.txt"))
+cat(paste(report_lines, collapse = "\n"))
 ```
 
 #### RMR warm temperatures, juveniles
 ```{r}
 report_lines <- readLines(here("Data_exports","juvenilemodels", "RMR_W_anova_summary_report.txt"))
 cat(paste(report_lines, collapse = "\n"))
+report_lines <- readLines(here("Data_exports","juvenilemodels", "RMR_W_anova_summary_report_linearHyp.txt"))
+cat(paste(report_lines, collapse = "\n"))
 ```
 
 #### AS warm temperatures, juveniles
 ```{r}
 report_lines <- readLines(here("Data_exports","juvenilemodels", "AS_W_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+report_lines <- readLines(here("Data_exports","juvenilemodels", "AS_W_anova_summary_report_linearHyp.txt"))
 cat(paste(report_lines, collapse = "\n"))
 ```
 
@@ -964,7 +1033,7 @@ cat(paste(report_lines, collapse = "\n"))
 
 
 <br>
-### Static scaling - adults only
+### Life-stage specific scaling - adults only
 #### MMR optimal temperatures, adults
 ```{r}
 report_lines <- readLines(here("Data_exports","adultmodels", "MMR_ER_anova_summary_report.txt"))
@@ -975,11 +1044,15 @@ cat(paste(report_lines, collapse = "\n"))
 ```{r}
 report_lines <- readLines(here("Data_exports","adultmodels", "RMR_ER_anova_summary_report.txt"))
 cat(paste(report_lines, collapse = "\n"))
+report_lines <- readLines(here("Data_exports","adultmodels", "RMR_ER_anova_summary_report_linearHyp.txt"))
+cat(paste(report_lines, collapse = "\n"))
 ```
 
 #### AS optimal temperatures, adults
 ```{r}
 report_lines <- readLines(here("Data_exports","adultmodels", "AS_ER_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+report_lines <- readLines(here("Data_exports","adultmodels", "AS_ER_anova_summary_report_linearHyp.txt"))
 cat(paste(report_lines, collapse = "\n"))
 ```
 
@@ -993,11 +1066,15 @@ cat(paste(report_lines, collapse = "\n"))
 ```{r}
 report_lines <- readLines(here("Data_exports","adultmodels", "MMR_W_anova_summary_report.txt"))
 cat(paste(report_lines, collapse = "\n"))
+report_lines <- readLines(here("Data_exports","adultmodels", "MMR_W_anova_summary_report_linearHyp.txt"))
+cat(paste(report_lines, collapse = "\n"))
 ```
 
 #### RMR warm temperatures, adults
 ```{r}
 report_lines <- readLines(here("Data_exports","adultmodels", "RMR_W_anova_summary_report.txt"))
+cat(paste(report_lines, collapse = "\n"))
+report_lines <- readLines(here("Data_exports","adultmodels", "RMR_W_anova_summary_report_linearHyp.txt"))
 cat(paste(report_lines, collapse = "\n"))
 ```
 
@@ -1030,30 +1107,28 @@ cat(paste(report_lines, collapse = "\n"))
 
 
 ```
-### Static scaling 
+### Inter-specific global scaling 
 
 #### Table S15. Confidence intervals for each model parameter.
 ```{r confidence intervals1}
-# herehere
-# read.csv(here("./Data_exports/Ecologies/Table_CIsummary.csv")) %>% 
-#   select(MR, temp_cat, var, X25.., X95..) %>% 
-#   dplyr::mutate(across(X5..:X95.., ~ round(.x, 3))) %>% 
-#   rename("CI 5%" = X5..,
-#          "CI 95%" = X95..,
-#          "Parameter" = var,
-#          "MR metric" = MR,
-#          "Temperature category" = temp_cat) %>% 
-#   filter(!grepl(pattern = ".sig", Parameter)) %>%
-#   dplyr::mutate(`Temperature category`= str_replace(`Temperature category`,
-#                                                     "ER", "optimal"),
-#                 `Temperature category`= str_replace(`Temperature category`,
-#                                                     "W", "warm")) %>% 
-#   flextable()
-
+read.csv(here("./Data_exports/models/Table_CIsummary.csv")) %>%
+  select(MR, temp_cat, var, X2.5.., X97.5..) %>%
+  dplyr::mutate(across(X2.5..:X97.5.., ~ round(.x, 3))) %>%
+  rename("CI 5%" = X2.5..,
+         "CI 95%" = X97.5..,
+         "Parameter" = var,
+         "MR metric" = MR,
+         "Temperature category" = temp_cat) %>%
+  filter(!grepl(pattern = ".sig", Parameter)) %>%
+  dplyr::mutate(`Temperature category`= str_replace(`Temperature category`,
+                                                    "ER", "optimal"),
+                `Temperature category`= str_replace(`Temperature category`,
+                                                    "W", "warm")) %>%
+  flextable()
 
 ```
 
-<!-- ### Scaling relationship parameters and summary statistics for each ecological and morphological fish group.  -->
+<!-- ### Scaling relationship parameters and summary statistics for each ecological and morphological fish group. -->
 #### Table S16. MMR scaling relationship estimates and 95% confidence interval in fish sharing similar ecologies and morphologies. The temperature and body mass ranges, and n-values for each category are in Table S12.
 ```{r}
 read.csv(here("Data_exports/Ecologies/ecologies_MMR.csv")) %>% 
@@ -1247,7 +1322,7 @@ knitr::include_graphics(here("Figures/Suppl_species_hist.png"))
 #### Figure S10. The histogram of all scaling slopes for all fish species included in the dataset. (A) Maximum metabolic rates, (B) resting metabolic rates, (C) factorial aerobic scopes. The vertical lines are the mean of all slopes for each temperature condition (optimal = grey-scale, and warm = colored).
 
 
-## Phylogenetic trees (ontogenic scaling models only)
+## Phylogenetic trees (Inter-specific global scaling models only)
 
 ```{r,  out.width  = 0.45,  out.height = 1}
 knitr::include_graphics(here("Data_exports/Phylo_plots/FAS-warm_treeplot.png"))

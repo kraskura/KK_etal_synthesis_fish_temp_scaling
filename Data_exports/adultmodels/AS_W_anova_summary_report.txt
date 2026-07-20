@@ -5,7 +5,7 @@
 Model formula:
 lnAS ~ lnBWg * tempTest + (1 | species) + (0 + lnBWg | species:trial) + 
     (1 | species:trial)
-<environment: 0xbaf982890>
+<environment: 0xa8ecbd690>
 
 ANOVA Type selected automatically: Type III
  **************** ANOVA Table ****************  
@@ -19,12 +19,12 @@ tempTest        1.1576  1     0.2820
 lnBWg:tempTest 16.6583  1  4.475e-05 ***
 ---
 Signif. codes:  
-  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’
-  0.1 ‘ ’ 1
+  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1
+  ‘ ’ 1
 
  ****************  Model Summary **************** 
-Linear mixed model fit by maximum
-  likelihood [lmerMod]
+Linear mixed model fit by maximum  likelihood
+ [lmerMod]
 Formula: 
 lnAS ~ lnBWg * tempTest + (1 | species) + (0 + lnBWg | species:trial) +  
     (1 | species:trial)
@@ -54,16 +54,11 @@ Number of obs: 262, groups:
 species:trial, 15; species, 9
 
 Fixed effects:
-                Estimate Std. Error
-(Intercept)    -1.758599   1.186889
-lnBWg           1.564057   0.190414
-tempTest        0.040690   0.037819
-lnBWg:tempTest -0.026235   0.006428
-               t value
-(Intercept)     -1.482
-lnBWg            8.214
-tempTest         1.076
-lnBWg:tempTest  -4.081
+                Estimate Std. Error t value
+(Intercept)    -1.758599   1.186889  -1.482
+lnBWg           1.564057   0.190414   8.214
+tempTest        0.040690   0.037819   1.076
+lnBWg:tempTest -0.026235   0.006428  -4.081
 
 Correlation of Fixed Effects:
             (Intr) lnBWg  tmpTst

@@ -11,6 +11,7 @@
 # Figure 1 ----
 # 
 library(here)
+library(tidyverse)
 
 data<-readxl::read_excel("./Data/Summary_scaling_b_mmr_rmr_mar2026.xlsx")
 data<-data %>% 
@@ -29,7 +30,8 @@ data<-data %>%
 #   }
 # }
 
-# data
+str(data)
+
 
 plot <- ggplot(data = data, mapping = aes(x = b, y=factor(Order), size = MR,
                                     Color = Test_C, fill = Test_C,
@@ -54,14 +56,15 @@ plot <- ggplot(data = data, mapping = aes(x = b, y=factor(Order), size = MR,
   theme(axis.text.y = element_text(face = "italic", color = "black", size = 9.5),
         axis.text.x = element_text( color = "black", size =10),
         axis.title.y = element_blank(),
-        legend.position = c(0.88, 0.1),
+        legend.position = c(0.88, 0.15),
         axis.line.y=element_line(colour = 'black',size=0.5),
         axis.line.x=element_line(colour = 'black',size=0.5),
         axis.ticks.y=element_line(size=0.5),
         axis.ticks.x=element_line(size=0),
         text=element_text(size=12,  family="Helvetica"),
-        legend.spacing.x = unit(0.1, 'cm'),
-        legend.margin = margin(-0.3,0,0,0, unit="cm"), legend.box = "horizontal")+
+        legend.spacing.y = unit(-0.5, 'cm'),
+        legend.margin = margin(-0.3,0,0,0, unit="cm"),
+        legend.box = "vertical")+
   guides(size = "legend", colour = "legend") 
 
   plot

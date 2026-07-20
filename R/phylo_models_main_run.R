@@ -160,7 +160,7 @@ cat(">>> Datasets with all data are ready, all lifestages included")
 
 # IMPORTANT MESSAGES TO LOOK FOR: 
 # 1. Phylo matching for all data frames (ecol relev or 'optimal' and 'warm)
-# RMR-optimal: All species names are identified and mathced with phylo data 
+# RMR-optimal: All species names are identified and matched with phylo data 
 #   N species:92
 # 2. Correct best model identification message: 
 #  Correct best models identified: Phylo_RMR_model4int (for all models n =8)
@@ -236,25 +236,55 @@ fas_mod_W.j<-juvenile_models[[8]] # NO int
 
 # *************************************************************
 # *************************************************************
-# Test if the slope is different than 1 
+# Function to save output: 
+run_anova_hypothesis <- function(model,
+                      hypothesis, 
+                      save.path) {
+
+  # Export formatted text report with Anovas, model summary, etc
+  report_path <- save.path
+    sink(report_path)
+    
+    cat("============================================================\n")
+    cat("      ANOVA RESULTS — test null hypothesis slope = 1 \n")
+    cat("============================================================\n\n")
+    
+    print(linearHypothesis(model, hypothesis))
+    
+    sink()
+}
+
+
+ 
+# Test if the slope is different than 1 ------
 # use car linerhypothesis
 # inter-specific global ; ontogenetic models; excluda FAS
-linearHypothesis(amr_mod_ER, "lnBWg = 1") # NS  1 0.5781     0.4471
-linearHypothesis(rmr_mod_W, "lnBWg = 1") # Sig  1 4.4767    0.03436 *
+run_anova_hypothesis(amr_mod_ER, "lnBWg = 1", 
+                     save.path = here(paste("Data_exports/models/MMR_ER_anova_summary_report_linearHyp.txt", sep = ""))) # NS  1 0.5781     0.4471
+run_anova_hypothesis(rmr_mod_W, "lnBWg = 1", 
+                     save.path = here(paste("Data_exports/models/RMR_W_anova_summary_report_linearHyp.txt", sep = ""))) # Sig  1 4.4767    0.03436 *
 # adults; excluda FAS
-linearHypothesis(rmr_mod_ER.a, "lnBWg = 1")# Sig  1 4.9981    0.02537 *
-linearHypothesis(as_mod_ER.a, "lnBWg = 1")# NS    1     0      0.998
-linearHypothesis(rmr_mod_W.a, "lnBWg = 1")# Sig   1 41.26  1.333e-10 ***
-linearHypothesis(amr_mod_W.a, "lnBWg = 1")# Sig   1 50.058  1.493e-12 ***
+run_anova_hypothesis(rmr_mod_ER.a, "lnBWg = 1",
+                     save.path = here(paste("Data_exports/adultmodels/RMR_ER_anova_summary_report_linearHyp.txt", sep = "")))# Sig  1 4.9981    0.02537 *
+run_anova_hypothesis(as_mod_ER.a, "lnBWg = 1",
+                     save.path = here(paste("Data_exports/adultmodels/AS_ER_anova_summary_report_linearHyp.txt", sep = "")))# NS    1     0      0.998
+run_anova_hypothesis(rmr_mod_W.a, "lnBWg = 1",
+                     save.path = here(paste("Data_exports/adultmodels/RMR_W_anova_summary_report_linearHyp.txt", sep = "")))# Sig   1 41.26  1.333e-10 ***
+run_anova_hypothesis(amr_mod_W.a, "lnBWg = 1",
+                     save.path = here(paste("Data_exports/adultmodels/MMR_W_anova_summary_report_linearHyp.txt", sep = "")))# Sig   1 50.058  1.493e-12 ***
 # juveniles; excluda FAS
-linearHypothesis(rmr_mod_ER.j, "lnBWg = 1")# NS   1 1.0401     0.3078
-linearHypothesis(rmr_mod_W.j, "lnBWg = 1")# Sig   1 75.404  < 2.2e-16 ***
-linearHypothesis(amr_mod_W.j, "lnBWg = 1")# NS    1 2.0966     0.1476
-linearHypothesis(as_mod_W.j, "lnBWg = 1")# Sig    1 58.956  1.612e-14 ***
+run_anova_hypothesis(rmr_mod_ER.j, "lnBWg = 1",
+                     save.path = here(paste("Data_exports/juvenilemodels/RMR_ER_anova_summary_report_linearHyp.txt", sep = "")))# NS   1 1.0401     0.3078
+run_anova_hypothesis(rmr_mod_W.j, "lnBWg = 1",
+                     save.path = here(paste("Data_exports/juvenilemodels/RMR_W_anova_summary_report_linearHyp.txt", sep = "")))# Sig   1 75.404  < 2.2e-16 ***
+run_anova_hypothesis(amr_mod_W.j, "lnBWg = 1",
+                     save.path = here(paste("Data_exports/juvenilemodels/MMR_W_anova_summary_report_linearHyp.txt", sep = "")))# NS    1 2.0966     0.1476
+run_anova_hypothesis(as_mod_W.j, "lnBWg = 1",
+                     save.path = here(paste("Data_exports/juvenilemodels/AS_W_anova_summary_report_linearHyp.txt", sep = "")))# Sig    1 58.956  1.612e-14 ***
 
-
-# testing zeros that are reported in the manuscript. 
-linearHypothesis(fas_mod_W, "lnBWg = 0")# Sig    1 58.956  1.612e-14 ***
+# testing zeros that are reported in the manuscript;sanity check
+run_anova_hypothesis(fas_mod_W, "lnBWg = 0",
+                     save.path = here(paste("Data_exports/models/FAS_W_anova_summary_report_linearHyp.txt", sep = "")))# Sig    1 58.956  1.612e-14 ***
 
 
 # **************************************************************
@@ -362,7 +392,7 @@ data.as.test<-data.amr.test[c(!is.na(data.amr.test$lnAS) & is.finite(data.amr.te
 # ************************************************************************************
 
 # depending on local R setting this may give some errors about displaying all the data. 
-output.RMR.ER <- ecol_model_update(###########
+output.RMR.ER <- ecol_model_update(
                   data.BIC = NULL,
                   data.ANOVA = NULL,
                   data.EMMEANS = NULL, 
@@ -447,7 +477,7 @@ output.FAS.W <- ecol_model_update(
                     ref.lnBWg = c(log(1)),
                     ref.tempTest = 20)
   
-output.AS.ER <- ecol_model_update(###################
+output.AS.ER <- ecol_model_update(
                     data.BIC = NULL,
                     data.ANOVA = NULL,
                     data.EMMEANS = NULL, 
@@ -595,10 +625,10 @@ ecolAS1<-ggplot(data=data.as, aes(y=mass_specas, fill=DemersPelag_plot,
   scale_x_discrete(labels=c( "benthopelagic-ecol_relev" = "Bentho- \n pelagic",
                                   "demersal-ecol_relev" = "Demersal" ,
                                   "pelagic-ecol_relev" = "Pelagic",
-                                  "reef-associated-ecol_relev" = "Reef- \n associac.",
+                                  "reef-associated-ecol_relev" = "Reef- \n associat.",
                                   "benthopelagic-warm" = "Bentho- \n pelagic",
                                   "demersal-warm" = "Demersal" ,
-                                  "reef-associated-warm" = "Reef- \n associac.",
+                                  "reef-associated-warm" = "Reef- \n associat.",
                                   "pelagic-warm" = "Pelagic"))+
   ylim(0,8)+
   geom_segment(aes(x = 3.02, y = 2, xend = 3.2, yend = 3.2), size = 0.1)+
@@ -608,7 +638,10 @@ ecolAS1<-ggplot(data=data.as, aes(y=mass_specas, fill=DemersPelag_plot,
   annotate(geom = "text", y = 2.05, x = 3.21, label = "AS", size = 3, hjust = 0)+
   annotate(geom = "text", y = 1.5, x = 3.31, label = "RMR", size = 3, hjust = 0)+
   annotate(geom = "text", y = 7.9, x = 1, label = "∆BIC: AS,MMR,RMR***", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 7, x = 1, label = "ANOVA: p(AS, MMR) < 0.001, p(RMR) = 0.619", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 7, x = 1,
+           label = expression("ANOVA: " * italic(p) * "(AS, MMR) < 0.001, " * italic(p) * "(RMR) = 0.619"),
+           # label = "ANOVA: p(AS, MMR) < 0.001, p(RMR) = 0.619",
+           size = 3, hjust = 0)+
   annotate(geom = "text", y = 7.9, x = 5.0, label = "", size = 3, hjust = 0)+
   annotate(geom = "text", y = 7.9, x = 4.3, label = "OPTIMAL",
            hjust = 1, fontface = "bold", size = 3)+
@@ -691,7 +724,10 @@ ecolAS2<-ggplot(data=data.as, aes(y=mass_specas, fill=BodyShapeI_plot,
                             "short/deep-warm" = "Short/Deep"))+
   ylim(0,8)+
   annotate(geom = "text", y = 7.9, x = 1, label = "∆BIC: MMR, RMR***", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7, x = 1, label = "ANOVA: p(RMR) < 0.003, p(MMR) = 0.740", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7, x = 1,
+           label = expression("ANOVA: " * italic(p) * "(RMR) = 0.003, " * italic(p) * "(MMR) = 0.740"),
+           # label = "ANOVA: p(RMR) = 0.003, p(MMR) = 0.740",
+           size = 3, hjust =0)+
   geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
 ggformat(ecolAS2, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=F, size_text = 11)
 ecolAS2 <- ecolAS2 + theme(
@@ -789,7 +825,10 @@ ecolAS3<-ggplot(data=data.as, aes(y=mass_specas, fill=salintyComb_plot, x=salint
       "Marine; freshwater; brackish-warm" = "All \n salinities"))+
   ylim(0,8)+
   annotate(geom = "text", y = 7.9, x = 1, label = "∆BIC: RMR*** MMR*", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7, x = 1, label = "ANOVA: p(RMR) = 0.626, p(MMR) = 0.038", size = 3, hjust= 0)+
+  annotate(geom = "text", y = 7, x = 1,
+           label = expression("ANOVA: " * italic(p) * "(RMR) = 0.626, " * italic(p) * "(MMR) = 0.038"),
+           # label = "ANOVA: p(RMR) = 0.626, p(MMR) = 0.038",
+           size = 3, hjust= 0)+
   geom_vline(xintercept = 5.5, color = "grey", linetype = "dashed")
 ggformat(ecolAS3, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=F, size_text = 11)
 ecolAS3 <- ecolAS3 + theme(
@@ -872,7 +911,10 @@ ecolAS4<-ggplot(data=data.as, aes(y=mass_specas, fill=Climate_plot, x=Climate_pl
                                 "Tropical-warm" = "Tropical"))+
   ylim(0,8)+
   annotate(geom = "text", y = 7.9, x = 1, label = "∆BIC: RMR*** MMR*", size = 3, hjust =0)+
-  annotate(geom = "text", y = 7, x = 1, label = "ANOVA: p(RMR) = 0.044, p(MMR) = 0.408", size = 3, hjust =0)+
+  annotate(geom = "text", y = 7, x = 1,
+           label = expression("ANOVA: " * italic(p) * "(RMR) = 0.044, " * italic(p) * "(MMR) = 0.408"),
+           # label = "ANOVA: p(RMR) = 0.044, p(MMR) = 0.408",
+           size = 3, hjust =0)+
   annotate(geom = "text", y = 7.9, x = 5.0, label = "", size = 3, hjust = 0)+
   geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
 ggformat(ecolAS4, y_title = bquote("MR" ~ (mgO[2] ~ g^-1 ~ h^-1)), x_title = element_blank() , print=F, size_text = 11)
@@ -903,11 +945,11 @@ ecolFAS1<-ggplot(data=data.fas, aes(y=FAS, fill=DemersPelag_plot, x=DemersPelag_
   scale_x_discrete(labels=c( "benthopelagic-ecol_relev" = "Bentho- \n pelagic",
                                   "demersal-ecol_relev" = "Demersal" ,
                                   "pelagic-ecol_relev" = "Pelagic",
-                                  "reef-associated-ecol_relev" = "Reef- \n associac.",
+                                  "reef-associated-ecol_relev" = "Reef- \n associat.",
                                   "benthopelagic-warm" = "Bentho- \n pelagic",
                                   "demersal-warm" = "Demersal" ,
                                   "pelagic-warm" = "Pelagic",
-                                  "reef-associated-warm" = "Reef- \n associac."
+                                  "reef-associated-warm" = "Reef- \n associat."
                                   ))+
   ylim(0,28)+
   scale_y_continuous(breaks = c(5, 10, 15, 20, 25))+
@@ -957,7 +999,10 @@ ecolFAS2<-ggplot(data=data.fas, aes(FAS, fill=BodyShapeI_plot, x=BodyShapeI_plot
   ylim(0,28)+
   scale_y_continuous(breaks = c(5, 10, 15, 20, 25))+
   annotate(geom = "text", y = 25, x = 1, label = "∆BIC: FAS*", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 21, x = 1, label = "ANOVA: FAS p = 0.690", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 21, x = 1,
+           label = expression("ANOVA: FAS " * italic(p) * " = 0.690"),
+           # label = "ANOVA: FAS p = 0.690",
+           size = 3, hjust = 0)+
   # annotate(geom = "text", y = 18, x = 1, label = "ns", size = 3, hjust = 0)+
   # annotate(geom = "text", y = 19.5, x = 4.05, label = "", size = 3, hjust = 0)+
   geom_vline(xintercept =4.5, color = "grey", linetype = "dashed")
@@ -1032,9 +1077,15 @@ ecolFAS4<-ggplot(data=data.fas, aes(FAS, fill=Climate_plot, x=Climate_plot))+
   ylim(0,28)+
   scale_y_continuous(breaks = c(5, 10, 15, 20, 25))+
   annotate(geom = "text", y = 25, x = 1, label = "∆BIC: FAS ***", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 21, x = 1, label = "ANOVA: FAS p < 0.001 ", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 21, x = 1,
+           label = expression("ANOVA: FAS " * italic(p) * " < 0.001"),
+           # label = "ANOVA: FAS p < 0.001 ",
+           size = 3, hjust = 0)+
   annotate(geom = "text", y = 25, x = 5, label = "∆BIC: FAS *", size = 3, hjust = 0)+
-  annotate(geom = "text", y = 21, x = 5, label = "ANOVA: FAS p < 0.001 ", size = 3, hjust = 0)+
+  annotate(geom = "text", y = 21, x = 5,
+           label = expression("ANOVA: FAS " * italic(p) * " < 0.001"),
+           # label = "ANOVA: FAS p < 0.001 ",
+           size = 3, hjust = 0)+
   geom_vline(xintercept = 4.5, color = "grey", linetype = "dashed")
 ggformat(ecolFAS4, y_title = bquote("FAS"), x_title = element_blank() , print=F, size_text = 11)
 ecolFAS4 <- ecolFAS4 + theme(
@@ -1050,7 +1101,7 @@ ecolFAS4 <- ecolFAS4 + theme(
   legend.text = element_text(margin = margin(l = 0.1, unit = c("cm"))),
   legend.key.height= unit(0.5, 'cm'),
   legend.key.width= unit(0.5, 'cm'))
-
+ecolFAS4 
 #### save violin plots -------
  plot_grid(ecolAS1, ecolAS2,
           ecolFAS1, ecolFAS2,
@@ -1174,7 +1225,7 @@ cowplot:::plot_grid(amr_boxplot,rmr_boxplot,fas_boxplot,
 ggsave(filename = "./Figures/Supl_fig1_boxplots_Phylo.png", width = 12.5, height =10)
 
 
-# quick stats
+# quick stats reported in the MS------
 # pelagic fish AS
 data.as %>% 
   group_by(test_category3, DemersPelag) %>% 

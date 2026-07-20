@@ -5,7 +5,7 @@
 Model formula:
 lnFAS ~ lnBWg + tempTest + (1 | species) + (0 + tempTest | species) + 
     (1 | species:trial)
-<environment: 0xbb0a25ce8>
+<environment: 0xa867acd98>
 
 ANOVA Type selected automatically: Type II
  **************** ANOVA Table ****************  
@@ -17,12 +17,12 @@ lnBWg     2.1884  1     0.1391
 tempTest 39.0720  1  4.085e-10 ***
 ---
 Signif. codes:  
-  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’
-  0.1 ‘ ’ 1
+  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1
+  ‘ ’ 1
 
  ****************  Model Summary **************** 
-Linear mixed model fit by maximum
-  likelihood [lmerMod]
+Linear mixed model fit by maximum  likelihood
+ [lmerMod]
 Formula: 
 lnFAS ~ lnBWg + tempTest + (1 | species) + (0 + tempTest | species) +  
     (1 | species:trial)

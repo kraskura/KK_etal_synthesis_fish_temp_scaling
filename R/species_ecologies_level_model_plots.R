@@ -647,7 +647,7 @@ rmr.WARM.ER.good<-
   scale_fill_manual(values=c("black",cols.rmr[1], "black", cols.amr[2]))+# c("white", "white", "white", "white"))+
   xlab(expression(Slope~value~(italic(b))))+
   scale_x_continuous(limits = c(0.13,1.8))+
-  scale_size_manual(values = c(3,3))+
+  scale_size_manual(values = c(3,2))+
   # scale_y_discrete(limits=rev)+
   theme_classic()+
   theme(axis.text.y = element_text( family="Helvetica", color = "black", size = 12,

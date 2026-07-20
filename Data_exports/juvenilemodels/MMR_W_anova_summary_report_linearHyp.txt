@@ -1,0 +1,15 @@
+============================================================
+      ANOVA RESULTS — test null hypothesis slope = 1 
+============================================================
+
+
+Linear hypothesis test:
+lnBWg = 1
+
+Model 1: restricted model
+Model 2: lnAMR ~ lnBWg + tempTest + (1 | species) + (0 + lnBWg | species) + 
+    (1 | species:trial)
+
+  Df  Chisq Pr(>Chisq)
+1                     
+2  1 2.0966     0.1476

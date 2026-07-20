@@ -887,6 +887,7 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
 
   # this calls custom function 'get_data_phylo_matrix.R'. 
   # IMPORTANT: ensure to receive a message: "All species names are identified and mathced with phylo data N species" that marks that all species have been matched with original dataset. 
+  # ADULTS -----------------
   if(!is.null(lifestage)){
     if (lifestage == "adult") {
     message("Running adult data")
@@ -1113,6 +1114,7 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
     
     }
     
+    # JUVENILES-----------------
     if(lifestage == "juvenile"){
     message("Running juvenile data")
     # rmr
@@ -1344,7 +1346,7 @@ get_phylo_mixed_models<-function(data.rmr.test.modrun,
     } 
     
   } else { # full dataset
-    
+    # FULL DATASET -----------------
     # rmr
     get_phylo_matrix(species.list = unique(levels(data.rmrER$species)),
                      matrix.name = "A",

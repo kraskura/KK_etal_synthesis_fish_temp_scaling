@@ -5,7 +5,7 @@
 Model formula:
 lnAS ~ lnBWg + tempTest + (1 | species) + (0 + lnBWg | species) + 
     (1 | species:trial)
-<environment: 0xbaf982890>
+<environment: 0xa8ecbd690>
 
 ANOVA Type selected automatically: Type II
  **************** ANOVA Table ****************  
@@ -17,12 +17,12 @@ lnBWg     3.0608  1     0.0802 .
 tempTest 35.7576  1  2.235e-09 ***
 ---
 Signif. codes:  
-  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’
-  0.1 ‘ ’ 1
+  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1
+  ‘ ’ 1
 
  ****************  Model Summary **************** 
-Linear mixed model fit by maximum
-  likelihood [lmerMod]
+Linear mixed model fit by maximum  likelihood
+ [lmerMod]
 Formula: 
 lnAS ~ lnBWg + tempTest + (1 | species) + (0 + lnBWg | species) +  
     (1 | species:trial)
@@ -38,16 +38,11 @@ Scaled residuals:
 -4.8221 -0.4909  0.0936  0.6174  3.1132 
 
 Random effects:
- Groups        Name        Variance
- species.trial (Intercept)  0.01919
- species       lnBWg        1.12373
- species.1     (Intercept) 10.76056
- Residual                   0.07870
- Std.Dev.
- 0.1385  
- 1.0601  
- 3.2803  
- 0.2805  
+ Groups        Name        Variance Std.Dev.
+ species.trial (Intercept)  0.01919 0.1385  
+ species       lnBWg        1.12373 1.0601  
+ species.1     (Intercept) 10.76056 3.2803  
+ Residual                   0.07870 0.2805  
 Number of obs: 751, groups:  
 species:trial, 33; species, 17
 
